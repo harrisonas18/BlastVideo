@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="ORg-bI-iqP">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--RecordViewController-->
+        <scene sceneID="Bxb-od-OfJ">
+            <objects>
+                <viewController storyboardIdentifier="RecordViewController" title="RecordViewController" id="ORg-bI-iqP" customClass="RecordViewController" customModule="BlastVideo" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="ehm-gx-fCO">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xph-1v-6Fe">
+                                <rect key="frame" x="314" y="21" width="45" height="26"/>
+                                <color key="backgroundColor" red="0.23258754851515306" green="0.23375624189015187" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="26" id="a3n-Ip-A4I"/>
+                                    <constraint firstAttribute="width" constant="45" id="wbe-7H-ZNZ"/>
+                                </constraints>
+                                <color key="tintColor" red="0.99999600649999998" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <state key="normal" image="1751198200"/>
+                                <connections>
+                                    <action selector="flipCamera:" destination="ORg-bI-iqP" eventType="touchUpInside" id="avv-br-JhL"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3rb-h5-jna">
+                                <rect key="frame" x="248" y="21" width="24" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="24" id="D62-WU-m9p"/>
+                                    <constraint firstAttribute="height" constant="24" id="Q1H-0t-CyY"/>
+                                </constraints>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" image="1180191200"/>
+                                <connections>
+                                    <action selector="uploadPost:" destination="ORg-bI-iqP" eventType="touchUpInside" id="FeF-v8-2q1"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" clipsSubviews="YES" alpha="0.69999999999999996" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ToD-Ug-GBF">
+                                <rect key="frame" x="157" y="496" width="60" height="60"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="KCN-g6-pSD"/>
+                                    <constraint firstAttribute="width" constant="60" id="Uo8-Zs-Vdo"/>
+                                </constraints>
+                                <state key="normal">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="30"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="captureWithSender:" destination="ORg-bI-iqP" eventType="touchUpInside" id="UA7-5J-UOF"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="svL-98-DBm" firstAttribute="trailing" secondItem="Xph-1v-6Fe" secondAttribute="trailing" constant="16" id="577-fL-AGU"/>
+                            <constraint firstItem="Xph-1v-6Fe" firstAttribute="top" secondItem="svL-98-DBm" secondAttribute="top" constant="1" id="CSJ-O0-Dpu"/>
+                            <constraint firstItem="svL-98-DBm" firstAttribute="bottom" secondItem="ToD-Ug-GBF" secondAttribute="bottom" constant="111" id="IX8-3a-WvB"/>
+                            <constraint firstItem="ToD-Ug-GBF" firstAttribute="centerX" secondItem="ehm-gx-fCO" secondAttribute="centerX" id="a4I-eo-zkB"/>
+                            <constraint firstItem="Xph-1v-6Fe" firstAttribute="leading" secondItem="3rb-h5-jna" secondAttribute="trailing" constant="42" id="fwd-lT-9t7"/>
+                            <constraint firstItem="3rb-h5-jna" firstAttribute="top" secondItem="svL-98-DBm" secondAttribute="top" constant="1" id="gyR-aJ-vLu"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="svL-98-DBm"/>
+                    </view>
+                    <connections>
+                        <outlet property="recordButton" destination="ToD-Ug-GBF" id="eM3-7p-Ckx"/>
+                        <segue destination="gnT-jz-B0d" kind="presentation" identifier="playVideo" id="cdG-X1-a9A"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Jvh-dF-smF" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="189.59999999999999" y="944.97751124437787"/>
+        </scene>
+        <!--AV Player View Controller-->
+        <scene sceneID="k66-Ji-YEr">
+            <objects>
+                <avPlayerViewController videoGravity="AVLayerVideoGravityResizeAspect" id="gnT-jz-B0d" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="UuF-b9-3PA" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="966" y="951"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="1180191200" width="24" height="24"/>
+        <image name="1751198200" width="26" height="22"/>
+    </resources>
+</document>

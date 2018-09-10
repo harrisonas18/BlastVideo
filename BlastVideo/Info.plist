@@ -43,5 +43,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Blast would like to access your camera</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Blast would like to access your microphone</string>
 </dict>
 </plist>

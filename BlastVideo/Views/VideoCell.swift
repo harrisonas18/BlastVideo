@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CustomeCell: UICollectionViewCell {
+class VideoCell: UICollectionViewCell {
     
     
     override init(frame: CGRect) {
@@ -26,48 +26,41 @@ class CustomeCell: UICollectionViewCell {
     }
 }
 
-class VideoCell: CustomeCell {
+class PostCell: VideoCell {
     
-    var video: Video? {
+    
+    var post: Post? {
         didSet {
-            thumbnailImageView.backgroundColor = .blue
-            
+            updateView()
         }
     }
     
+    func updateView() {
+        if let photoUrlString = post?.photoUrl {
+            let photoUrl = URL(string: photoUrlString)
+            thumbnailImageView.sd_setImage(with: photoUrl)
+        }
+        
+    }
     
     let thumbnailImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "play-button1")
         imageView.contentMode = .scaleAspectFill
-        imageView.clipsToBounds = true
+        //imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
 
     
-    var titleLabelHeightConstraint: NSLayoutConstraint?
-    private var allConstraints: [NSLayoutConstraint] = []
-    
     override func setupViews() {
         addSubview(thumbnailImageView)
-
         
-        let views: [String: Any] = [
-            "thumbnailImageView": thumbnailImageView,]
+        thumbnailImageView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true;
+        thumbnailImageView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true;
+        thumbnailImageView.topAnchor.constraint(equalTo: topAnchor).isActive = true;
+        thumbnailImageView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1.0).isActive = true;
         
-        let imageVerticalConstraint = NSLayoutConstraint.constraints(
-            withVisualFormat: "V:|-[thumbnailImageView]-]",
-            metrics: nil,
-            views: views)
-        allConstraints += imageVerticalConstraint
-        
-        let imageHorizontalConstraint = NSLayoutConstraint.constraints(
-            withVisualFormat: "H:|-[thumbnailImageView]-]",
-            metrics: nil,
-            views: views)
-        allConstraints += imageHorizontalConstraint
-        
-        NSLayoutConstraint.activate(allConstraints)
         
     }
 }

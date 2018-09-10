@@ -12,34 +12,28 @@ class TabBarViewController: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tabBar.barTintColor = .white
-        setupTabBar()
+        
+        
+        
+        let firstViewController = UINavigationController(rootViewController: DiscoverViewController())
+        firstViewController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "search"), selectedImage: #imageLiteral(resourceName: "search-selected"))
+        firstViewController.tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
+        
+        let secondViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "RecordViewController")
+        secondViewController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "camera"), selectedImage: #imageLiteral(resourceName: "camera-selected"))
+        secondViewController.tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
+        
+        let thirdViewController = SignInViewController()
+        thirdViewController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "home"), selectedImage: #imageLiteral(resourceName: "home-selected"))
+        thirdViewController.tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
+        
+        let tabBarList = [firstViewController, secondViewController, thirdViewController]
+        
+        viewControllers = tabBarList
+        
+        tabBar.tintColor = UIColor(named: "Theme")
+        
+        
     }
     
-    func setupTabBar() {
-        
-        let discoverViewController = createNavController(vc: DiscoverViewController(), selected: #imageLiteral(resourceName: "play-button1"), unselected: #imageLiteral(resourceName: "play-button1-selected"))
-        
-        let cameraViewController = createNavController(vc: CameraViewController(), selected:#imageLiteral(resourceName: "photo-camera"), unselected:#imageLiteral(resourceName: "photo-camera-selected"))
-        
-        viewControllers = [discoverViewController, cameraViewController] //Discover, Camera, Profile
-        
-        guard let items = tabBar.items else { return }
-        
-        for item in items {
-            item.imageInsets = UIEdgeInsetsMake(4, 0, -4, 0)
-        }
-    }
-    
-}
-
-extension UITabBarController {
-    
-    func createNavController(vc: UIViewController, selected: UIImage, unselected: UIImage) -> UINavigationController {
-        let viewController = vc
-        let navController = UINavigationController(rootViewController: viewController)
-        navController.tabBarItem.image = unselected
-        navController.tabBarItem.selectedImage = selected
-        return navController
-    }
 }
