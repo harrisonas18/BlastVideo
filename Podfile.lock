@@ -1,0 +1,270 @@
+PODS:
+  - ActiveLabel (1.1.0)
+  - Cache (5.2.0)
+  - DeepDiff (2.2.0)
+  - Disk (0.6.4)
+  - Firebase/Auth (6.9.0):
+    - Firebase/CoreOnly
+    - FirebaseAuth (~> 6.2.3)
+  - Firebase/Core (6.9.0):
+    - Firebase/CoreOnly
+    - FirebaseAnalytics (= 6.1.2)
+  - Firebase/CoreOnly (6.9.0):
+    - FirebaseCore (= 6.3.0)
+  - Firebase/Database (6.9.0):
+    - Firebase/CoreOnly
+    - FirebaseDatabase (~> 6.1.0)
+  - Firebase/Storage (6.9.0):
+    - Firebase/CoreOnly
+    - FirebaseStorage (~> 3.4.1)
+  - FirebaseAnalytics (6.1.2):
+    - FirebaseCore (~> 6.3)
+    - FirebaseInstanceID (~> 4.2)
+    - GoogleAppMeasurement (= 6.1.2)
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
+    - GoogleUtilities/MethodSwizzler (~> 6.0)
+    - GoogleUtilities/Network (~> 6.0)
+    - "GoogleUtilities/NSData+zlib (~> 6.0)"
+    - nanopb (~> 0.3)
+  - FirebaseAuth (6.2.3):
+    - FirebaseAuthInterop (~> 1.0)
+    - FirebaseCore (~> 6.2)
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.2)
+    - GoogleUtilities/Environment (~> 6.2)
+    - GTMSessionFetcher/Core (~> 1.1)
+  - FirebaseAuthInterop (1.0.0)
+  - FirebaseCore (6.3.0):
+    - FirebaseCoreDiagnostics (~> 1.0)
+    - FirebaseCoreDiagnosticsInterop (~> 1.0)
+    - GoogleUtilities/Environment (~> 6.2)
+    - GoogleUtilities/Logger (~> 6.2)
+  - FirebaseCoreDiagnostics (1.1.0):
+    - FirebaseCoreDiagnosticsInterop (~> 1.0)
+    - GoogleDataTransportCCTSupport (~> 1.0)
+    - GoogleUtilities/Environment (~> 6.2)
+    - GoogleUtilities/Logger (~> 6.2)
+  - FirebaseCoreDiagnosticsInterop (1.0.0)
+  - FirebaseDatabase (6.1.0):
+    - FirebaseAuthInterop (~> 1.0)
+    - FirebaseCore (~> 6.0)
+    - leveldb-library (~> 1.18)
+  - FirebaseInstanceID (4.2.5):
+    - FirebaseCore (~> 6.0)
+    - GoogleUtilities/Environment (~> 6.0)
+    - GoogleUtilities/UserDefaults (~> 6.0)
+  - FirebaseStorage (3.4.1):
+    - FirebaseAuthInterop (~> 1.0)
+    - FirebaseCore (~> 6.0)
+    - GTMSessionFetcher/Core (~> 1.1)
+  - GoogleAppMeasurement (6.1.2):
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
+    - GoogleUtilities/MethodSwizzler (~> 6.0)
+    - GoogleUtilities/Network (~> 6.0)
+    - "GoogleUtilities/NSData+zlib (~> 6.0)"
+    - nanopb (~> 0.3)
+  - GoogleDataTransport (2.0.0)
+  - GoogleDataTransportCCTSupport (1.1.0):
+    - GoogleDataTransport (~> 2.0)
+    - nanopb
+  - GoogleUtilities/AppDelegateSwizzler (6.3.0):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+  - GoogleUtilities/Environment (6.3.0)
+  - GoogleUtilities/Logger (6.3.0):
+    - GoogleUtilities/Environment
+  - GoogleUtilities/MethodSwizzler (6.3.0):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/Network (6.3.0):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (6.3.0)"
+  - GoogleUtilities/Reachability (6.3.0):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/UserDefaults (6.3.0):
+    - GoogleUtilities/Logger
+  - GradientLoadingBar (2.0.0):
+    - LightweightObservable (~> 1.0)
+  - GTMSessionFetcher/Core (1.2.2)
+  - IGListKit (3.4.0):
+    - IGListKit/Default (= 3.4.0)
+  - IGListKit/Default (3.4.0):
+    - IGListKit/Diffing
+  - IGListKit/Diffing (3.4.0)
+  - InstantSearch (5.1.0):
+    - InstantSearch/UI (= 5.1.0)
+    - InstantSearchCore (~> 6.0)
+  - InstantSearch/UI (5.1.0):
+    - InstantSearchCore (~> 6.0)
+  - InstantSearchClient (7.0.0)
+  - InstantSearchCore (6.2.0):
+    - InstantSearchClient (~> 7.0)
+  - KILabel (1.0.1)
+  - Kingfisher (5.8.1):
+    - Kingfisher/Core (= 5.8.1)
+  - Kingfisher/Core (5.8.1)
+  - leveldb-library (1.22)
+  - LightweightObservable (1.0.3)
+  - MarqueeLabel (4.0.0)
+  - nanopb (0.3.901):
+    - nanopb/decode (= 0.3.901)
+    - nanopb/encode (= 0.3.901)
+  - nanopb/decode (0.3.901)
+  - nanopb/encode (0.3.901)
+  - NextLevelSessionExporter (0.4.2)
+  - NotificationBannerSwift (2.5.1):
+    - MarqueeLabel (~> 4.0.0)
+    - SnapKit (~> 5.0.0)
+  - PINCache (3.0.1-beta.6):
+    - PINCache/Arc-exception-safe (= 3.0.1-beta.6)
+    - PINCache/Core (= 3.0.1-beta.6)
+  - PINCache/Arc-exception-safe (3.0.1-beta.6):
+    - PINCache/Core
+  - PINCache/Core (3.0.1-beta.6):
+    - PINOperation (~> 1.1.0)
+  - PINOperation (1.1.2)
+  - PINRemoteImage/Core (3.0.0-beta.13):
+    - PINOperation
+  - PINRemoteImage/iOS (3.0.0-beta.13):
+    - PINRemoteImage/Core
+  - PINRemoteImage/PINCache (3.0.0-beta.13):
+    - PINCache (= 3.0.1-beta.6)
+    - PINRemoteImage/Core
+  - SJSegmentedScrollView (1.5.0)
+  - SnapKit (5.0.1)
+  - Texture (2.8.1):
+    - Texture/AssetsLibrary (= 2.8.1)
+    - Texture/Core (= 2.8.1)
+    - Texture/MapKit (= 2.8.1)
+    - Texture/Photos (= 2.8.1)
+    - Texture/PINRemoteImage (= 2.8.1)
+    - Texture/Video (= 2.8.1)
+  - Texture/AssetsLibrary (2.8.1):
+    - Texture/Core
+  - Texture/Core (2.8.1)
+  - Texture/IGListKit (2.8.1):
+    - IGListKit (~> 3.0)
+    - Texture/Core
+  - Texture/MapKit (2.8.1):
+    - Texture/Core
+  - Texture/Photos (2.8.1):
+    - Texture/Core
+  - Texture/PINRemoteImage (2.8.1):
+    - PINRemoteImage/iOS (= 3.0.0-beta.13)
+    - PINRemoteImage/PINCache
+    - Texture/Core
+  - Texture/Video (2.8.1):
+    - Texture/Core
+  - TwitterProfile (0.1.5)
+  - XLPagerTabStrip (9.0.0)
+
+DEPENDENCIES:
+  - ActiveLabel
+  - Cache
+  - DeepDiff
+  - Disk
+  - Firebase/Auth
+  - Firebase/Core
+  - Firebase/Database
+  - Firebase/Storage
+  - GradientLoadingBar
+  - InstantSearch
+  - KILabel
+  - Kingfisher
+  - NextLevelSessionExporter
+  - NotificationBannerSwift
+  - SJSegmentedScrollView
+  - Texture
+  - Texture/IGListKit
+  - TwitterProfile (~> 0.1.5)
+  - XLPagerTabStrip
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - ActiveLabel
+    - Cache
+    - DeepDiff
+    - Disk
+    - Firebase
+    - FirebaseAnalytics
+    - FirebaseAuth
+    - FirebaseAuthInterop
+    - FirebaseCore
+    - FirebaseCoreDiagnostics
+    - FirebaseCoreDiagnosticsInterop
+    - FirebaseDatabase
+    - FirebaseInstanceID
+    - FirebaseStorage
+    - GoogleAppMeasurement
+    - GoogleDataTransport
+    - GoogleDataTransportCCTSupport
+    - GoogleUtilities
+    - GradientLoadingBar
+    - GTMSessionFetcher
+    - IGListKit
+    - InstantSearch
+    - InstantSearchClient
+    - InstantSearchCore
+    - KILabel
+    - Kingfisher
+    - leveldb-library
+    - LightweightObservable
+    - MarqueeLabel
+    - nanopb
+    - NextLevelSessionExporter
+    - NotificationBannerSwift
+    - PINCache
+    - PINOperation
+    - PINRemoteImage
+    - SJSegmentedScrollView
+    - SnapKit
+    - Texture
+    - TwitterProfile
+    - XLPagerTabStrip
+
+SPEC CHECKSUMS:
+  ActiveLabel: 5e3f4de79a1952d4604b845a0610d4776e4b82b3
+  Cache: 807c5d86d01a177f06ede9865add3aea269bbfd4
+  DeepDiff: e329bc46dd14ca788d8ec08d34420799ba1d77f2
+  Disk: dcee5c2e98fb72f9a924cde8da8435b08244a80e
+  Firebase: 2d750c54cda57d5a6ae31212cfe5cc813c6be7e4
+  FirebaseAnalytics: 5d9ccbf46ed25d3ec9304d263f85bddf1e93e2d2
+  FirebaseAuth: e7f86c2dfc57281cd01f7da5e4b40e01e4510a4a
+  FirebaseAuthInterop: 0ffa57668be100582bb7643d4fcb7615496c41fc
+  FirebaseCore: 8b2765c445d40db7137989b7146a3aa3f91b5529
+  FirebaseCoreDiagnostics: be4f7a09d02ab305f18de59a470412caddb64c2a
+  FirebaseCoreDiagnosticsInterop: 6829da2b8d1fc795ff1bd99df751d3788035d2cb
+  FirebaseDatabase: 518cd94286de2ee999e19383a2a6ae04c81ce993
+  FirebaseInstanceID: 550df9be1f99f751d8fcde3ac342a1e21a0e6c42
+  FirebaseStorage: b7c6d00997bc21d4465453bdcc5cc65513110fed
+  GoogleAppMeasurement: 0ae90be1cc4dad40f4a27fc767ef59fa032ec87b
+  GoogleDataTransport: c8617c00e4f3eb9418e42ac0e8ac5241a9d555dd
+  GoogleDataTransportCCTSupport: 9f352523e8785a71f6754f51eeff09f49ec19268
+  GoogleUtilities: 9c2c544202301110b29f7974a82e77fdcf12bf51
+  GradientLoadingBar: b46dffa5b505dd0b20ec65b80d178da600d815bb
+  GTMSessionFetcher: 61bb0f61a4cb560030f1222021178008a5727a23
+  IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
+  InstantSearch: f8fc507193577efacef84e54367b9b7271cb42c4
+  InstantSearchClient: c9c1522c59f109514c6a37a7ec2a622e069ba56b
+  InstantSearchCore: cabb31c6267a36de3e613fdd61802e30086b5c39
+  KILabel: 4797807cdc0b4992dad8bf91175ddc973c3b569b
+  Kingfisher: de969e451c81ca6c07a454bc36fea84b8b08c3c7
+  leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
+  LightweightObservable: 8687e8e1e2940ae2f64d7f71fe78c036d89c966f
+  MarqueeLabel: b55b26e690b6ad41faedd95cbf5eae6f1d1735b4
+  nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
+  NextLevelSessionExporter: f711cf5c676030161413ad997d4528694d1613e0
+  NotificationBannerSwift: e55dd801b0d78f1a7bacb10d722a935ec95f94a3
+  PINCache: d195fdba255283f7e9900a55e3cced377f431f9b
+  PINOperation: 24b774353ca248fcf87d67b2d61eef42087c125a
+  PINRemoteImage: d6d51c5d2adda55f1ce30c96e850b6c4ebd2856a
+  SJSegmentedScrollView: 67ca97389a9c3a409d3b54c88781f031f5091c61
+  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  Texture: 8ecf6984065a1e54f06bf97b349ecca28582acd7
+  TwitterProfile: e72e407454a6416615b55412db44f89e1b3e6ead
+  XLPagerTabStrip: 61c57fd61f611ee5f01ff1495ad6fbee8bf496c5
+
+PODFILE CHECKSUM: 4baa14083cc237c977bfab5ddedcd7ccee37b65b
+
+COCOAPODS: 1.5.2

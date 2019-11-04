@@ -7,13 +7,17 @@
 //
 
 import UIKit
+import AsyncDisplayKit
 
-protocol PinterestLayoutDelegate: class {
+protocol PinterestLayoutDelegate: ASCollectionDelegate {
     // 1. Method to ask the delegate for the height of the image
-    func collectionView(_ collectionView:UICollectionView, heightForPhotoAtIndexPath indexPath:IndexPath) -> CGFloat
+    func collectionView(_ collectionView: UICollectionView, heightForPhotoAtIndexPath indexPath: IndexPath) -> CGFloat
+    
+    func collectionNode(_ collectionNode: ASCollectionNode, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize
+    
 }
 
-class PinterestLayout: UICollectionViewLayout {
+class PinterestLayout: UICollectionViewFlowLayout {
     //1. Pinterest Layout Delegate
     weak var delegate: PinterestLayoutDelegate!
     

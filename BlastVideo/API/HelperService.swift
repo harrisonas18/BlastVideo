@@ -9,7 +9,10 @@
 import Foundation
 import FirebaseStorage
 import FirebaseDatabase
+import FirebaseAuth
+
 class HelperService {
+    
     static func uploadDataToServer(data: Data, videoUrl: URL? = nil, ratio: Float, caption: String, onSuccess: @escaping () -> Void) {
         if let videoUrl = videoUrl {
             self.uploadVideoToFirebaseStorage(videoUrl: videoUrl, onSuccess: { (videoUrl) in
@@ -31,10 +34,18 @@ class HelperService {
         storageRef.putFile(from: videoUrl, metadata: nil) { (metadata, error) in
             if error != nil {
                 //ProgressHUD.showError(error!.localizedDescription)
+                print(error!.localizedDescription)
                 return
             }
-            if let videoUrl = metadata?.downloadURL()?.absoluteString {
-                onSuccess(videoUrl)
+            var videoURL: String = ""
+            storageRef.downloadURL { (url, error) in
+                guard let downloadURL = url else {
+                    // Uh-oh, an error occurred!
+                    print("Error could not retrieve URL")
+                    return
+                }
+                videoURL = downloadURL.absoluteString
+                onSuccess(videoURL)
             }
         }
     }
@@ -47,34 +58,41 @@ class HelperService {
                 //ProgressHUD.showError(error!.localizedDescription)
                 return
             }
-            if let photoUrl = metadata?.downloadURL()?.absoluteString {
-                onSuccess(photoUrl)
+            var photoURL: String = ""
+            storageRef.downloadURL { (url, error) in
+                guard let downloadURL = url else {
+                    // Uh-oh, an error occurred!
+                    print("Error could not retrieve URL")
+                    return
+                }
+                photoURL = downloadURL.absoluteString
+                onSuccess(photoURL)
             }
+
             
         }
     }
     
     static func sendDataToDatabase(photoUrl: String, videoUrl: String? = nil, ratio: Float, caption: String, onSuccess: @escaping () -> Void) {
         let newPostId = Api.Post.REF_POSTS.childByAutoId().key
-        let newPostReference = Api.Post.REF_POSTS.child(newPostId)
+        let newPostReference = Api.Post.REF_POSTS.child(newPostId!)
         
-        guard let currentUser = Api.User.CURRENT_USER else {
+        guard let currentUser = Auth.auth().currentUser else {
             return
         }
         
         let currentUserId = currentUser.uid
-        
-        let words = caption.components(separatedBy: CharacterSet.whitespacesAndNewlines)
-        
-        for var word in words {
-            if word.hasPrefix("#") {
-                word = word.trimmingCharacters(in: CharacterSet.punctuationCharacters)
-                let newHashTagRef = Api.HashTag.REF_HASHTAG.child(word.lowercased())
-                newHashTagRef.updateChildValues([newPostId: true])
-            }
-        }
-        
         let timestamp = Int(Date().timeIntervalSince1970)
+        
+//        let words = caption.components(separatedBy: CharacterSet.whitespacesAndNewlines)
+//        
+//        for var word in words {
+//            if word.hasPrefix("#") {
+//                word = word.trimmingCharacters(in: CharacterSet.punctuationCharacters)
+//                let newHashTagRef = Api.HashTag.REF_HASHTAG.child(word.lowercased()).child(newPostId!)
+//                newHashTagRef.setValue(["timestamp": timestamp])
+//            }
+//        }
         
         var dict = ["uid": currentUserId ,"photoUrl": photoUrl, "caption": caption, "likeCount": 0, "ratio": ratio, "timestamp": timestamp] as [String : Any]
         if let videoUrl = videoUrl {
@@ -85,13 +103,14 @@ class HelperService {
             (error, ref) in
             if error != nil {
                 //ProgressHUD.showError(error!.localizedDescription)
+                print("Error uploading new post reference")
                 return
             }
             
-            Api.Feed.REF_FEED.child(Api.User.CURRENT_USER!.uid).child(newPostId)
+            Api.Feed.REF_FEED.child(Auth.auth().currentUser!.uid).child(newPostId!)
                 .setValue(["timestamp": timestamp])
             
-            let myPostRef = Api.MyPosts.REF_MYPOSTS.child(currentUserId).child(newPostId)
+            let myPostRef = Api.MyPosts.REF_MYPOSTS.child(currentUserId).child(newPostId!)
             myPostRef.setValue(["timestamp": timestamp], withCompletionBlock: { (error, ref) in
                 if error != nil {
                     //ProgressHUD.showError(error!.localizedDescription)

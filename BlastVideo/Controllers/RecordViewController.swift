@@ -30,13 +30,16 @@ class RecordViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        recordButton.layer.borderWidth = 3.0
+        recordButton.layer.borderColor = UIColor(red:0.33, green:0.94, blue:0.77, alpha:1.0).cgColor
+        
         setupCaptureSession()
         setupDevice()
         setupInputOutput()
         setupPreviewLayer()
         startRunningCaptureSession()
         navigationController?.isNavigationBarHidden = true
-        
+        UIApplication.shared.statusBarView?.backgroundColor = .clear
         UIApplication.shared.isStatusBarHidden = true
 
         
@@ -53,7 +56,7 @@ class RecordViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        UIApplication.shared.statusBarView?.backgroundColor = .clear
         UIApplication.shared.isStatusBarHidden = true
     }
     
@@ -100,7 +103,6 @@ class RecordViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     }
     // MARK: - Action methods
     
-   
     
     @IBAction func capture(sender: UIButton) {
         if !isRecording {
@@ -125,15 +127,18 @@ class RecordViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     }
     
     
+    //Segue to edit view sending file to view
     // MARK: - AVCaptureFileOutputRecordingDelegate methods
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if error != nil {
-            //print(error)
+            print(error)
             return
         }
         
         performSegue(withIdentifier: "playVideo", sender: outputFileURL)
     }
+    
+    
     //upload (needs to only show videos, not photos though)
     @IBAction func uploadPost(_ sender: Any) {
         let pickerController = UIImagePickerController()

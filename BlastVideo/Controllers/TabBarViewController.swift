@@ -7,33 +7,97 @@
 //
 
 import UIKit
+import Disk
+import FirebaseAuth
 
-class TabBarViewController: UITabBarController {
+class TabBarController: UITabBarController {
+    
+    var signedIn = false
+    
+    var profileNavController = UINavigationController()
+    var discoverTestNav = UINavigationController()
+    
+    var discoverTest = DiscoverPageController()
+    var profileViewController = ProfileViewController()
+    let layout = UICollectionViewFlowLayout()
+    var livePhotoSelectorCtrl = LivePhotoSelectorController()
+    var livePhotoSlctNav = UINavigationController()
+    var searchController = SearchController()
+    var searchNavController = UINavigationController()
+    
+    let pop1 = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SignUpPopover") as! SignUpPopoverController
+    let pop2 = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SignUpPopover") as! SignUpPopoverController
+    
+    var pop1Nav = UINavigationController()
+    var pop2Nav = UINavigationController()
+    
+    var tabBarList: [UIViewController] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
-        
-        let firstViewController = UINavigationController(rootViewController: DiscoverViewController())
-        firstViewController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "search"), selectedImage: #imageLiteral(resourceName: "search-selected"))
-        firstViewController.tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
-        
-        let secondViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "RecordViewController")
-        secondViewController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "camera"), selectedImage: #imageLiteral(resourceName: "camera-selected"))
-        secondViewController.tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
-        
-        let thirdViewController = SignInViewController()
-        thirdViewController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "home"), selectedImage: #imageLiteral(resourceName: "home-selected"))
-        thirdViewController.tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
-        
-        let tabBarList = [firstViewController, secondViewController, thirdViewController]
-        
-        viewControllers = tabBarList
-        
-        tabBar.tintColor = UIColor(named: "Theme")
+        self.delegate = self
+        tabBar.tintColor = .black
+        Auth.auth().addStateDidChangeListener { (auth, user) in
+            if user != nil {
+                self.signedIn = true
+                self.discoverTestNav = UINavigationController(rootViewController: self.discoverTest)
+                self.discoverTestNav.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "feedIcon"), selectedImage: #imageLiteral(resourceName: "feedIcon"))
+                
+                self.searchNavController = UINavigationController(rootViewController: self.searchController)
+                self.searchNavController.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "search-selected"), selectedImage: #imageLiteral(resourceName: "search-selected"))
+                
+                self.livePhotoSelectorCtrl = LivePhotoSelectorController(collectionViewLayout: self.layout)
+                self.livePhotoSlctNav = UINavigationController(rootViewController: self.livePhotoSelectorCtrl)
+                self.livePhotoSlctNav.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "AddButton"), selectedImage: #imageLiteral(resourceName: "AddButton"))
+                
+                self.profileNavController = UINavigationController(rootViewController: self.profileViewController)
+                self.profileNavController.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "ProfileIcon"), selectedImage: #imageLiteral(resourceName: "ProfileIcon"))
+                
+                self.viewControllers = [self.discoverTestNav, self.searchNavController, self.livePhotoSlctNav, self.profileNavController]
+                
+            } else {
+                
+                self.signedIn = false
+                
+                self.discoverTestNav = UINavigationController(rootViewController: self.discoverTest)
+                self.discoverTestNav.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "feedIcon"), selectedImage: #imageLiteral(resourceName: "feedIcon"))
+                
+                self.searchNavController = UINavigationController(rootViewController: self.searchController)
+                self.searchNavController.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "search-selected"), selectedImage: #imageLiteral(resourceName: "search-selected"))
+                
+                self.livePhotoSelectorCtrl = LivePhotoSelectorController(collectionViewLayout: self.layout)
+                self.livePhotoSlctNav = UINavigationController(rootViewController: self.livePhotoSelectorCtrl)
+                self.livePhotoSlctNav.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "AddButton"), selectedImage: #imageLiteral(resourceName: "AddButton"))
+                
+                self.profileNavController = UINavigationController(rootViewController: self.profileViewController)
+                self.profileNavController.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "ProfileIcon"), selectedImage: #imageLiteral(resourceName: "ProfileIcon"))
+                
+                self.viewControllers = [self.discoverTestNav, self.searchNavController]
+            }
+        }
         
         
     }
     
 }
+
+extension TabBarController: UITabBarControllerDelegate {
+    
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        
+        if viewController == tabBarController.viewControllers?[2] && signedIn == false {
+            let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SignUpPopover") as! SignUpPopoverController
+            vc.modalPresentationStyle = .overCurrentContext
+            self.present(vc, animated: true, completion: nil)
+            return false
+        } else {
+            return true
+        }
+        
+    }
+    
+}
+
+    
+    
+

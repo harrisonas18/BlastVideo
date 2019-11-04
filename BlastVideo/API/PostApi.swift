@@ -8,6 +8,9 @@
 
 import Foundation
 import FirebaseDatabase
+import FirebaseAuth
+import NotificationBannerSwift
+
 class PostApi {
     var REF_POSTS = Database.database().reference().child("posts")
     
@@ -55,7 +58,7 @@ class PostApi {
         })
     }
     
-    func getRecentPost(start timestamp: Int? = nil, limit: UInt, completionHandler: @escaping ([(Post, UserModel)]) -> Void) {
+    func getRecentPost(start timestamp: Int? = nil, limit: UInt, completionHandler: @escaping ([(Post, UserObject)]) -> Void) {
         
         var feedQuery = REF_POSTS.queryOrdered(byChild: "timestamp")
         if let latestPostTimestamp = timestamp, latestPostTimestamp > 0 {
@@ -63,21 +66,18 @@ class PostApi {
         } else {
             feedQuery = feedQuery.queryLimited(toLast: limit)
         }
-        
         // Call Firebase API to retrieve the latest records
         feedQuery.observeSingleEvent(of: .value, with: { (snapshot) in
             let items = snapshot.children.allObjects
             let myGroup = DispatchGroup()
             
+            var results: [(post: Post, user: UserObject)] = []
             
-            var results: [(post: Post, user: UserModel)] = []
-            
-            for (index, item) in (items as! [DataSnapshot]).enumerated() {
+            for (_, item) in (items as! [DataSnapshot]).enumerated() {
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
                     Api.User.observeUser(withId: post.uid!, completion: { (user) in
-                        results.insert((post, user), at: index)
-                        print(index)
+                        results.append((post: post, user: user))
                         myGroup.leave()
                     })
                 })
@@ -86,12 +86,12 @@ class PostApi {
                 results.sort(by: {$0.0.timestamp! > $1.0.timestamp! })
                 completionHandler(results)
             }
-            
-            
         })
         
     }
-    func getOldPost(start timestamp: Int, limit: UInt, completionHandler: @escaping ([(Post, UserModel)]) -> Void) {
+    
+    func getOldPost(start timestamp: Int, limit: UInt, completionHandler: @escaping ([(Post, UserObject)]) -> Void) {
+        
         
         let feedOrderQuery = REF_POSTS.queryOrdered(byChild: "timestamp")
         let feedLimitedQuery = feedOrderQuery.queryEnding(atValue: timestamp - 1, childKey: "timestamp").queryLimited(toLast: limit)
@@ -101,16 +101,14 @@ class PostApi {
             
             let myGroup = DispatchGroup()
             
-            var results: [(post: Post, user: UserModel)] = []
+            var results: [(post: Post, user: UserObject)] = []
             
-            for (index, item) in items.enumerated() {
-                print("Item: ", item)
-                print("Index: ", index)
+            for (_, item) in items.enumerated() {
                 
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
                     Api.User.observeUser(withId: post.uid!, completion: { (user) in
-                        results.insert((post, user), at: index)
+                        results.append((post: post, user: user))
                         myGroup.leave()
                     })
                 })
@@ -123,44 +121,34 @@ class PostApi {
         
     }
     
-    func removeObserveLikeCount(id: String, likeHandler: UInt) {
-        Api.Post.REF_POSTS.child(id).removeObserver(withHandle: likeHandler)
-    }
     
-    
-    func incrementLikes(postId: String, onSucess: @escaping (Post) -> Void, onError: @escaping (_ errorMessage: String?) -> Void) {
-        let postRef = Api.Post.REF_POSTS.child(postId)
-        postRef.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
-            if var post = currentData.value as? [String : AnyObject], let uid = Api.User.CURRENT_USER?.uid {
-                var likes: Dictionary<String, Bool>
-                likes = post["likes"] as? [String : Bool] ?? [:]
-                var likeCount = post["likeCount"] as? Int ?? 0
-                if let _ = likes[uid] {
-                    likeCount -= 1
-                    likes.removeValue(forKey: uid)
-                } else {
-                    likeCount += 1
-                    likes[uid] = true
-                }
-                post["likeCount"] = likeCount as AnyObject?
-                post["likes"] = likes as AnyObject?
-                
-                currentData.value = post
-                
-                return TransactionResult.success(withValue: currentData)
-            }
-            return TransactionResult.success(withValue: currentData)
-        }) { (error, committed, snapshot) in
-            if let error = error {
-                onError(error.localizedDescription)
-            }
-            if let dict = snapshot?.value as? [String: Any] {
-                let post = Post.transformPostPhoto(dict: dict, key: snapshot!.key)
-                onSucess(post)
-            }
+    func deletePost(post: Post){
+        
+        guard let currentUser = Auth.auth().currentUser else {
+            return
         }
+        if currentUser.uid == post.uid {
+            let ref = REF_POSTS.child(post.id!)
+            
+            ref.removeValue { (error, ref) in
+                if error == nil {
+//                    let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Post Removed", attributes: [:]), style: .success, colors: nil)
+//                    success.duration = 3.0
+//                    success.show()
+                } else {
+//                    let error = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Error Removing Post", attributes: [:]), style: .danger, colors: nil)
+//                    error.duration = 3.0
+//                    error.show()
+                }
+            }
+        } else {
+//            let error = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Error Removing Post", attributes: [:]), style: .danger, colors: nil)
+//            error.duration = 3.0
+//            error.show()
+        }
+        
+        
     }
-    
     
     
 }

@@ -17,4 +17,55 @@ class HashTagApi {
             completion(snapshot.key)
         })
     }
+    
+    func getHashtagPosts(hashtag: String, start timestamp: Int? = nil, limit: UInt, completion: @escaping ([(Post, UserObject)]) -> Void) {
+        
+        var feedQuery = REF_HASHTAG.child(hashtag.lowercased()).queryOrdered(byChild: "timestamp")
+        feedQuery = feedQuery.queryLimited(toLast: limit)
+        
+        feedQuery.observeSingleEvent(of: .value) { (snapshot) in
+            let items = snapshot.children.allObjects
+            let myGroup = DispatchGroup()
+            var results: [(Post, UserObject)] = []
+            for (_, item) in (items as! [DataSnapshot]).enumerated() {
+                myGroup.enter()
+                Api.Post.observePost(withId: item.key, completion: { (post) in
+                    Api.User.observeUser(withId: post.uid!, completion: { (user) in
+                        results.append((post, user))
+                        myGroup.leave()
+                    })
+                })
+            }
+            myGroup.notify(queue: .main) {
+                results.sort(by: {$0.0.timestamp! > $1.0.timestamp! })
+                completion(results)
+            }
+        }
+    }
+    
+    func getMoreHashtagPosts(hashtag: String, start timestamp: Int, limit: UInt, completion: @escaping ([(Post, UserObject)]) -> Void) {
+        
+        let feedQuery = REF_HASHTAG.child(hashtag.lowercased()).queryOrdered(byChild: "timestamp")
+        let feedLimitedQuery = feedQuery.queryEnding(atValue: timestamp - 1, childKey: "timestamp").queryLimited(toLast: limit)
+        
+        feedLimitedQuery.observeSingleEvent(of: .value) { (snapshot) in
+            let items = snapshot.children.allObjects
+            let myGroup = DispatchGroup()
+            var results: [(Post, UserObject)] = []
+            
+            for (_, item) in (items as! [DataSnapshot]).enumerated() {
+                myGroup.enter()
+                Api.Post.observePost(withId: item.key, completion: { (post) in
+                    Api.User.observeUser(withId: post.uid!, completion: { (user) in
+                        results.append((post, user))
+                        myGroup.leave()
+                    })
+                })
+            }
+            myGroup.notify(queue: .main) {
+                results.sort(by: {$0.0.timestamp! > $1.0.timestamp! })
+                completion(results)
+            }
+        }
+    }
 }

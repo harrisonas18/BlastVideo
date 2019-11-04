@@ -8,22 +8,30 @@
 
 import UIKit
 import Firebase
+import AsyncDisplayKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.makeKeyAndVisible()
-        let mainVC = TabBarViewController()
-        window?.rootViewController = mainVC
+    override init() {
+        super.init()
         FirebaseApp.configure()
+    }
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Override point for customization after application launch.
+        //ASImageNode.shouldShowImageScalingOverlay = true
+        //ASControlNode.enableHitTestDebug = true
+        
+        self.window = UIWindow(frame: UIScreen.main.bounds)
+        let tabBarController = TabBarController()
+        self.window?.rootViewController = tabBarController
+        self.window?.makeKeyAndVisible()
+        
         return true
+        
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -50,4 +58,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 }
-
+extension UIApplication {
+    var statusBarView: UIView? {
+        return value(forKey: "statusBar") as? UIView
+    }
+}

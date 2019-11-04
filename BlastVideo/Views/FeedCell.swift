@@ -9,75 +9,131 @@
 import UIKit
 import SDWebImage
 
-// first UICollectionViewCell
-class FeedCell: PostCell, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UIScrollViewDelegate {
+protocol CellDelegate: class {
+    func colCategorySelected(postId: String)
     
-    let collectionView: UICollectionView = {
-        let layout = PinterestLayout();
-        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout);
-        cv.backgroundColor = .white; //testing
-        cv.translatesAutoresizingMaskIntoConstraints = false;
-        return cv;
-    }();
+    func hideNavigationBar()
+    func showNavigationBar()
+    func contentOffset(scrollView: UIScrollView)
+}
+
+class FeedCell: PostCell, UICollectionViewDataSource, UICollectionViewDelegate, UINavigationControllerDelegate {
     
-    let cellId = "CellId"; // same as above unique id
-    var posts = [Post]()
+    weak var delegate: CellDelegate?
     
-    override func setupViews(){
+    lazy var collectionView: UICollectionView = {
+        let layout = PinterestLayout()
+        layout.delegate = self
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        cv.backgroundColor = UIColor.white
+        cv.translatesAutoresizingMaskIntoConstraints = false
+        
+        return cv
+    }()
+    
+    let cellId = "cellId"
+    var numberOfItemsInSection = 0
+    let myGroup = DispatchGroup()
+    
+    override func setupViews() {
         super.setupViews()
         
-        addSubview(collectionView);
-        loadTopPosts()
+        loadLatestPosts()
         
+        print("Posts count UIKit: ", posts.count)
+        // Set the PinterestLayout delegate
+        backgroundColor = .brown
+        addSubview(collectionView)
         
-        collectionView.register(PostCell.self, forCellWithReuseIdentifier: cellId);
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.contentInset = UIEdgeInsets(top: 65, left: 2, bottom: 50, right: 2);
+        collectionView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+        collectionView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        collectionView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        collectionView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        collectionView.register(PostCell.self, forCellWithReuseIdentifier: cellId)
         
-        collectionView.delegate = self;
-        collectionView.dataSource = self;
-        if let layout = collectionView.collectionViewLayout as? PinterestLayout {
-            layout.delegate = self
+    }
+    
+    var donePaginating = false
+    
+    
+    func loadLatestPosts (){
+        
+        isLoadingPost = true
+        Api.Post.getRecentPost(start: posts.first?.timestamp, limit: 9  ) { (results) in
+            if results.count > 0 {
+                results.forEach({ (result) in
+                    posts.append(result.0)
+                    users.append(result.1)
+                })
+            }
+            isLoadingPost = false
+            self.collectionView.reloadData()
         }
-        //Collection View Constraints
-        collectionView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
-        collectionView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true;
-        collectionView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true;
-        collectionView.topAnchor.constraint(equalTo: topAnchor).isActive = true;
-        collectionView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true;
+    }
+    
+    
+    func loadOlderPosts () {
+        guard !isLoadingPost else {
+            return
+        }
+        isLoadingPost = true
         
-        
+        guard let lastPostTimestamp = posts.last?.timestamp else {
+            isLoadingPost = false
+            return
+        }
+        Api.Post.getOldPost(start: lastPostTimestamp, limit: 6) { (results) in
+            if results.count == 0 {
+                return
+            }
+            for result in results {
+                posts.append(result.0)
+                users.append(result.1)
+            }
+            self.collectionView.reloadData()
+            isLoadingPost = false
+        }
     }
     
     func loadTopPosts() {
         posts.removeAll()
         self.collectionView.reloadData()
         Api.Post.observeTopPosts { (post) in
-            self.posts.append(post)
+            posts.append(post)
             self.collectionView.reloadData()
         }
     }
-    
-    
-    
     // Collection View methods /////////////////////////////////////////////////////////////////////////
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! PostCell;
-    
-        cell.layer.masksToBounds = true
-        cell.layer.cornerRadius = 8.0
-        cell.post = posts[indexPath.item]
-        
-        return cell;
-    }
-    
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.posts.count;
+        return posts.count
     }
     
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellId", for: indexPath) as! PostCell
+        
+        cell.contentView.layer.cornerRadius = 6.0
+        cell.contentView.layer.borderWidth = 1.0
+        cell.contentView.layer.borderColor = UIColor.clear.cgColor
+        cell.contentView.layer.masksToBounds = true;
+        
+        
+        cell.layer.shadowColor = UIColor.lightGray.cgColor
+        cell.layer.shadowOffset = CGSize(width:0,height: 2.0)
+        cell.layer.shadowRadius = 2.0
+        cell.layer.shadowOpacity = 0.5
+        cell.layer.masksToBounds = false;
+        cell.layer.shadowPath = UIBezierPath(roundedRect:cell.bounds, cornerRadius:cell.contentView.layer.cornerRadius).cgPath
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
+        
+        cell.post = posts[indexPath.item]
+        cell.user = users[indexPath.item]
+        
+        
+        return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -85,16 +141,31 @@ class FeedCell: PostCell, UICollectionViewDataSource, UICollectionViewDelegate, 
         return CGSize(width: itemSize, height: itemSize)
     }
     
-    // Collection View methods /////////////////////////////////////////////////////////////////////////
-}
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        delegate?.colCategorySelected(postId: posts[indexPath.item].id!)
+    }
 
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y >= scrollView.contentSize.height - super.frame.height {
+            loadOlderPosts()
+        }
+        
+        delegate?.contentOffset(scrollView: scrollView)
+        
+    }
+  
+}
 //MARK: - PINTEREST LAYOUT DELEGATE
 extension FeedCell: PinterestLayoutDelegate {
     func collectionView(_ collectionView: UICollectionView,
                         heightForPhotoAtIndexPath indexPath:IndexPath) -> CGFloat {
         
         return (375 / posts[indexPath.item].ratio!) / 2
+        //return 200
     }
-    
-    
 }
+

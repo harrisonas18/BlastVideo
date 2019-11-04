@@ -14,4 +14,7 @@ struct Api {
     static var MyPosts = MyPostsApi()
     static var Feed = FeedApi()
     static var HashTag = HashTagApi()
+    static var Favorites = FavoritesApi()
+    static var Follow = FollowApi()
+    static var Auth = AuthService()
 }

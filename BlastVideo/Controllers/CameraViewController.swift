@@ -33,5 +33,7 @@ class CameraViewController: UIViewController {
         self.navigationController?.isNavigationBarHidden = true
         self.view.backgroundColor = .white
         self.testView.backgroundColor = .red
+        UIApplication.shared.statusBarView?.backgroundColor = .clear
     }
+    
 }

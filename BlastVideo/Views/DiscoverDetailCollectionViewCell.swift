@@ -1,28 +1,57 @@
+
 //
-//  DiscoverDetailCollectionViewCell.swift
-//  VideoAppLatestUpdate
+//  HomeTableViewCell.swift
+//  Blast Video
 //
-//  Created by Harrison Senesac on 8/2/18.
-//  Copyright © 2018 The Zero2Launch Team. All rights reserved.
+//  Created by Harrison Senesac
+//  Copyright © 2018 Harrison Senesac All rights reserved.
 //
 
 import UIKit
+import AVFoundation
+import KILabel
+
 
 class DiscoverDetailCollectionViewCell: UICollectionViewCell {
     
-    @IBOutlet weak var photo: UIImageView!
+    let postImageView: UIImageView = {
+        let imageView = UIImageView()
+        return imageView
+    }()
+
+    
+    var player: AVPlayer?
+    var playerLayer: AVPlayerLayer?
     
     var post: Post? {
         didSet {
-            //updateView()
+            updateView()
         }
     }
     
-//    func updateView() {
-//        if let photoUrlString = post?.photoUrl {
-//            let photoUrl = URL(string: photoUrlString)
-//            let placeHolderImage = UIImage(imageLiteralResourceName: "placeholder-photo")
-//            photo.sd_setImage(with: photoUrl, placeholderImage: placeHolderImage)
-//        }
-//    }
+    func updateView() {
+        if let videoUrlString = post?.videoUrl, let videoUrl = URL(string: videoUrlString) {
+            player = AVPlayer(url: videoUrl)
+            playerLayer = AVPlayerLayer(player: player)
+            playerLayer?.frame = postImageView.frame
+            playerLayer?.backgroundColor = UIColor.white.cgColor
+            playerLayer?.frame.size.width = UIScreen.main.bounds.width
+            playerLayer?.frame.size.height = UIScreen.main.bounds.width / post!.ratio!
+            self.contentView.layer.addSublayer(playerLayer!)
+            player?.playImmediately(atRate: 1.0)
+        }
+    
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        playerLayer?.removeFromSuperlayer()
+        player?.pause()
+    }
+    
 }
