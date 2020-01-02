@@ -59,12 +59,20 @@ class SettingsDisplayContentNode: ASDisplayNode {
     
     let arrowIcon: ASImageNode = {
         let node = ASImageNode()
-        node.image = UIImage(named: "next-page")
+        node.image = UIImage(named: "arrowLeft")
         node.style.preferredSize = CGSize(width: 24, height: 24)
         node.contentMode = .scaleAspectFit
-        node.tintColor = .black
+        node.tintColor = .lightGray
         return node
     }()
+    
+//    let divider: ASDisplayNode = {
+//        let node = ASDisplayNode()
+//        node.backgroundColor = .lightGray
+//        node.style.preferredLayoutSize.width = ASDimensionMake("100%")
+//        node.style.preferredSize.height = 1.0
+//        return node
+//    }()
     
     
     // MARK: - Object life cycle
@@ -85,7 +93,7 @@ class SettingsDisplayContentNode: ASDisplayNode {
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
         
         let horzStack = ASStackLayoutSpec.init(direction: .horizontal,
-                                               spacing: 8.0,
+                                               spacing: 12.0,
                                                justifyContent: .start,
                                                alignItems: .center,
                                                children: [settingIcon, settingTitle])
@@ -95,7 +103,7 @@ class SettingsDisplayContentNode: ASDisplayNode {
                                                alignItems: .center,
                                                children: [horzStack, arrowIcon])
         
-        let inset = ASInsetLayoutSpec(insets: UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8), child: cellHorzStack)
+        let inset = ASInsetLayoutSpec(insets: UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12), child: cellHorzStack)
         
         return inset
         

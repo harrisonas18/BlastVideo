@@ -30,6 +30,12 @@ class LivePhotoSelectorController: UICollectionViewController, UICollectionViewD
             self.fetchPhotos()
         }
         
+        NotificationCenter.default.addObserver(self, selector: #selector(changeIndex), name: Notification.Name("ChangeIndex"), object: nil)
+        
+    }
+    
+    @objc func changeIndex(){
+        self.tabBarController?.selectedIndex = 0
     }
     
     override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
@@ -79,16 +85,19 @@ class LivePhotoSelectorController: UICollectionViewController, UICollectionViewD
                         self.livePhotos.append(livePhoto)
                         self.assets.append(asset)
                     }
-                    
-                    if count % 10 == 0 {
-                        DispatchQueue.main.async {
-                            self.collectionView?.reloadData()
-                        }
-                    } else if count == allPhotos.count - 1 {
-                        DispatchQueue.main.async {
-                            self.collectionView?.reloadData()
-                        }
+                    let index = self.livePhotos.count - 1
+                    DispatchQueue.main.async {
+                        self.collectionView?.insertItems(at: [IndexPath(row: index, section: 0)])
                     }
+//                    if count % 10 == 0 {
+//                        DispatchQueue.main.async {
+//                            self.collectionView?.reloadData()
+//                        }
+//                    } else if count == allPhotos.count - 1 {
+//                        DispatchQueue.main.async {
+//                            self.collectionView?.reloadData()
+//                        }
+//                    }
                     
                 })
                 
@@ -142,6 +151,7 @@ class LivePhotoSelectorController: UICollectionViewController, UICollectionViewD
     
     @objc func segueToEdit(){
         let editController = FilterPickerController(livePhoto: self.livePhoto!, asset: self.selectedAsset!, selectedImage: self.selectedImage!)
+        PostManager.shared.livePhoto = self.livePhoto!
         self.navigationController?.pushViewController(editController, animated: true)
     }
 }

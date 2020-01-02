@@ -8,19 +8,60 @@
 
 import UIKit
 import Firebase
+import FirebaseMessaging
+import FirebaseDatabase
 import AsyncDisplayKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
 
     var window: UIWindow?
 
     override init() {
         super.init()
         FirebaseApp.configure()
+        Messaging.messaging().delegate = self
+        Database.database().isPersistenceEnabled = true
     }
-
+    
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
+        Api.Auth.updateProfile(profileImgURL: nil, username: nil, email: nil, realName: nil, bio: nil, FCMToken: fcmToken, onSuccess: {
+            
+        }) { (error) in
+            
+        }
+    }
+    
+    func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
+        print(remoteMessage)
+        
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        for attch in notification.request.content.attachments {
+            print("Notification: ",attch)
+        }
+        print("Notifications foreground called")
+        
+    }
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        if #available(iOS 10.0, *) {
+          // For iOS 10 display notification (sent via APNS)
+          UNUserNotificationCenter.current().delegate = self
+
+          let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+          UNUserNotificationCenter.current().requestAuthorization(
+            options: authOptions,
+            completionHandler: {_, _ in })
+        } else {
+          let settings: UIUserNotificationSettings =
+          UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
+          application.registerUserNotificationSettings(settings)
+        }
+
+        application.registerForRemoteNotifications()
+        
         // Override point for customization after application launch.
         //ASImageNode.shouldShowImageScalingOverlay = true
         //ASControlNode.enableHitTestDebug = true
@@ -30,8 +71,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window?.rootViewController = tabBarController
         self.window?.makeKeyAndVisible()
         
+        
+        
         return true
         
+    }
+    
+    
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

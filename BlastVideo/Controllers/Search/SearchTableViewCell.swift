@@ -23,12 +23,6 @@ class SearchTableViewCell: UITableViewCell {
         userImg.contentMode = .scaleAspectFill
         userImg.layer.cornerRadius = 25.0
         userImg.clipsToBounds = true
-        //userImg.layer.borderWidth = 1
-        //userImg.layer.borderColor = UIColor.red.cgColor
-        //usernameLabel.layer.borderWidth = 1
-        //usernameLabel.layer.borderColor = UIColor.blue.cgColor
-        
-        //followButton.backgroundColor = .black
         
         followButton.setTitle("Unfollow", for: .selected)
         followButton.backgroundColor = .systemPink
@@ -46,7 +40,7 @@ class SearchTableViewCell: UITableViewCell {
 
         contentView.addSubview(userImg)
         contentView.addSubview(usernameLabel)
-        contentView.addSubview(followButton)
+        //contentView.addSubview(followButton)
     }
     
     required init?(coder: NSCoder) {

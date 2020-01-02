@@ -110,12 +110,12 @@ class LivePhotoViewController: UIViewController {
     
     @IBAction func uploadMediaTouched(_ sender: Any) {
         view.endEditing(true)
-        if let profileImg = self.selectedImage, let imageData = profileImg.jpegData(compressionQuality: 1.0) {
-            let ratio = profileImg.size.width / profileImg.size.height
-            HelperService.uploadDataToServer(data: imageData, videoUrl: self.videoURL, ratio: Float(ratio), caption: "", onSuccess: {
-                self.clearAll()
-                self.tabBarController?.selectedIndex = 0
-            })
+        if let profileImg = self.selectedImage, let _ = profileImg.jpegData(compressionQuality: 1.0) {
+            _ = profileImg.size.width / profileImg.size.height
+            //HelperService.uploadDataToServer(data: imageData, videoUrl: self.videoURL, ratio: Float(ratio), caption: "", onSuccess: {
+//                self.clearAll()
+//                self.tabBarController?.selectedIndex = 0
+//            })
 
         } else {
             print("Error")
@@ -144,7 +144,7 @@ class LivePhotoViewController: UIViewController {
             guard UIImagePickerController.isSourceTypeAvailable(src)
                 else { print("alas"); return }
             
-            guard let arr = UIImagePickerController.availableMediaTypes(for: src)
+            guard UIImagePickerController.availableMediaTypes(for: src) != nil
                 else { print("no available types"); return }
             
             let picker = UIImagePickerController()
@@ -177,8 +177,8 @@ class LivePhotoViewController: UIViewController {
     
     @objc func segueToEdit(){
         print("Next Button Pressed")
-        let editController = EditPhotoViewController(livePhoto: livePhoto!, displayPhoto: livePhoto!)
-        self.navigationController?.pushViewController(editController, animated: true)
+//        let editController = EditPhotoViewController(livePhoto: livePhoto!, displayPhoto: livePhoto!, tmpVideo: )
+//        self.navigationController?.pushViewController(editController, animated: true)
     }
 }
 
@@ -230,19 +230,19 @@ extension LivePhotoViewController : UIImagePickerControllerDelegate, UINavigatio
                         self.showLivePhoto(live!)
                         self.livePhoto = live
                         self.navigationItem.rightBarButtonItem?.isEnabled = true
-                        //let resources = PHAssetResource.assetResources(for: live!)
-                        LivePhoto.extractResources(from: live!, completion: { (resources) in
-                            self.photoURL = resources?.pairedImage
-                            self.videoURL = resources?.pairedVideo
-                            if let keyPhotoPath = self.photoURL {
-                                if FileManager.default.fileExists(atPath: keyPhotoPath.path) {
-                                    guard let keyPhotoImage = UIImage(contentsOfFile: keyPhotoPath.path) else {
-                                        return
-                                    }
-                                    self.selectedImage = keyPhotoImage
-                                }
-                            }
-                        })
+                        let resources = PHAssetResource.assetResources(for: live!)
+//                        LivePhoto.extractResources(from: live!, completion: { (resources) in
+//                            self.photoURL = resources?.pairedImage
+//                            self.videoURL = resources?.pairedVideo
+//                            if let keyPhotoPath = self.photoURL {
+//                                if FileManager.default.fileExists(atPath: keyPhotoPath.path) {
+//                                    guard let keyPhotoImage = UIImage(contentsOfFile: keyPhotoPath.path) else {
+//                                        return
+//                                    }
+//                                    self.selectedImage = keyPhotoImage
+//                                }
+//                            }
+//                        })
                     }
                 default:
                     let alert = UIAlertController(title: "Error", message:"You Must Choose a Live Photo", preferredStyle: .actionSheet)

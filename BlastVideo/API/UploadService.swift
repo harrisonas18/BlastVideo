@@ -14,53 +14,66 @@ import FirebaseAuth
 class UploadService {
 
     //Upload Post Helper function
-    static func uploadPost(photoURL: URL, videoURL: URL, ratio: Float, caption: String, completion: @escaping () -> Void){
+    func uploadPost(photoURL: URL, videoURL: URL, ratio: Float, caption: String, completion: @escaping (Bool) -> Void){
         
         var photoString : String = ""
         var videoString : String = ""
         let group = DispatchGroup()
         let queue = DispatchQueue(label: "dispatchQueue", qos: .userInitiated)
         
+        let uniformTypeID = NSUUID().uuidString
+        
         group.enter()
         print("photo upload called")
-        uploadPhoto(photoURL: photoURL, completion: { (photoURLString) in
-            photoString = photoURLString
-            print("photo uploaded")
-            group.leave()
+        uploadPhoto(id: uniformTypeID, photoURL: photoURL, completion: { (photoURLString) in
+            if let pString = photoURLString {
+                print("photo uploaded")
+                photoString = pString
+                group.leave()
+            }
         })
         
         group.enter()
         print("video upload called")
-        uploadVideo(videoURL: videoURL, completion: { (videoURLString) in
-            videoString = videoURLString
-            print("video uploaded")
-            group.leave()
+        uploadVideo(id: uniformTypeID, videoURL: videoURL, completion: { (videoURLString) in
+            if let vString = videoURLString {
+                print("video uploaded")
+                videoString = vString
+                group.leave()
+            }
         })
         
         group.notify(queue: queue) {
             print("post upload called")
-            uploadPostData(photoUrl: photoString, videoUrl: videoString, ratio: ratio , caption: caption, completion: {
+            self.uploadPostData(photoUrl: photoString, videoUrl: videoString, ratio: ratio , caption: caption, uniformTypeID: uniformTypeID, completion: { success in
                 print("post uploaded")
-                completion()
+                if success {
+                    completion(true)
+                } else {
+                    completion(false)
+                }
+                
             })
         }
     }
     
     //Upload Video
-    private static func uploadVideo(videoURL: URL, completion: @escaping (_ videoURL: String) -> Void){
-        let videoIdString = NSUUID().uuidString
-        let storageRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(videoIdString)
-        storageRef.putFile(from: videoURL, metadata: nil) { (metadata, error) in
+    func uploadVideo(id: String, videoURL: URL, completion: @escaping (_ videoURL: String?) -> Void){
+        let photoRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(id).child("photo")
+        //let videoIdString = NSUUID().uuidString
+        //let storageRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(videoIdString)
+        photoRef.putFile(from: videoURL, metadata: nil) { (metadata, error) in
             if error != nil {
                 //ProgressHUD.showError(error!.localizedDescription)
                 print(error!.localizedDescription)
-                return
+                completion(nil)
             }
             var videoURLString: String = ""
-            storageRef.downloadURL { (url, error) in
+            photoRef.downloadURL { (url, error) in
                 guard let downloadURL = url else {
                     // Uh-oh, an error occurred!
                     print("Error could not retrieve Video URL")
+                    completion(nil)
                     return
                 }
                 videoURLString = downloadURL.absoluteString
@@ -70,19 +83,21 @@ class UploadService {
     }
     
     //Upload Photo
-    private static func uploadPhoto(photoURL: URL, completion: @escaping (_ photoURL: String) -> Void){
-        let photoIdString = NSUUID().uuidString
-        let storageRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(photoIdString)
-        storageRef.putFile(from: photoURL, metadata: nil) { (metadata, error) in
+    private func uploadPhoto(id: String, photoURL: URL, completion: @escaping (_ photoURL: String?) -> Void){
+        //let photoIdString = NSUUID().uuidString
+        //let storageRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(photoIdString)
+        let videoRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(id).child("video")
+        videoRef.putFile(from: photoURL, metadata: nil) { (metadata, error) in
             if error != nil {
                 print(error!.localizedDescription)
                 return
             }
             var photoURLString: String = ""
-            storageRef.downloadURL { (url, error) in
+            videoRef.downloadURL { (url, error) in
                 guard let downloadURL = url else {
                     // Uh-oh, an error occurred!
                     print("Error could not retrieve Photo URL")
+                    completion(nil)
                     return
                 }
                 photoURLString = downloadURL.absoluteString
@@ -92,9 +107,9 @@ class UploadService {
     }
     
     //Upload Post Data to database
-    private static func uploadPostData(photoUrl: String, videoUrl: String, ratio: Float, caption: String, completion: @escaping () -> Void){
+    private func uploadPostData(photoUrl: String, videoUrl: String, ratio: Float, caption: String, uniformTypeID: String, completion: @escaping (Bool) -> Void){
         let newPostId = Api.Post.REF_POSTS.childByAutoId().key
-        let newPostReference = Api.Post.REF_POSTS.child(newPostId!)
+        let newPostReference = Api.Post.REF_POSTS.child("posts").child(newPostId!)
         
         guard let currentUser = Auth.auth().currentUser else {
             return
@@ -108,28 +123,28 @@ class UploadService {
         for var word in words {
             if word.hasPrefix("#") {
                 word = word.trimmingCharacters(in: CharacterSet.punctuationCharacters)
-                let newHashTagRef = Api.HashTag.REF_HASHTAG.child(word.lowercased()).child(newPostId!)
+                let newHashTagRef = Api.HashTag.REF_HASHTAG.child(word.lowercased()).child("posts").child(newPostId!)
                 newHashTagRef.setValue(["timestamp": timestamp])
             }
         }
         
-        let dict = ["uid": currentUserId ,"photoUrl": photoUrl, "videoUrl": videoUrl, "caption": caption, "ratio": ratio, "timestamp": timestamp] as [String : Any]
+        let dict = ["uid": currentUserId ,"photoUrl": photoUrl, "videoUrl": videoUrl, "caption": caption, "ratio": ratio, "timestamp": timestamp, "uniformTypeID": uniformTypeID] as [String : Any]
         
         newPostReference.setValue(dict, withCompletionBlock: {
             (error, ref) in
             if error != nil {
-                return
+                completion(false)
             }
-            Api.Feed.REF_FEED.child(Auth.auth().currentUser!.uid).child(newPostId!)
+            Api.Feed.REF_FEED.child(Auth.auth().currentUser!.uid).child("posts").child(newPostId!)
                 .setValue(["timestamp": timestamp])
             
-            let myPostRef = Api.MyPosts.REF_MYPOSTS.child(currentUserId).child(newPostId!)
+            let myPostRef = Api.MyPosts.REF_MYPOSTS.child(currentUserId).child("posts").child(newPostId!)
             myPostRef.setValue(["timestamp": timestamp], withCompletionBlock: { (error, ref) in
                 if error != nil {
-                    return
+                    completion(false)
                 }
             })
-            completion()
+            completion(true)
         })
     }
 }

@@ -13,6 +13,16 @@ class ProfileViewController : UIViewController, UIScrollViewDelegate, TPDataSour
     var scrollView = UIScrollView()
     var gradientBar : GradientActivityIndicatorView?
     
+    init() {
+        headerVC = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "HeaderViewController") as? HeaderViewController
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        headerVC = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "HeaderViewController") as? HeaderViewController
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavBar()
@@ -24,8 +34,7 @@ class ProfileViewController : UIViewController, UIScrollViewDelegate, TPDataSour
         self.tp_configure(with: self, delegate: self)
         
         NotificationCenter.default.addObserver(self, selector: #selector(scrollToTop), name: Notification.Name("ToTopProfilePost"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(endRefresh), name: Notification.Name("refreshProfilePost"), object: nil)
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(endRefresh), name: Notification.Name("endRefreshProfile"), object: nil)
     }
     
     @objc func scrollToTop(notification: Notification){
@@ -44,7 +53,7 @@ class ProfileViewController : UIViewController, UIScrollViewDelegate, TPDataSour
     
     //MARK: TPDataSource
     func headerViewController() -> UIViewController {
-        headerVC = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "HeaderViewController") as? HeaderViewController
+//        headerVC = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "HeaderViewController") as? HeaderViewController
         return headerVC!
     }
     
@@ -76,7 +85,7 @@ class ProfileViewController : UIViewController, UIScrollViewDelegate, TPDataSour
     }
     
     @objc func handleRefreshControl() {
-        
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshProfile"), object: nil)
     }
 }
 

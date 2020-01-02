@@ -15,7 +15,6 @@ class FollowingController: ASViewController<ASCollectionNode> {
     static let shared = FollowingController()
     let navigation = NavigationBarNode()
     let collectionNode: ASCollectionNode!
-    var refreshControl : UIRefreshControl?
     var layout: UICollectionViewFlowLayout
     
     var pageTitle: String?
@@ -33,15 +32,12 @@ class FollowingController: ASViewController<ASCollectionNode> {
         self.adapter.setASDKCollectionNode(self.collectionNode)
         self.adapter.dataSource = self
         self.collectionNode.alwaysBounceVertical = true
-        refreshControl = UIRefreshControl()
-        refreshControl?.addTarget(self, action: #selector(refreshContent), for: .valueChanged)
-        self.collectionNode.view.addSubview(refreshControl!)
         
     }
     
     @objc func refreshContent(){
         FollowingData.shared.feedItems.removeAll()
-        fetchDetailInfo()
+        fetchFeedItems()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -51,13 +47,13 @@ class FollowingController: ASViewController<ASCollectionNode> {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavBar()
-        fetchDetailInfo()
-        print("View loaded")
+        fetchFeedItems()
+        print("View did load")
     }
     
-    private func fetchDetailInfo() {
-        FollowingData.shared.fetchPosts { (feedItems) in
-            //print("Following Fetch posts called - UI")
+    func fetchFeedItems() {
+        print("Fetch called")
+        FollowingData.shared.fetchPosts(with: currentUserGlobal.id ?? "", limit: 2) { (feedItems) in
             self.feedItems = feedItems
             self.updateUI()
         }
@@ -95,7 +91,25 @@ extension FollowingController: ListAdapterDataSource {
         return items
     }
     
-    func emptyView(for listAdapter: ListAdapter) -> UIView? { return nil }
+    func emptyView(for listAdapter: ListAdapter) -> UIView? {
+        let baseView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.screenWidth(), height: UIScreen.screenHeight()))
+        
+        let view = UILabel()//frame: CGRect(x: 150, y: 150, width: 50, height: 35))
+        view.text = "No Posts"
+        view.textColor = .black
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        baseView.addSubview(view)
+        
+        NSLayoutConstraint.activate([
+            view.centerXAnchor.constraint(equalTo: baseView.centerXAnchor, constant: 15),
+            view.centerYAnchor.constraint(equalTo: baseView.centerYAnchor, constant: -45),
+            view.widthAnchor.constraint(equalToConstant: 100),
+            view.heightAnchor.constraint(equalToConstant: 35),
+        ])
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "endRefreshDiscover"), object: nil)
+        return baseView
+    }
 }
 
 extension FollowingController: FollowingDataDelegate {

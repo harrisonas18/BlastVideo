@@ -94,6 +94,21 @@ class ASDetailNode: ASDisplayNode {
     //Set up Like Button
     let likeButtonNode: ASButtonNode = {
         let node = ASButtonNode()
+        
+        node.style.preferredSize = CGSize(width: 20.0, height: 20.0)
+        return node
+    }()
+    
+    //Set up Mute Button
+    let muteButtonNode: ASButtonNode = {
+        let node = ASButtonNode()
+        node.style.preferredSize = CGSize(width: 20.0, height: 20.0)
+        return node
+    }()
+    
+    //Set up Share Button
+    let shareButtonNode: ASButtonNode = {
+        let node = ASButtonNode()
         node.style.preferredSize = CGSize(width: 20.0, height: 20.0)
         return node
     }()
@@ -120,6 +135,8 @@ class ASDetailNode: ASDisplayNode {
         //automaticallyManagesSubnodes = true
         addSubnode(livePhotoNode)
         addSubnode(usernameNode)
+        addSubnode(muteButtonNode)
+        addSubnode(shareButtonNode)
         addSubnode(likeButtonNode)
         addSubnode(caption)
         addSubnode(timeStampNode)
@@ -159,6 +176,15 @@ class ASDetailNode: ASDisplayNode {
         likeButtonNode.setImage(UIImage(named: "starFilled"), for: .selected)
         likeButtonNode.imageNode.contentMode = .scaleAspectFit
         likeButtonNode.addTarget(self, action: #selector(likePressed), forControlEvents: .touchUpInside)
+        
+        muteButtonNode.setImage(UIImage(named: "VolumeIcon"), for: .normal)
+        muteButtonNode.setImage(UIImage(named: "MuteIcon"), for: .selected)
+        muteButtonNode.imageNode.contentMode = .scaleAspectFit
+        
+        shareButtonNode.setImage(UIImage(named: "ShareIcon"), for: .normal)
+        shareButtonNode.setImage(UIImage(named: "ShareIcon"), for: .selected)
+        shareButtonNode.imageNode.contentMode = .scaleAspectFit
+        
         usernameNode.addTarget(self, action: #selector(usernamePressed), forControlEvents: .touchUpInside)
         
         caption.labelNode?.handleHashtagTap({ (hashtag) in
@@ -247,11 +273,18 @@ class ASDetailNode: ASDisplayNode {
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
         
         // horizontal stack
+        let iconStack = ASStackLayoutSpec.horizontal()
+        iconStack.style.preferredLayoutSize.width = ASDimensionMake("30%")
+        iconStack.alignItems = .center // center items vertically in horiz stack
+        iconStack.justifyContent = .spaceBetween
+        iconStack.children = [muteButtonNode, shareButtonNode, likeButtonNode]
+        
+        // horizontal stack
         let horizontalStack = ASStackLayoutSpec.horizontal()
         horizontalStack.style.preferredLayoutSize.width = ASDimensionMake("100%")
         horizontalStack.alignItems = .center // center items vertically in horiz stack
         horizontalStack.justifyContent = .spaceBetween
-        horizontalStack.children = [usernameNode, likeButtonNode]
+        horizontalStack.children = [usernameNode, iconStack]
         
         let vertStack = ASStackLayoutSpec.vertical()
         vertStack.style.preferredLayoutSize.width = ASDimensionMake("100%")

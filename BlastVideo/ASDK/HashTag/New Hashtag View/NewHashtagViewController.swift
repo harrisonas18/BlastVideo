@@ -13,11 +13,12 @@ import XLPagerTabStrip
 
 class NewHashtagViewController: ASViewController<ASCollectionNode> {
     
-    static let shared = NewHashtagViewController()
+    //static let shared = NewHashtagViewController()
     let navigation = NavigationBarNode()
     let collectionNode: ASCollectionNode!
     var refreshControl : UIRefreshControl?
     var layout: FeedLayout
+    var hashtag: String?
     
     var pageTitle: String?
     
@@ -27,7 +28,8 @@ class NewHashtagViewController: ASViewController<ASCollectionNode> {
         return ListAdapter(updater: ListAdapterUpdater(), viewController: self, workingRangeSize: 1)
     }()
     
-    init() {
+    init(hashtag: String) {
+        self.hashtag = hashtag
         layout = FeedLayout()
         self.collectionNode = ASCollectionNode(collectionViewLayout: layout)
         super.init(node: self.collectionNode)
@@ -42,7 +44,7 @@ class NewHashtagViewController: ASViewController<ASCollectionNode> {
     
     @objc func refreshContent(){
         HashtagData.shared.feedItems.removeAll()
-        fetchDetailInfo()
+        //fetchDetailInfo()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -52,15 +54,15 @@ class NewHashtagViewController: ASViewController<ASCollectionNode> {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavBar()
-        fetchDetailInfo()
+        //fetchDetailInfo()
     }
     
-    private func fetchDetailInfo() {
-        HashtagData.shared.fetchPosts(hashtag: "vermont") { (feedItems) in
-            self.feedItems = feedItems
-            self.updateUI()
-        }
-    }
+//    private func fetchDetailInfo() {
+//        HashtagData.shared.fetchPosts(hashtag: self.hashtag!) { (feedItems) in
+//            self.feedItems = feedItems
+//            self.updateUI()
+//        }
+//    }
     
     private func updateUI() {
         adapter.performUpdates(animated: true, completion: nil)
@@ -130,8 +132,15 @@ extension NewHashtagViewController: PushUsernameDelegate {
 extension NewHashtagViewController {
     
     func setupNavBar() {
-        let backBarButton = UIBarButtonItem(title: " ", style: .plain, target: nil, action: nil)
-        navigationItem.leftBarButtonItem = backBarButton
+        let navLabel = UILabel()
+        let font = UIFont.init(name: "Modulus-Bold", size: 24.0)
+        let navTitle = NSMutableAttributedString(string: "#"+hashtag!, attributes:[
+            NSAttributedString.Key.font: font!,
+            NSAttributedString.Key.foregroundColor: UIColor.black])
+        
+        navLabel.attributedText = navTitle
+        self.navigationItem.titleView = navLabel
+        
     }
     
     @objc func pushSearch(){

@@ -14,15 +14,31 @@ import FirebaseAuth
 class MyPostsApi {
     var REF_MYPOSTS = Database.database().reference().child("myPosts")
     
+    func observeMyPostsCount(id: String, completion: @escaping (Int) -> Void){
+        print("Observe posts id: ",id)
+        REF_MYPOSTS.child(id).child("myPostsCount").observeSingleEvent(of: .value) { (snapshot) in
+            if let value = snapshot.value as? Int {
+                print("Value from api my posts count: ", value)
+                completion(value)
+            } else {
+                print("Value from api my posts count: ", snapshot.value as? Int)
+                completion(0)
+            }
+        }
+    }
+    
     func getProfilePosts(userId: String, start timestamp: Int? = nil, limit: UInt, completion: @escaping ([Post]) -> Void) {
         
-        var feedQuery = REF_MYPOSTS.child(userId).queryOrdered(byChild: "timestamp")
-            feedQuery = feedQuery.queryLimited(toLast: limit)
+        let feedQuery = REF_MYPOSTS.child(userId).child("posts").queryLimited(toLast: limit)
+        //feedQuery = feedQuery.queryLimited(toLast: limit)
         
         feedQuery.observeSingleEvent(of: .value) { (snapshot) in
             let items = snapshot.children.allObjects
             let myGroup = DispatchGroup()
             var results: [Post] = []
+            print(snapshot.key)
+            print(snapshot.ref)
+            print("Snapshot object count: ",snapshot.children.allObjects.count)
             for (_, item) in (items as! [DataSnapshot]).enumerated() {
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
@@ -39,7 +55,7 @@ class MyPostsApi {
     
     func getOlderProfilePosts(userId: String, start timestamp: Int, limit: UInt, completion: @escaping ([Post]) -> Void) {
         
-        let feedQuery = REF_MYPOSTS.child(userId).queryOrdered(byChild: "timestamp")
+        let feedQuery = REF_MYPOSTS.child(userId).child("posts").queryOrdered(byChild: "timestamp")
         let feedLimitedQuery = feedQuery.queryEnding(atValue: timestamp - 1, childKey: "timestamp").queryLimited(toLast: limit)
         
         feedLimitedQuery.observeSingleEvent(of: .value) { (snapshot) in
@@ -83,7 +99,7 @@ class MyPostsApi {
             return
         }
         if currentUser.uid == post.uid {
-            let ref = REF_MYPOSTS.child(currentUser.uid).child(post.id!)
+            let ref = REF_MYPOSTS.child(currentUser.uid).child("posts").child(post.id!)
             
             ref.removeValue { (error, ref) in
                 if error == nil {

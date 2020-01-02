@@ -29,7 +29,7 @@ class SignUpNode: ASDisplayNode {
     
     let profImage: ASImageNode = {
         let node = ASImageNode()
-        node.style.preferredSize = CGSize(width: 24, height: 24)
+        node.style.preferredSize = CGSize(width: 25, height: 25)
         node.image = #imageLiteral(resourceName: "addImage")
         node.contentMode = .scaleAspectFit
         node.clipsToBounds = true
@@ -88,17 +88,38 @@ class SignUpNode: ASDisplayNode {
         return node
     }()
     
-    let passwordNode: ASEditableTextNode = {
-        let node = ASEditableTextNode()
-        node.attributedPlaceholderText = NSAttributedString(string: "Password", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular)])
-        node.textView.typingAttributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular), NSAttributedString.Key.foregroundColor: UIColor.black]
+    let passwordValidImg: ASImageNode = {
+        let node = ASImageNode()
+        node.contentMode = .scaleAspectFit
+        node.alpha = 0
+        node.image = #imageLiteral(resourceName: "GreenCheck")
+        node.style.preferredSize = CGSize(width: 25, height: 25)
+        return node
+        
+    }()
+    
+    let passwordNode: TextFieldNode = {
+        let node = TextFieldNode(height: UIScreen.screenWidth(), width: 22)
+        node.textFieldNode?.attributedPlaceholder = NSAttributedString(string: "Password", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular)])
+        node.textFieldNode?.typingAttributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular), NSAttributedString.Key.foregroundColor: UIColor.black]
         node.isUserInteractionEnabled = true
         node.style.preferredSize.width = UIScreen.screenWidth()
         node.style.preferredSize.height = 22
-        node.returnKeyType = .done
-        node.textView.isSecureTextEntry = true
+        node.textFieldNode?.returnKeyType = .done
+        node.textFieldNode?.isSecureTextEntry = true
         return node
     }()
+    
+//    let passwordNode: ASEditableTextNode = {
+//        let node = ASEditableTextNode()
+//        node.attributedPlaceholderText = NSAttributedString(string: "Password", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular)])
+//        node.textView.typingAttributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular), NSAttributedString.Key.foregroundColor: UIColor.black]
+//        node.isUserInteractionEnabled = true
+//        node.style.preferredSize.width = UIScreen.screenWidth()
+//        node.style.preferredSize.height = 22
+//        node.returnKeyType = .done
+//        return node
+//    }()
     
     let passwordSeparator: ASDisplayNode = {
         let node = ASDisplayNode()
@@ -116,7 +137,6 @@ class SignUpNode: ASDisplayNode {
         node.style.preferredSize.width = UIScreen.screenWidth()
         node.style.preferredSize.height = 22
         node.returnKeyType = .done
-        node.textView.isSecureTextEntry = true
         return node
     }()
     
@@ -154,7 +174,7 @@ class SignUpNode: ASDisplayNode {
     let arrowImage: ASImageNode = {
         let node = ASImageNode()
         node.style.preferredSize = CGSize(width: 12, height: 12)
-        node.image = #imageLiteral(resourceName: "right-arrow")
+        node.image = #imageLiteral(resourceName: "arrowLeft")
         return node
     }()
     
@@ -170,16 +190,15 @@ class SignUpNode: ASDisplayNode {
     override func didLoad() {
         super.didLoad()
         usernameNode.delegate = self
-        passwordNode.delegate = self
+        passwordNode.textFieldNode?.delegate = self
         //passwordNode.addTarget(self, action: #selector(self.textFieldDidChange), for: UIControl.Event.editingChanged)
-        
         
     }
     
     @objc func signupButtonTapped(){
         view.endEditing(true)
         print("Signup tapped")
-        signUpDelegate?.getSignUpInfo(username: usernameNode.textView.text!, email: emailNode.textView.text!, password: passwordNode.textView.text!)
+        signUpDelegate?.getSignUpInfo(username: usernameNode.textView.text!, email: emailNode.textView.text!, password: passwordNode.textFieldNode?.text! ?? "")
         
     }
     
@@ -190,8 +209,8 @@ class SignUpNode: ASDisplayNode {
     }
     
     @objc func textFieldDidChange() {
-        guard let username = usernameNode.textView.text, !usernameNode.textView.text.isEmpty,
-            let password = passwordNode.textView.text, !passwordNode.textView.text.isEmpty else {
+        guard let _ = usernameNode.textView.text, !usernameNode.textView.text.isEmpty,
+            let _ = passwordNode.textFieldNode?.text, !(passwordNode.textFieldNode?.text?.isEmpty ?? false) else {
                 signupButton.isEnabled = false
                 print("Button Not enabled")
                 return
@@ -204,7 +223,7 @@ class SignUpNode: ASDisplayNode {
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
         
         //let profImageStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 0, justifyContent: .start, alignItems: .center, children: [profImage])
-        let insetImg = ASInsetLayoutSpec.init(insets: UIEdgeInsets(top: 32, left: 32, bottom: 32, right: 32), child: profImage)
+        let insetImg = ASInsetLayoutSpec.init(insets: UIEdgeInsets(top: 24, left: 24, bottom: 24, right: 24), child: profImage)
         let imgOverlay = ASOverlayLayoutSpec.init(child: profImageBack, overlay: insetImg)
         
         let vertStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 0, justifyContent: .start, alignItems: .start, children: [titleNode])
@@ -213,7 +232,11 @@ class SignUpNode: ASDisplayNode {
         
         let emailStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 5, justifyContent: .start, alignItems: .start, children: [emailNode,emailSeparator])
         
-        let passwordStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 5, justifyContent: .start, alignItems: .start, children: [passwordNode,passwordSeparator])
+        let insetValidatImg = ASInsetLayoutSpec.init(insets: UIEdgeInsets(top: 0, left: CGFloat.infinity, bottom: 0, right: 0), child: passwordValidImg)
+        
+        let validationOverlay = ASOverlayLayoutSpec.init(child: passwordNode, overlay: insetValidatImg)
+        
+        let passwordStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 5, justifyContent: .start, alignItems: .start, children: [validationOverlay,passwordSeparator])
         
         let repeatPasswordStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 5, justifyContent: .start, alignItems: .start, children: [repeatPasswordNode, repeatPasswordSeparator])
         
@@ -237,6 +260,38 @@ class SignUpNode: ASDisplayNode {
     
 }
 
+extension SignUpNode: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        //print(passwordNode.textFieldNode?.text ?? "")
+        if isValidPassword(testStr: passwordNode.textFieldNode?.text ?? "") {
+            //Show Green Check to show password is acceptable
+            passwordValidImg.image = #imageLiteral(resourceName: "GreenCheck")
+            passwordValidImg.alpha = 100
+        } else {
+            print("returned false valid")
+            //Show Red x indicating field hasn't been satisfied
+            passwordValidImg.image = #imageLiteral(resourceName: "RedEx")
+            passwordValidImg.alpha = 100
+            //passwordValidImg.isHidden = false
+        }
+        if string == "\n"{
+            textField.resignFirstResponder()
+        }
+        
+        if range.length + range.location > passwordNode.textFieldNode?.text?.count ?? 0 {
+            return false
+        }
+        
+        let newLength = passwordNode.textFieldNode?.text?.count ?? 0 + string.count - range.length
+        return newLength <= 30
+    }
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        print(textField.text ?? "")
+    }
+    
+}
+
 extension SignUpNode: ASEditableTextNodeDelegate {
     func editableTextNode(_ editableTextNode: ASEditableTextNode, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         
@@ -254,12 +309,18 @@ extension SignUpNode: ASEditableTextNodeDelegate {
     
     func editableTextNodeDidUpdateText(_ editableTextNode: ASEditableTextNode) {
         
-        
-        
         let textCount = editableTextNode.textView.text.count
-        let countLeft = 140 - textCount
+        _ = 140 - textCount
         
         delegate?.getCaptionText(text: editableTextNode.textView.text)
+    }
+    
+    func isValidPassword(testStr:String?) -> Bool {
+        
+        guard testStr != nil else { print("returned false"); return false }
+        let passwordTest = NSPredicate(format: "SELF MATCHES %@", "^(?=\\P{Ll}*\\p{Ll})(?=\\P{Lu}*\\p{Lu})(?=\\P{N}*\\p{N})(?=[\\p{L}\\p{N}]*[^\\p{L}\\p{N}])[\\s\\S]{8,}$")
+        return passwordTest.evaluate(with: testStr)
+        
     }
     
     func editableTextNodeDidFinishEditing(_ editableTextNode: ASEditableTextNode) {

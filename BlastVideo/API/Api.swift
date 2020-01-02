@@ -17,4 +17,7 @@ struct Api {
     static var Favorites = FavoritesApi()
     static var Follow = FollowApi()
     static var Auth = AuthService()
+    static var Upload = UploadService()
+    static var Helper = HelperService()
+    static var Notification = NotificationApi()
 }

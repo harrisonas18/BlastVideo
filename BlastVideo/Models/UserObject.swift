@@ -15,8 +15,8 @@ class UserObject: Codable {
     var username: String? = nil
     var id: String? = nil
     var isFollowing: Bool? = false
-    // var has favorites bool
-    // profile name string
+    var realName: String? = nil
+    var bio: String? = nil
 }
 
 extension UserObject {
@@ -25,6 +25,8 @@ extension UserObject {
         user.email = dict["email"] as? String
         user.profileImageUrl = dict["profileImageUrl"] as? String
         user.username = dict["username"] as? String
+        user.realName = dict["realName"] as? String
+        user.bio = dict["bio"] as? String
         user.id = key
         return user
     }
@@ -39,6 +41,6 @@ extension UserObject: ListDiffable {
         guard self !== object else { return true }
         guard let object = object as? UserObject else { return false }
         return profileImageUrl == object.profileImageUrl &&
-            isFollowing == object.isFollowing 
+            isFollowing == object.isFollowing && realName == object.realName && bio == object.bio
     }
 }

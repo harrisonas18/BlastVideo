@@ -26,7 +26,7 @@ class CollectionPostCellNode: ASCellNode {
     
     override func didLoad() {
         super.didLoad()
-//        self.layer.borderColor = UIColor.containerBorderColor().cgColor
+//        self.layer.borderColor = UIColor.black.cgColor
 //        self.layer.borderWidth = 1.0
     }
     
@@ -34,7 +34,7 @@ class CollectionPostCellNode: ASCellNode {
     
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
         
-        let insets = ASInsetLayoutSpec(insets: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5), child: contentNode)
+        let insets = ASInsetLayoutSpec(insets: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0), child: contentNode)
         return insets
     }
     
@@ -130,7 +130,7 @@ class PostContentNode: ASDisplayNode {
     
     override func didLoad() {
         super.didLoad()
-//        self.layer.borderColor = UIColor.containerBorderColor().cgColor
+//        self.layer.borderColor = UIColor.black.cgColor
 //        self.layer.borderWidth = 1.0
         
     }

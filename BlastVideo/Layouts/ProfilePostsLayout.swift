@@ -35,7 +35,7 @@ class ProfilePostsLayout: UICollectionViewFlowLayout {
     // MARK: - Layout
     private func setupLayout() {
         self.minimumInteritemSpacing = 10.0
-        self.minimumLineSpacing = 15.0
+        self.minimumLineSpacing = 10.0
         self.scrollDirection = .vertical
         self.sectionInset = collectionInsets
     }

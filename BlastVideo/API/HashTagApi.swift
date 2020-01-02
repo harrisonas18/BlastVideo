@@ -11,6 +11,31 @@ import FirebaseDatabase
 class HashTagApi {
     var REF_HASHTAG = Database.database().reference().child("hashTag")
     
+    
+    func observePostCount(id: String, completion: @escaping (Int) -> Void){
+        Database.database().reference().child("hashTag").child(id).child("hashtagPostsCount").observeSingleEvent(of: .value) { (snapshot) in
+            print("Value: ", snapshot.value)
+            if let value = snapshot.value as? Int {
+                print("Value: ", value)
+                completion(value)
+            } else {
+                completion(0)
+            }
+        }
+    }
+    
+    func fetchHashTags(completion: @escaping ([String])->Void){
+        REF_HASHTAG.observeSingleEvent(of: .value) { (snapshot) in
+            let items = snapshot.children.allObjects
+            var results: [String] = []
+            for (_, item) in (items as! [DataSnapshot]).enumerated() {
+                results.append(item.key)
+            }
+            completion(results)
+        }
+        
+    }
+    
     func fetchPosts(withTag tag: String, completion: @escaping (String) -> Void) {
         REF_HASHTAG.child(tag.lowercased()).observe(.childAdded, with: {
             snapshot in
@@ -68,4 +93,7 @@ class HashTagApi {
             }
         }
     }
+    
+    
+    
 }

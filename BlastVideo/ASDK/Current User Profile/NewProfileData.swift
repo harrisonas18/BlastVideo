@@ -11,39 +11,47 @@ import Foundation
 import IGListKit
 
 class NewProfileData: NSObject {
-    
+    static let shared = NewProfileData()
     var isLoadingPost = false
     var firstFetchPosts = true
     var firstFetchFavs = true
+    var newItems = 0
     
     var feedItems: [FeedItem] = [FeedItem]()
     var favFeedItems: [FeedItem] = [FeedItem]()
     
-    static let shared = NewProfileData()
-    
     //Fetches Current users posts - based on timestamp in descending order
-    func fetchUserPosts(user: UserObject, completion: @escaping ([FeedItem]) -> Void) {
+    func fetchUserPosts(user: UserObject, limit: UInt, completion: @escaping ([FeedItem]) -> Void) {
         if isLoadingPost {
             return
         }
-        firstFetchPosts = false
-        self.isLoadingPost = true
-        Api.MyPosts.getProfilePosts(userId: "7Fg8SurjSoh5y7J8g7gjNna45Rp2", start: nil, limit: 8) { (results) in
-            self.isLoadingPost = false
-            if results.count > 0 {
-                results.forEach({ (result) in
-                    let item = FeedItem(id: result.id!, post: result, user: user)
-                    self.feedItems.append(item)
-                })
-            } else {
-                return
-            }
+        if limit == 0 {
+            firstFetchPosts = false
+            self.isLoadingPost = true
             completion(self.feedItems)
+        } else {
+            firstFetchPosts = false
+            self.isLoadingPost = true
+            Api.MyPosts.getProfilePosts(userId: user.id!, start: nil, limit: limit) { (results) in
+                print("Profile posts count", results.count)
+                self.isLoadingPost = false
+                if results.count > 0 {
+                    results.forEach({ (result) in
+                        let item = FeedItem(id: result.id!, post: result, user: user)
+                        self.feedItems.append(item)
+                    })
+                } else {
+                    return
+                }
+                self.newItems = results.count
+                completion(self.feedItems)
+            }
         }
+        
     }
     
     //Fetches more current user posts
-    func fetchMoreUserPosts(userID: UserObject, completion: @escaping ([FeedItem]) -> Void) {
+    func fetchMoreUserPosts(user: UserObject, completion: @escaping ([FeedItem]) -> Void) {
         if isLoadingPost {
             return
         }
@@ -52,10 +60,11 @@ class NewProfileData: NSObject {
             self.isLoadingPost = false
             return
         }
-        Api.MyPosts.getOlderProfilePosts(userId: currentUserGlobal.id!, start: lastPostTimestamp, limit: 8) { (results) in
+        Api.MyPosts.getOlderProfilePosts(userId: user.id!, start: lastPostTimestamp, limit: 8) { (results) in
             if results.count == 0 {
                 return
             }
+            self.newItems = results.count
             for result in results {
                 let item = FeedItem(id: result.id!, post: result, user: currentUserGlobal)
                 self.feedItems.append(item)
@@ -66,30 +75,37 @@ class NewProfileData: NSObject {
     }
     
     //Fetches Current users posts - based on timestamp in descending order
-    func fetchUserFavs(userID: UserObject, completion: @escaping ([FeedItem]) -> Void) {
+    func fetchUserFavs(user: UserObject, limit: UInt, completion: @escaping ([FeedItem]) -> Void) {
 //        if isLoadingPost {
 //            print("Currently Loading")
 //            return
 //        }
-        firstFetchPosts = false
-        self.isLoadingPost = true
-        print("Favs Fired")
-        Api.Favorites.getFavorites(userId: userID.id ?? "", start: favFeedItems.first?.post.timestamp, limit: 8) { (results) in
+        if limit == 0 {
             self.isLoadingPost = false
-            if results.count > 0 {
-                results.forEach({ (result) in
-                    let item = FeedItem(id: result.0.id!, post: result.0, user: result.1)
-                    self.favFeedItems.append(item)
-                })
-            } else {
-                return
-            }
+            firstFetchPosts = false
             completion(self.favFeedItems)
+        } else {
+            firstFetchPosts = false
+            self.isLoadingPost = true
+            Api.Favorites.getFavorites(userId: user.id ?? "", start: favFeedItems.first?.post.timestamp, limit: limit) { (results) in
+                self.isLoadingPost = false
+                if results.count > 0 {
+                    results.forEach({ (result) in
+                        let item = FeedItem(id: result.0.id!, post: result.0, user: result.1)
+                        self.favFeedItems.append(item)
+                    })
+                } else {
+                    return
+                }
+                self.newItems = results.count
+                completion(self.favFeedItems)
+            }
         }
+        
     }
     
     //Fetches more current user posts
-    func fetchMoreUserFavs(userID: UserObject, completion: @escaping ([FeedItem]) -> Void) {
+    func fetchMoreUserFavs(user: UserObject, completion: @escaping ([FeedItem]) -> Void) {
         if isLoadingPost {
             return
         }
@@ -98,10 +114,11 @@ class NewProfileData: NSObject {
             self.isLoadingPost = false
             return
         }
-        Api.MyPosts.getOlderProfilePosts(userId: userID.id ?? "", start: lastPostTimestamp, limit: 8) { (results) in
+        Api.MyPosts.getOlderProfilePosts(userId: user.id ?? "", start: lastPostTimestamp, limit: 8) { (results) in
             if results.count == 0 {
                 return
             }
+            self.newItems = results.count
             for result in results {
                 let item = FeedItem(id: result.id!, post: result, user: currentUserGlobal)
                 self.favFeedItems.append(item)

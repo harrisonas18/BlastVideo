@@ -13,26 +13,62 @@ class PushProfileHeader: UIViewController {
     
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var bannerImageView: UIImageView!
+    @IBOutlet weak var followButton: UIButton!
+    @IBOutlet weak var divider: UIView!
     
+    @IBOutlet weak var imgContainer: UIView!
     @IBOutlet weak var fullName: UILabel!
     @IBOutlet weak var username: UILabel!
     
+    @IBAction func followButtonTouched(_ sender: Any) {
+        followID()
+        unfollow()
+    }
     var bannerInitialCenterY: CGFloat!
     var stickyBanner = true
     var user: UserObject?
+//    var user: UserObject? {
+//        didSet {
+//            Api.User.observeUser(withId: user?.id ?? "") { (user) in
+//                DispatchQueue.main.async {
+//                    self.fullName.text = user.username ?? "Full Name"
+//                    self.username.text = user.username ?? "Username"
+//                    let url = URL(string: user.profileImageUrl ?? "")
+//                    self.userImageView.kf.setImage(with: url)
+//                }
+//            }
+//        }
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        Api.User.observeUser(withId: user?.id ?? "") { (user) in
-            self.fullName.text = user.username ?? "Full Name"
-            self.username.text = user.username ?? "Username"
-            let url = URL(string: user.profileImageUrl ?? "")
-            self.userImageView.kf.setImage(with: url)
-            
+        //Checks to see if the current user follows the user with the corresponding user id
+        Api.Follow.isFollowing(userId: user?.id! ?? "") { (isFollowing) in
+            if isFollowing {
+                self.configureUnFollowButton()
+            } else {
+                self.configureFollowButton()
+            }
         }
         
+        
+        if let name = self.user?.realName {
+            self.fullName.text = name
+        } else {
+            self.fullName.text = ""
+        }
+        self.username.text = self.user?.bio ?? ""
+        let url = URL(string: self.user?.profileImageUrl ?? "")
+        //self.userImageView.kf.setImage(with: url)
+        let placeholder = UIImage(named: "ProfilePlaceholder")
+        self.userImageView.contentMode = .scaleAspectFill
+        self.userImageView.kf.setImage(with: url, placeholder: placeholder)
+        
         userImageView.layer.cornerRadius = userImageView.frame.height / 2
+        divider.layer.cornerRadius = divider.frame.height / 2
+        //imgContainer.layer.cornerRadius = 37
+        //userImageView.layer.borderWidth = 8.0
+        //userImageView.layer.borderColor = UIColor.white.cgColor
         
         let firstColor = UIColor(red: 238/255.0, green: 99/255.0, blue: 82/255.0, alpha: 1.0)
         let secondColor = UIColor(red: 89/255.0, green: 205/255.0, blue: 144/255.0, alpha: 1.0)
@@ -40,28 +76,90 @@ class PushProfileHeader: UIViewController {
         let fourthColor = UIColor(red: 250/255.0, green: 192/255.0, blue: 94/255.0, alpha: 1.0)
         //let fifthColor = UIColor(red: 247/255.0, green: 157/255.0, blue: 132/255.0, alpha: 1.0)
         
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.layer.borderColor = UIColor.systemBlue.cgColor
+        view.layer.borderWidth = 2.0
+        view.layer.cornerRadius = 39
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        let view2 = UIView()
+        view2.backgroundColor = .clear
+        view2.layer.borderColor = UIColor.white.cgColor
+        view2.layer.borderWidth = 4.0
+        view2.layer.cornerRadius = 39
+        view2.translatesAutoresizingMaskIntoConstraints = false
+        
         let gradient = CAGradientLayer()
-        gradient.frame =  CGRect(origin: CGPoint.zero, size: userImageView.frame.size)
+        gradient.frame =  CGRect(origin: CGPoint.zero, size: view.frame.size)
         gradient.transform = CATransform3DMakeRotation(CGFloat.pi / 4, 0, 0, 1)
         gradient.colors = [secondColor.cgColor, thirdColor.cgColor, fourthColor.cgColor, firstColor.cgColor]
         
         let shape = CAShapeLayer()
-        shape.lineWidth = 4
-        shape.path = UIBezierPath(roundedRect: userImageView.bounds, cornerRadius: userImageView.layer.cornerRadius).cgPath
+        shape.lineWidth = 8
+        shape.path = UIBezierPath(roundedRect: view.bounds, cornerRadius: view.layer.cornerRadius).cgPath
         shape.strokeColor = UIColor.black.cgColor
         shape.fillColor = UIColor.clear.cgColor
         gradient.mask = shape
         
-        userImageView.layer.addSublayer(gradient)
+        //view.layer.insertSublayer(shape, at: 99)
         
+        imgContainer.insertSubview(view2, at: 88)
+        imgContainer.insertSubview(view, at: 99)
+        
+        NSLayoutConstraint.activate([
+            view2.topAnchor.constraint(equalTo: imgContainer.topAnchor, constant: -4.0),
+            view2.bottomAnchor.constraint(equalTo: self.imgContainer.bottomAnchor, constant: 4.0),
+            view2.leadingAnchor.constraint(equalTo: self.imgContainer.leadingAnchor, constant: -4.0),
+            view2.trailingAnchor.constraint(equalTo: self.imgContainer.trailingAnchor, constant: 4.0),
+            view.topAnchor.constraint(equalTo: self.imgContainer.topAnchor, constant: -4.0),
+            view.bottomAnchor.constraint(equalTo: self.imgContainer.bottomAnchor, constant: 4.0),
+            view.leadingAnchor.constraint(equalTo: self.imgContainer.leadingAnchor, constant: -4.0),
+            view.trailingAnchor.constraint(equalTo: self.imgContainer.trailingAnchor, constant: 4.0),
+        ])
+        
+    }
+    
+    //Configures follow Button
+    func configureFollowButton(){
+        UIView.animate(withDuration: 0.3) {
+            self.followButton.addTarget(self, action: #selector(self.followID), for: .touchUpInside)
+            self.followButton.setTitleColor(UIColor.init(red: 185/255, green: 185/255, blue: 185/255, alpha: 1.0), for: .normal)
+            self.followButton.setTitle("follow", for: .normal)
+        }
+    }
+    //Configures unfollow Button
+    func configureUnFollowButton(){
+        UIView.animate(withDuration: 0.3) {
+            self.followButton.addTarget(self, action: #selector(self.unfollow), for: .touchUpInside)
+            self.followButton.setTitleColor(UIColor.init(red: 185/255, green: 185/255, blue: 185/255, alpha: 1.0), for: .normal)
+            self.followButton.setTitle("unfollow", for: .normal)
+        }
+    }
+    
+    
+    //Configures unfollow Button when follow tapped
+    @objc func followID(){
+        if user!.isFollowing! == false {
+            Api.Follow.followAction(withUser: user!.id!)
+            configureUnFollowButton()
+            user!.isFollowing! = true
+        }
+    }
+    
+    
+    //Configures follow Button when unfollow tapped
+    @objc func unfollow(){
+        if user!.isFollowing! == true {
+            Api.Follow.unFollowAction(withUser: user!.id!)
+            configureFollowButton()
+            user!.isFollowing! = false
+        }
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        //        if bannerInitialCenterY == nil{
-        //            bannerInitialCenterY = bannerImageView.center.y
-        //        }
     }
     
     func adjustBannerView(with progress: CGFloat, headerHeight: ClosedRange<CGFloat>){

@@ -18,6 +18,7 @@ class ASDetailViewController: ASViewController<ASTableNode> {
     let post: Post
     let user: UserObject
     var livePhoto: PHLivePhoto?
+    var pushUserDelegate: PushUsernameDelegate?
     
     private var tableNode: ASTableNode {
         return node
@@ -47,9 +48,7 @@ class ASDetailViewController: ASViewController<ASTableNode> {
         super.viewDidLoad()
         self.setupNavBar()
         self.view.backgroundColor = .white
-//        StorageCacheController.shared.retrieveLivePhoto(post: post) { (livePhoto) in
-//            self.livePhoto = livePhoto
-//        }
+        
     }
 }
 
@@ -63,20 +62,6 @@ extension ASDetailViewController: ASTableDataSource, ASTableDelegate {
         let node = ProductCellNode(post: self.post, user: self.user)
         node.detailNode.delegate = self
         node.detailNode.hashtagDelegate = self
-//        StorageCacheController.shared.retrieveLivePhoto(post: post) { (livePhoto) in
-//            DispatchQueue.main.async {
-//                //self.setUpBadgeView()
-//                // To remove it, just call removeFromSuperview()
-//                node.detailNode.activityIndicator.stopAnimating()
-//                node.detailNode.activityIndicator.removeFromSuperview()
-//                UIView.transition(with: node.detailNode.livePhotoNode.photoNode!,
-//                                  duration: 0.35,
-//                                  options: .transitionCrossDissolve,
-//                                  animations: { node.detailNode.livePhotoNode.photoNode?.livePhoto = livePhoto},
-//                                  completion: nil)
-//                //self.livePhotoNode.view.addSubview(self.badgeBaseView)
-//            }
-//        }
         return node
     }
     
@@ -131,13 +116,13 @@ extension ASDetailViewController {
 
 extension ASDetailViewController: PushUsernameDelegate {
     func pushUser(user: UserObject) {
-        
+        pushUserDelegate?.pushUser(user: user)
     }
 }
 
 extension ASDetailViewController: PushHashtagDelegate {
     func pushHashtag(hashtag: String) {
-        let controller = NewHashtagViewController()
+        let controller = NewHashtagViewController(hashtag: hashtag)
         //controller.hashtag = hashtag
         navigationController?.pushViewController(controller, animated: true)
     }

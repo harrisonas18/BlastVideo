@@ -83,8 +83,9 @@ extension SignUpDisplayController: SignUpInfoDelegate {
         Api.Auth.signUp(username: username, email: email, password: password, imageData: self.imgData, onSuccess: {
             let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Sign Up Succesful", attributes: [:]), style: .success, colors: nil)
             success.show()
+            self.navigationController?.popViewController(animated: true)
         }, onError: { (error) in
-            let alert = UIAlertController(title: "Error", message: "There was an error signing in. Please Try again.", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Error", message: "There was an error signing up. Please Try again Later.", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
         })
@@ -138,8 +139,12 @@ class ImagePickerManager: NSObject, UIImagePickerControllerDelegate, UINavigatio
             picker.sourceType = .camera
             self.viewController!.present(picker, animated: true, completion: nil)
         } else {
-            let alertWarning = UIAlertView(title:"Warning", message: "You don't have camera", delegate:nil, cancelButtonTitle:"OK", otherButtonTitles:"")
-            alertWarning.show()
+            let alert = UIAlertController(title: "Warning", message: "You don't have a camera", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
+            NSLog("The \"OK\" alert occured.")
+            }))
+            print("No camera")
+            
         }
     }
     func openGallery(){

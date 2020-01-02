@@ -56,6 +56,7 @@ class SignInNode: ASDisplayNode {
         node.style.preferredSize.height = 22
         node.returnKeyType = .done
         node.textView.isSecureTextEntry = true
+        node.isSecureTextEntry = true
         return node
     }()
     
@@ -95,12 +96,12 @@ class SignInNode: ASDisplayNode {
     
     let phoneIcon: ASImageNode = {
         let node = ASImageNode()
-        node.style.preferredSize = CGSize(width: 20, height: 20)
+        node.style.preferredSize = CGSize(width: 25, height: 25)
         node.cornerRadius = 12.0
         node.borderColor = UIColor.black.cgColor
-        node.borderWidth = 2.0
-        node.image = #imageLiteral(resourceName: "call-answer")
-        
+        //node.borderWidth = 1.0
+        node.image = #imageLiteral(resourceName: "telephone")
+        node.contentMode = .scaleAspectFit
         return node
     }()
     
@@ -115,8 +116,10 @@ class SignInNode: ASDisplayNode {
     
     let arrowImage: ASImageNode = {
         let node = ASImageNode()
-        node.style.preferredSize = CGSize(width: 12, height: 12)
-        node.image = #imageLiteral(resourceName: "right-arrow")
+        node.style.preferredSize = CGSize(width: 25, height: 25)
+        node.image = #imageLiteral(resourceName: "arrowLeft")
+        node.contentMode = .scaleAspectFit
+        node.tintColor = .black
         return node
     }()
     
@@ -144,8 +147,8 @@ class SignInNode: ASDisplayNode {
     
     
     @objc func textFieldDidChange() {
-        guard let username = usernameNode.textView.text, !usernameNode.textView.text.isEmpty,
-            let password = passwordNode.textView.text, !passwordNode.textView.text.isEmpty else {
+        guard let _ = usernameNode.textView.text, !usernameNode.textView.text.isEmpty,
+            let _ = passwordNode.textView.text, !passwordNode.textView.text.isEmpty else {
                 loginButton.isEnabled = false
                 print("Button Not enabled")
                 return
@@ -177,7 +180,7 @@ class SignInNode: ASDisplayNode {
         let finalStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 0, justifyContent: .spaceBetween, alignItems: .center, children: [upperFinal, lowerStack])
         
         
-        return ASInsetLayoutSpec.init(insets: UIEdgeInsets(top: 30, left: 8, bottom: 30, right: 8), child: finalStack)
+        return ASInsetLayoutSpec.init(insets: UIEdgeInsets(top: 30, left: 8, bottom: 60, right: 8), child: finalStack)
         
         
     }
@@ -203,8 +206,8 @@ extension SignInNode: ASEditableTextNodeDelegate {
         
         
         
-        let textCount = editableTextNode.textView.text.count
-        let countLeft = 140 - textCount
+        //let textCount = editableTextNode.textView.text.count
+        //let countLeft = 140 - textCount
         
         delegate?.getCaptionText(text: editableTextNode.textView.text)
     }

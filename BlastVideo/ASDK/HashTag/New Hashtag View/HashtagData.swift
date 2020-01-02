@@ -18,13 +18,15 @@ class HashtagData: NSObject {
     var isLoadingPost = false
     var newItems = 0
     var feedItems: [FeedItem] = [FeedItem]()
+    var currentHashtag: String?
     
-    func fetchPosts(hashtag: String, completion: @escaping ([FeedItem]) -> Void) {
+    func fetchPosts(hashtag: String, limit: UInt, completion: @escaping ([FeedItem]) -> Void) {
         if isLoadingPost {
             return
         }
+        currentHashtag = hashtag
         isLoadingPost = true
-        Api.HashTag.getHashtagPosts(hashtag: hashtag, limit: 8) { (results) in
+        Api.HashTag.getHashtagPosts(hashtag: hashtag, limit: limit) { (results) in
             self.firstFetch = false
             self.isLoadingPost = false
             if results.count > 0 {
@@ -49,6 +51,7 @@ class HashtagData: NSObject {
         if isLoadingPost {
             return
         }
+        currentHashtag = hashtag
         isLoadingPost = true
         Api.HashTag.getMoreHashtagPosts(hashtag: hashtag, start: lastPostTimestamp, limit: 8) { (results) in
             self.isLoadingPost = false

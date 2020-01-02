@@ -41,12 +41,23 @@ class PhotoSelectorCell: UICollectionViewCell {
         return view
     }()
 
-    let selectedImage: UIView = {
-        let view = UIView()
-        view.layer.borderWidth = 2.0
+//    let selectedImage: UIView = {
+//        let view = UIView()
+//        view.layer.borderWidth = 2.0
+//        view.layer.borderColor = UIColor.white.cgColor
+//        view.layer.backgroundColor = UIColor(red: 27.0/255.0, green: 145.0/255.0, blue: 255.0/255.0, alpha: 1.0).cgColor
+//        view.layer.cornerRadius = 12.5
+//        return view
+//    }()
+    
+    let selectedImage: UIImageView = {
+        let view = UIImageView()
+        view.layer.borderWidth = 1.0
         view.layer.borderColor = UIColor.white.cgColor
-        view.layer.backgroundColor = UIColor(red: 27.0/255.0, green: 145.0/255.0, blue: 255.0/255.0, alpha: 1.0).cgColor
+        //view.layer.backgroundColor = UIColor(red: 27.0/255.0, green: 145.0/255.0, blue: 255.0/255.0, alpha: 1.0).cgColor
         view.layer.cornerRadius = 12.5
+        view.clipsToBounds = true
+        view.image = #imageLiteral(resourceName: "selectedIcon")
         return view
     }()
     

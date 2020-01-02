@@ -46,6 +46,7 @@ extension SignInDisplayController: SignInInfoDelegate {
                 }
                 let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Login Succesful", attributes: [:]), style: .success, colors: nil)
                 success.show()
+                self.navigationController?.popViewController(animated: true)
                 
             } else {
                 let alert = UIAlertController(title: "Error", message: "There was an error signing in. Please Try again.", preferredStyle: .alert)

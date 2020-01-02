@@ -12,10 +12,28 @@ import FirebaseAuth
 import NotificationBannerSwift
 
 class PostApi {
+    
+    init() {
+        REF_POSTS.keepSynced(true)
+    }
+    
     var REF_POSTS = Database.database().reference().child("posts")
     
+    func observePostCount(completion: @escaping (Int) -> Void){
+        REF_POSTS.child("postsCount").observeSingleEvent(of: .value) { (snapshot) in
+            //print("Value: ", snapshot.value)
+            if let value = snapshot.value as? Int {
+                //print("Value: ", value)
+                completion(value)
+            } else {
+                completion(0)
+            }
+            
+        }
+    }
+    
     func observePosts(completion: @escaping (Post) -> Void) {
-        REF_POSTS.observe(.childAdded) { (snapshot: DataSnapshot) in
+        REF_POSTS.child("posts").observe(.childAdded) { (snapshot: DataSnapshot) in
             if let dict = snapshot.value as? [String: Any] {
                 let newPost = Post.transformPostPhoto(dict: dict, key: snapshot.key)
                 completion(newPost)
@@ -24,7 +42,7 @@ class PostApi {
     }
     
     func observePost(withId id: String, completion: @escaping (Post) -> Void) {
-        REF_POSTS.child(id).observeSingleEvent(of: DataEventType.value, with: {
+        REF_POSTS.child("posts").child(id).observeSingleEvent(of: DataEventType.value, with: {
             snapshot in
             if let dict = snapshot.value as? [String: Any] {
                 let post = Post.transformPostPhoto(dict: dict, key: snapshot.key)
@@ -35,7 +53,7 @@ class PostApi {
     
     func observeLikeCount(withPostId id: String, completion: @escaping (Int, UInt) -> Void) {
         var likeHandler: UInt!
-        likeHandler = REF_POSTS.child(id).observe(.childChanged, with: {
+        likeHandler = REF_POSTS.child("posts").child(id).observe(.childChanged, with: {
             snapshot in
             if let value = snapshot.value as? Int {
               //  Database.database().reference().removeObserver(withHandle: ref)
@@ -46,7 +64,7 @@ class PostApi {
     }
     
     func observeTopPosts(completion: @escaping (Post) -> Void) {
-        REF_POSTS.queryOrdered(byChild: "likeCount").observeSingleEvent(of: .value, with: {
+        REF_POSTS.child("posts").queryOrdered(byChild: "likeCount").observeSingleEvent(of: .value, with: {
             snapshot in
             let arraySnapshot = (snapshot.children.allObjects as! [DataSnapshot]).reversed()
             arraySnapshot.forEach({ (child) in
@@ -60,7 +78,7 @@ class PostApi {
     
     func getRecentPost(start timestamp: Int? = nil, limit: UInt, completionHandler: @escaping ([(Post, UserObject)]) -> Void) {
         
-        var feedQuery = REF_POSTS.queryOrdered(byChild: "timestamp")
+        var feedQuery = REF_POSTS.child("posts").queryOrdered(byChild: "timestamp")
         if let latestPostTimestamp = timestamp, latestPostTimestamp > 0 {
             feedQuery = feedQuery.queryStarting(atValue: latestPostTimestamp + 1, childKey: "timestamp").queryLimited(toLast: limit)
         } else {
@@ -70,19 +88,23 @@ class PostApi {
         feedQuery.observeSingleEvent(of: .value, with: { (snapshot) in
             let items = snapshot.children.allObjects
             let myGroup = DispatchGroup()
-            
+            //print("in snapshot")
+            //print(snapshot.childrenCount)
             var results: [(post: Post, user: UserObject)] = []
             
             for (_, item) in (items as! [DataSnapshot]).enumerated() {
+                //print("items: ", items)
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
                     Api.User.observeUser(withId: post.uid!, completion: { (user) in
                         results.append((post: post, user: user))
+                        //print("Results: ",results)
                         myGroup.leave()
                     })
                 })
             }
             myGroup.notify(queue: .main) {
+                //print("resullts")
                 results.sort(by: {$0.0.timestamp! > $1.0.timestamp! })
                 completionHandler(results)
             }
@@ -93,7 +115,7 @@ class PostApi {
     func getOldPost(start timestamp: Int, limit: UInt, completionHandler: @escaping ([(Post, UserObject)]) -> Void) {
         
         
-        let feedOrderQuery = REF_POSTS.queryOrdered(byChild: "timestamp")
+        let feedOrderQuery = REF_POSTS.child("posts").queryOrdered(byChild: "timestamp")
         let feedLimitedQuery = feedOrderQuery.queryEnding(atValue: timestamp - 1, childKey: "timestamp").queryLimited(toLast: limit)
         
         feedLimitedQuery.observeSingleEvent(of: .value, with: { (snapshot) in

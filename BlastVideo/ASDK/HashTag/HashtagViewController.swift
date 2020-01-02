@@ -6,21 +6,31 @@
 //  Copyright © 2019 Harrison Senesac. All rights reserved.
 //
 
-import UIKit
+//
+//  ProfilePostsVC.swift
+//  BlastVideo
+//
+//  Created by Harrison Senesac on 6/20/19.
+//  Copyright © 2019 Harrison Senesac. All rights reserved.
+//
+
+import Foundation
 import AsyncDisplayKit
-import GradientLoadingBar
+import SJSegmentedScrollView
+import XLPagerTabStrip
+import IGListKit
+import DeepDiff
 
 class HashtagViewController: ASViewController<ASCollectionNode> {
     
     let layout = ProfilePostsLayout()
-    var gradientBar : GradientLoadingBar?
-    var refreshControl : UIRefreshControl?
-    var firstFetch = true
-    var posts: [Post] = []
-    var users: [UserObject] = []
-    var isLoadingPost = false
-    var newItems = 0
-    var hashtag: String?
+    var feedItems: [FeedItem] = [FeedItem]()
+    let data = HashtagData.shared
+    var newPosts = 0
+    var isLoading = false
+    var count = 0
+    var hashtag = ""
+    var pageTitle: String?
     
     private var collectionNode: ASCollectionNode {
         return node
@@ -29,7 +39,63 @@ class HashtagViewController: ASViewController<ASCollectionNode> {
     init(hashtag: String) {
         self.hashtag = hashtag
         super.init(node: ASCollectionNode(collectionViewLayout: layout))
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        collectionNode.delegate = self
+        collectionNode.dataSource = self
+        Api.HashTag.observePostCount(id: hashtag) { (count) in
+            print(count)
+            if count > 7 {
+                self.fetchPosts(limit: 8)
+            } else {
+                self.fetchPosts(limit: UInt(bitPattern: count))
+            }
+            
+        }
         
+    }
+    
+    @objc func refreshContent(){
+        NewProfileData.shared.feedItems.removeAll()
+        Api.HashTag.observePostCount(id: hashtag) { (count) in
+            print(count)
+            if count > 7 {
+                self.fetchPosts(limit: 8)
+            } else {
+                self.fetchPosts(limit: UInt(bitPattern: count))
+            }
+            
+        }
+    }
+    
+    func fetchPosts(limit: UInt){
+        data.fetchPosts(hashtag: hashtag, limit: limit) { (feedItems) in
+            if feedItems.count == 0 {
+                let label = ASTextNode()
+                label.view.translatesAutoresizingMaskIntoConstraints = false
+                //label.frame = CGRect(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY, width: 120, height: 45)
+                label.frame = .zero
+                label.attributedText = NSAttributedString(string: "No hashtag posts", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+                self.node.addSubnode(label)
+                NSLayoutConstraint.activate([
+                    label.view.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor),
+                    label.view.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor, constant: -100),
+                    label.view.heightAnchor.constraint(equalToConstant: 45),
+                    label.view.widthAnchor.constraint(equalToConstant: 120)
+                ])
+            }
+            
+            DispatchQueue.main.async {
+                let results = diff(old: self.feedItems, new: feedItems)
+                self.collectionNode.view.reload(changes: results, updateData: ({
+                    self.feedItems = feedItems
+                    
+                }))
+                
+            }
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -37,86 +103,12 @@ class HashtagViewController: ASViewController<ASCollectionNode> {
     }
     
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        self.setupNavBar()
-        collectionNode.delegate = self
-        collectionNode.dataSource = self
-        gradientBar = GradientLoadingBar(height: 5.0, isRelativeToSafeArea: true)
-        gradientBar?.fadeIn()
-        self.collectionNode.alwaysBounceVertical = true
-        refreshControl = UIRefreshControl()
-        refreshControl?.addTarget(self, action: #selector(refreshContent), for: .valueChanged)
-        self.collectionNode.view.addSubview(refreshControl!)
-        
-    }
-    
-    @objc func refreshContent(){
-        refreshControl?.endRefreshing()
-        clearPostData()
-        self.isLoadingPost = false
-        self.firstFetch = true
+}
 
-    }
+extension HashtagViewController: PushUsernameDelegate {
     
-    func clearPostData(){
-    }
-    
-    func fetchNewBatchWithContext(_ context: ASBatchContext?) {
-        if firstFetch {
-            DispatchQueue.main.async {
-                self.gradientBar?.fadeIn()
-            }
-            firstFetch = false
-            self.isLoadingPost = true
-            Api.HashTag.getHashtagPosts(hashtag: hashtag!, limit: 8) { (results) in
-                if results.count > 0 {
-                    results.forEach({ (result) in
-                        self.posts.append(result.0)
-                        self.users.append(result.1)
-                    })
-                }
-                self.newItems = results.count
-                self.gradientBar?.fadeOut()
-                self.addRowsIntoTableNode(newPhotoCount: results.count)
-                context?.completeBatchFetching(true)
-                self.isLoadingPost = false
-            }
-            
-        } else {
-            guard !isLoadingPost else {
-                context?.completeBatchFetching(true)
-                return
-            }
-            isLoadingPost = true
-            
-            guard let lastPostTimestamp = posts.last?.timestamp else {
-                isLoadingPost = false
-                return
-            }
-            Api.HashTag.getMoreHashtagPosts(hashtag: hashtag!, start: lastPostTimestamp, limit: 8) { (results) in
-                if results.count == 0 {
-                    return
-                }
-                for result in results {
-                    self.posts.append(result.0)
-                    self.users.append(result.1)
-                }
-                self.newItems = results.count
-                self.addRowsIntoTableNode(newPhotoCount: results.count)
-                context?.completeBatchFetching(true)
-                self.isLoadingPost = false
-                
-            }
-        }
-    }
-    
-    func addRowsIntoTableNode(newPhotoCount newPhotos: Int) {
-        let indexRange = (posts.count - newPhotos..<posts.count)
-        let indexPaths = indexRange.map { IndexPath(row: $0, section: 0) }
-        DispatchQueue.main.async {
-            self.collectionNode.insertItems(at: indexPaths)
-        }
+    func pushUser(user: UserObject) {
+        
     }
     
 }
@@ -130,66 +122,63 @@ extension HashtagViewController: UICollectionViewDelegateFlowLayout {
         let itemWidth = width / layout.numberOfColumns
         return ASSizeRangeMake(CGSize(width: itemWidth, height: 100), CGSize(width: itemWidth, height: 450))
     }
+    
 }
 
-extension HashtagViewController: PushUsernameDelegate {
-    
-    func pushUser(user: UserObject) {
-        
-        
-    }
-    
-}
+// MARK: ASTableDataSource / ASTableDelegate
 
 extension HashtagViewController: ASCollectionDataSource, ASCollectionDelegate {
     
-    
-    func collectionView(_ collectionNode: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return posts.count
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 10.0, left: 10.0, bottom: 140.0, right: 10.0)
     }
     
+    func collectionView(_ collectionNode: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return feedItems.count
+    }
+
     func collectionView(_ collectionView: ASCollectionView, nodeForItemAt indexPath: IndexPath) -> ASCellNode {
-        let post = self.posts[indexPath.row]
-        let user = self.users[indexPath.row]
-        return CollectionPostCellNode(post: post, user: user)
+        let feedItem = feedItems[indexPath.row]
+        let cell = CollectionPostCellNode(post: feedItem.post, user: feedItem.user)
+        return cell
+    }
+    
+    func collectionView(_ collectionNode: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let feedItem = feedItems[indexPath.row]
+        let detailViewController = ASDetailViewController(post: feedItem.post, user: feedItem.user)
+        detailViewController.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(detailViewController, animated: true)
     }
     
     func shouldBatchFetch(for collectionNode: ASCollectionNode) -> Bool {
+        if isLoading {
+            return false
+        }
         return true
     }
     
     func collectionNode(_ collectionNode: ASCollectionNode, willBeginBatchFetchWith context: ASBatchContext) {
-        fetchNewBatchWithContext(context)
+        if !NewProfileData.shared.isLoadingPost && !NewProfileData.shared.firstFetchPosts && NewProfileData.shared.newItems > 7 {
+            isLoading = true
+            NewProfileData.shared.fetchMoreUserPosts(user: currentUserGlobal) { (feedItems) in
+                DispatchQueue.main.async {
+                    let results = diff(old: self.feedItems, new: feedItems)
+                    self.collectionNode.view.reload(changes: results, updateData: ({
+                        self.feedItems = feedItems
+                    }))
+                    
+                }
+                self.isLoading = false
+                context.completeBatchFetching(true)
+            }
+        } else {
+            context.completeBatchFetching(true)
+        }
     }
     
-    func collectionView(_ collectionNode: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let post = posts[indexPath.item]
-        let user = users[indexPath.item]
-        let detailViewController = ASDetailViewController(post: post, user: user)
-        detailViewController.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(detailViewController, animated: true)
-    }
 }
-
-extension HashtagViewController {
-    
-    func setupNavBar() {
-        let navLabel = UILabel()
-        let boldFont = UIFont.init(name: "Modulus-Bold", size: 24.0)
-        let navTitle = NSMutableAttributedString(string: "#\(hashtag!)", attributes:[
-            NSAttributedString.Key.font: boldFont!,
-            NSAttributedString.Key.foregroundColor: UIColor.black])
-        
-        navLabel.attributedText = navTitle
-        self.navigationItem.titleView = navLabel
-        
-        let backBarButton = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem = backBarButton
-        
-        navigationController?.navigationBar.isTranslucent = false
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-        self.navigationController?.navigationBar.shadowImage = UIImage()
-        
+extension HashtagViewController: IndicatorInfoProvider {
+    func indicatorInfo(for pagerTabStripController: PagerTabStripViewController) -> IndicatorInfo {
+        return IndicatorInfo.init(title: pageTitle ?? "Tab 3)")
     }
-    
 }

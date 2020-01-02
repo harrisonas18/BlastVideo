@@ -10,19 +10,20 @@ import Foundation
 import FirebaseAuth
 import IGListKit
 
-class Post {
+class Post: Codable {
     
     var caption: String? = nil
     var photoUrl: String? = nil
     var uid: String? = nil
     var id: String? = nil
     var likeCount: Int? = 0
-    var likes: Dictionary<String, Any>? = ["User": 1]
+    //var likes: Dictionary<String, Any>? = ["User": 1]
     var isLiked: Bool? = false
     var ratio: CGFloat? = 0.66
     var videoUrl: String? = nil
     var timestamp: Int? = 0
     var user: UserObject?
+    var uniformTypeID: String?
     
 }
 
@@ -35,17 +36,18 @@ extension Post {
         post.videoUrl = dict["videoUrl"] as? String
         post.uid = dict["uid"] as? String
         post.likeCount = dict["likeCount"] as? Int
-        post.likes = dict["likes"] as? Dictionary<String, Any>
+        //post.likes = dict["likes"] as? Dictionary<String, Any>
         post.ratio = dict["ratio"] as? CGFloat
         post.timestamp = dict["timestamp"] as? Int
+        post.uniformTypeID = dict["uniformTypeID"] as? String
         if post.likeCount == nil {
             post.likeCount = 0
         }
-        if let currentUserId = Auth.auth().currentUser?.uid {
-            if post.likes != nil {
-                post.isLiked = post.likes![currentUserId] != nil
-            }
-        }
+//        if let currentUserId = Auth.auth().currentUser?.uid {
+//            if post.likes != nil {
+//                post.isLiked = post.likes![currentUserId] != nil
+//            }
+//        }
       
         return post
     }

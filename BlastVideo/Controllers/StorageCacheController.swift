@@ -24,9 +24,11 @@ class StorageCacheController: NSObject {
     //Stores Live Photo objects that have been assembled
     var livePhotoCache = NSCache<NSString, PHLivePhoto>()
     
-    //
+    //Config for Posts Cache
     let diskConfig = DiskConfig(name: "Posts", expiry: .never, maxSize: 10000, directory: nil, protectionType: FileProtectionType.none)
     let memoryConfig = MemoryConfig(expiry: .never, countLimit: 100, totalCostLimit: 10000)
+    
+    
     
     //  Check to see if Read/Write is in progress
     private var inProgress: Bool = false
@@ -39,6 +41,152 @@ class StorageCacheController: NSObject {
     override init() {
         super.init()
         livePhotoCache.totalCostLimit = 10000000
+    }
+    
+    let dataStorage = try! Storage(
+      diskConfig: DiskConfig(name: "User", expiry: .never, maxSize: 10000, directory: nil, protectionType: FileProtectionType.none),
+      memoryConfig: MemoryConfig(expiry: .never, countLimit: 100, totalCostLimit: 10000),
+      transformer: TransformerFactory.forData()
+    )
+    
+    func saveUser(user: UserObject){
+        let userItemStorage = dataStorage.transformCodable(ofType: UserObject.self)
+        
+        do {
+            try userItemStorage.setObject(user, forKey: user.id ?? "")
+        } catch let error as NSError {
+            self.inProgress = false
+            fatalError("""
+                Domain: \(error.domain)
+                Code: \(error.code)
+                Description: \(error.localizedDescription)
+                Failure Reason: \(error.localizedFailureReason ?? "")
+                Suggestions: \(error.localizedRecoverySuggestion ?? "")
+                """)
+        }
+        
+    }
+    
+    func updateUser(user: UserObject){
+        let userItemStorage = dataStorage.transformCodable(ofType: UserObject.self)
+        
+        do {
+            try userItemStorage.setObject(user, forKey: user.id ?? "")
+        } catch let error as NSError {
+            self.inProgress = false
+            fatalError("""
+                Domain: \(error.domain)
+                Code: \(error.code)
+                Description: \(error.localizedDescription)
+                Failure Reason: \(error.localizedFailureReason ?? "")
+                Suggestions: \(error.localizedRecoverySuggestion ?? "")
+                """)
+        }
+        
+    }
+    
+    func retrieveUser(user: UserObject) -> UserObject?{
+        let userItemStorage = dataStorage.transformCodable(ofType: UserObject.self)
+        
+        do {
+            let object = try userItemStorage.existsObject(forKey: user.id ?? "")
+            if object {
+                do {
+                    return try userItemStorage.object(forKey: user.id ?? "")
+                } catch let error as NSError {
+                    self.inProgress = false
+                    fatalError("""
+                        Domain: \(error.domain)
+                        Code: \(error.code)
+                        Description: \(error.localizedDescription)
+                        Failure Reason: \(error.localizedFailureReason ?? "")
+                        Suggestions: \(error.localizedRecoverySuggestion ?? "")
+                        """)
+                }
+            } else {
+                return nil
+            }
+        } catch let error as NSError {
+            self.inProgress = false
+            fatalError("""
+                Domain: \(error.domain)
+                Code: \(error.code)
+                Description: \(error.localizedDescription)
+                Failure Reason: \(error.localizedFailureReason ?? "")
+                Suggestions: \(error.localizedRecoverySuggestion ?? "")
+                """)
+        }
+        
+    }
+    
+    func deleteUser(user: UserObject){
+        let userItemStorage = dataStorage.transformCodable(ofType: UserObject.self)
+        
+        do {
+            try userItemStorage.setObject(user, forKey: user.id ?? "")
+        } catch let error as NSError {
+            self.inProgress = false
+            fatalError("""
+                Domain: \(error.domain)
+                Code: \(error.code)
+                Description: \(error.localizedDescription)
+                Failure Reason: \(error.localizedFailureReason ?? "")
+                Suggestions: \(error.localizedRecoverySuggestion ?? "")
+                """)
+        }
+        
+    }
+    
+    func saveFeedItem(feedItem: FeedItem){
+        let feedItemStorage = dataStorage.transformCodable(ofType: FeedItem.self)
+        
+        do {
+            try feedItemStorage.setObject(feedItem, forKey: feedItem.id)
+        } catch let error as NSError {
+            self.inProgress = false
+            fatalError("""
+                Domain: \(error.domain)
+                Code: \(error.code)
+                Description: \(error.localizedDescription)
+                Failure Reason: \(error.localizedFailureReason ?? "")
+                Suggestions: \(error.localizedRecoverySuggestion ?? "")
+                """)
+        }
+    }
+    
+    func retrieveFeedItem(feedItem: FeedItem) -> FeedItem?{
+        let feedItemStorage = dataStorage.transformCodable(ofType: FeedItem.self)
+        
+        do {
+            let object = try feedItemStorage.existsObject(forKey: feedItem.id)
+            if object {
+                do {
+                     return try feedItemStorage.object(forKey: feedItem.id)
+                } catch let error as NSError {
+                    self.inProgress = false
+                    fatalError("""
+                        Domain: \(error.domain)
+                        Code: \(error.code)
+                        Description: \(error.localizedDescription)
+                        Failure Reason: \(error.localizedFailureReason ?? "")
+                        Suggestions: \(error.localizedRecoverySuggestion ?? "")
+                        """)
+                }
+            } else {
+                return nil
+            }
+        } catch let error as NSError {
+            self.inProgress = false
+            fatalError("""
+                Domain: \(error.domain)
+                Code: \(error.code)
+                Description: \(error.localizedDescription)
+                Failure Reason: \(error.localizedFailureReason ?? "")
+                Suggestions: \(error.localizedRecoverySuggestion ?? "")
+                """)
+        }
+        
+        
     }
     
     //  Variable - CurrentUserPosts: [Posts]
@@ -98,30 +246,34 @@ class StorageCacheController: NSObject {
     // 2. If not fetch from Network
     // 3. Save to disk
     // 4. Return Live Photo Video and Photo URLS to make LivePhoto Object
-    
+    let livePhotoQueue = DispatchQueue(label: "com.harrison.LivePhotoQueue")
     public func retrieveLivePhoto(post: Post, completion: @escaping (PHLivePhoto) -> Void ) {
         
         //TODO: Throw error message to UI
-        guard let id = post.id else { return }
-        let videoURL = "\(id)/video.mp4"
+        guard let id = post.uniformTypeID else { return }
+        let videoURL = "\(id)/video.mov"
         //1. if video exists retrieve from file system
         if Disk.exists(videoURL, in: .caches){
                 //Retrieve file URLS
                 //Call retrieveFileURLS
                 retrieveFileURLS(post: post) { (videoURL, photoURL) in
-                    LivePhoto.generate(from: photoURL, videoURL: videoURL, progress: { (progress) in
-                    }) { (livePhoto, resources) in
-                        if let livePhoto = livePhoto{
-                            print("Live Photo created successfully")
-                            self.livePhotoCache.setObject(livePhoto, forKey: post.id! as NSString)
+                    PHLivePhoto.request(withResourceFileURLs: [videoURL, photoURL], placeholderImage: nil, targetSize: .zero, contentMode: .aspectFill) { (livePhoto, info) in
+
+                        if let livePhoto = livePhoto {
                             completion(livePhoto)
+                            self.livePhotoCache.setObject(livePhoto, forKey: post.id! as NSString)
                         } else {
+                            for (key, value) in info {
+                                //print("Key: ", key, "Value: ", value)
+                                if let error = info[PHLivePhotoInfoErrorKey] as? NSError {
+                                    print(error.localizedDescription)
+                                }
+                            }
                             print("""
-                                Error Retrieving Live Photo
-                                Trace: Could not create Live Photo
-                                """)
+                            Error Retrieving Live Photo
+                            Trace: Could not create Live Photo
+                            """)
                         }
-                        
                     }
                 }
             
@@ -131,19 +283,24 @@ class StorageCacheController: NSObject {
             saveLivePhoto(post: post) { (success) in
                 if success {
                     self.retrieveFileURLS(post: post, completion: { (videoURL, photoURL) in
-                        LivePhoto.generate(from: photoURL, videoURL: videoURL, progress: { (progress) in
-                        }) { (livePhoto, resources) in
-                            if let livePhoto = livePhoto{
-                                print("Live Photo created successfully")
-                                self.livePhotoCache.setObject(livePhoto, forKey: post.id! as NSString)
+                        PHLivePhoto.request(withResourceFileURLs: [videoURL, photoURL], placeholderImage: nil, targetSize: .zero, contentMode: .aspectFill) { (livePhoto, info) in
+                            if let livePhoto = livePhoto {
                                 completion(livePhoto)
+                                self.livePhotoCache.setObject(livePhoto, forKey: post.id! as NSString)
                             } else {
+                                for (key, value) in info {
+                                    print("Key: ", key, "Value: ", value)
+                                    print("Key: ", key, "Description: ", key.description)
+                                    if let error = info[PHLivePhotoInfoErrorKey] as? NSError {
+                                        print(error)
+                                    }
+                                }
+
                                 print("""
                                 Error Retrieving Live Photo
                                 Trace: Could not create Live Photo
                                 """)
                             }
-                            
                         }
                     })
                 } else {
@@ -168,13 +325,22 @@ class StorageCacheController: NSObject {
         let group = DispatchGroup()
         let queue = DispatchQueue(label: "saveDispatchQueue", qos: .userInitiated)
         
+        let tmpVideoURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        .appendingPathComponent("\(post.uniformTypeID!)/video")
+        .appendingPathExtension("mov")
+              
+        let tmpPhotoURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        .appendingPathComponent("\(post.uniformTypeID!)/photo")
+        .appendingPathExtension("jpeg")
+    
+        
         //TODO: Throw error message to UI
         group.enter()
         guard let videoURL = URL(string: post.videoUrl ?? "") else { return }
         do {
             let videoData = try Data(contentsOf: videoURL, options: [])
             do {
-                try Disk.save(videoData, to: .caches , as: "\(post.id!)/video.mp4")
+                try Disk.save(videoData, to: .caches , as: "\(post.uniformTypeID!)/video.mov")
                 group.leave()
             } catch let error as NSError {
                 //TODO: Throw error to UI
@@ -208,7 +374,7 @@ class StorageCacheController: NSObject {
         do {
             let photoData = try Data(contentsOf: photoURL, options: [])
             do {
-                try Disk.save(photoData, to: .caches , as: "\(post.id!)/photo.jpg")
+                try Disk.save(photoData, to: .caches , as: "\(post.uniformTypeID!)/photo.jpeg")
                 group.leave()
             } catch let error as NSError {
                 //TODO: Throw error to UI
@@ -245,7 +411,6 @@ class StorageCacheController: NSObject {
     /*--------------------------------------------------------------------------------------*/
     
     /*--------------------------------------------------------------------------------------*/
-    //TODO: Add dispatch queue to retrieve both files at the same time
     // 1. Retrieves file URLs from Disk if URLs exist
     func retrieveFileURLS(post: Post, completion: @escaping (URL, URL)->Void) {
         //Returned File URLs that make up Live Photo
@@ -257,7 +422,7 @@ class StorageCacheController: NSObject {
         
         group.enter()
         do {
-            let videoURL = try Disk.url(for: "\(post.id!)/video.mp4", in: .caches)
+            let videoURL = try Disk.url(for: "\(post.uniformTypeID!)/video.mov", in: .caches)
             fileVideoURL = videoURL
             group.leave()
         } catch let error as NSError {
@@ -274,7 +439,7 @@ class StorageCacheController: NSObject {
         
         group.enter()
         do {
-            let photoURL = try Disk.url(for: "\(post.id!)/photo.jpg", in: .caches)
+            let photoURL = try Disk.url(for: "\(post.uniformTypeID!)/photo.jpeg", in: .caches)
             filePhotoURL = photoURL
             group.leave()
         } catch let error as NSError {

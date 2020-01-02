@@ -10,7 +10,13 @@ import Foundation
 import InstantSearch
 import Kingfisher
 
-class SearchController: UIViewController {
+class SearchController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
+    
+    let cellId = "cellId"
+    let tableCellId = "tableCellID"
+    var hashtags: [String] = []
+    
+    var collectionView: UICollectionView!
     
     let searcher: SingleIndexSearcher = SingleIndexSearcher(appID: "ME05ZIHAUV",
                                                             apiKey: "fad40b242d806b5c389b9256a1cd9a4b",
@@ -32,14 +38,16 @@ class SearchController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setup()
         configureUI()
+        setup()
         hitsTableController.tableView.alpha = 0
         hitsTableController.tableView.separatorStyle = .none
         hitsTableController.tableView.rowHeight = 55
+        hitsTableController.tableView.translatesAutoresizingMaskIntoConstraints = false
         label.text = "No Results"
         label.isHidden = true
         view.addSubview(label)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -55,52 +63,139 @@ class SearchController: UIViewController {
     func configureSearchHistory(){
         table.translatesAutoresizingMaskIntoConstraints = false
         table.frame = CGRect(x: 0, y: 0, width: UIScreen.screenWidth(), height: UIScreen.screenHeight())
-        table.register(SearchTableViewCell.self, forCellReuseIdentifier: "cellID")
+        table.register(SearchTableViewCell.self, forCellReuseIdentifier: tableCellId)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if hashtags.count == 0 {
+            return 0
+        } else if hashtags.count < 6 { 
+            return hashtags.count
+        } else {
+            return 6
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HashtagSearchCell
+        cell.hashtagLabel.text = "#" + hashtags[indexPath.row]
+        cell.loadImages(hashtag: hashtags[indexPath.row])
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 10, left: 10, bottom: 1, right: 10)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let width = (view.frame.width - 30) / 2
+        return CGSize(width: width, height: 150)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let vc = NewHashtagViewController(hashtag: hashtags[indexPath.row])
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @objc func handleTap(){
+        
     }
 
     func configureUI() {
 
         view.backgroundColor = .white
-
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        //layout.itemSize = CGSize(width: 150.0, height: 150.0)
+        
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(HashtagSearchCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView.backgroundColor = .white
+        collectionView.isScrollEnabled = true
+        collectionView.isUserInteractionEnabled = true
+        collectionView.bounces = true
+        //view.insertSubview(collectionView, at: 3)
+        view.addSubview(collectionView)
+        
         // Declare a stack view containing all the components
         let stackView = UIStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.spacing = 16
+        stackView.spacing = 0
         stackView.axis = .vertical
-        stackView.layoutMargins = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 0)
+        stackView.layoutMargins = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         stackView.isLayoutMarginsRelativeArrangement = true
         
         // Add searchBar
         let searchBar = searchBarController.searchBar
         searchBarController.searchDelegate = self
         searchBar.tintColor = .systemBlue
-        searchBar.placeholder = "Search"
+        searchBar.placeholder = "Search hashtags and people..."
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.heightAnchor.constraint(equalToConstant: 36).isActive = true
         searchBar.searchBarStyle = .minimal
-        stackView.addArrangedSubview(searchBar)
+        //stackView.addArrangedSubview(searchBar)
         
         // Add statsLabel
         let statsLabel = statsController.label
         statsLabel.translatesAutoresizingMaskIntoConstraints = false
         statsLabel.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        statsLabel.layoutMargins = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
         statsLabel.textColor = UIColor(red: 225/255, green: 225/255, blue: 225/255, alpha: 1.0)
-        
-        stackView.addArrangedSubview(statsLabel)
+        //statsLabel.frame
+        statsLabel.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+        //stackView.addArrangedSubview(statsLabel)
         
         // Add hits tableView
-        stackView.addArrangedSubview(hitsTableController.tableView)
+        //stackView.addArrangedSubview(hitsTableController.tableView)
 
         // Pin stackView to ViewController's view
-        view.addSubview(stackView)
+        //view.addSubview(stackView)
+        
+        //hitsTableController.tableView.isHidden = true
+        
+        view.addSubview(searchBar)
+        view.addSubview(hitsTableController.tableView)
 
         NSLayoutConstraint.activate([
-          stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-          stackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-          stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-          stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+          searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+          searchBar.heightAnchor.constraint(equalToConstant: 36),
+          searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+          searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+          
+          hitsTableController.tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 0),
+          hitsTableController.tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+          hitsTableController.tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+          hitsTableController.tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
         ])
+        
+        NSLayoutConstraint.activate([
+          collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 0),
+          collectionView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 0),
+          collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+          collectionView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: 0),
+        ])
+        
+        Api.HashTag.fetchHashTags { (hashtags) in
+            
+            if hashtags.count == 0 {
+                
+            } else {
+                self.hashtags = hashtags
+                self.collectionView.reloadData()
+            }
+            
+        }
 
     }
 
@@ -124,11 +219,11 @@ class SearchController: UIViewController {
         hitsInteractor.connectController(hitsTableController)
 
         // Register cell in tableView
-        hitsTableController.tableView.register(SearchTableViewCell.self, forCellReuseIdentifier: "cellID")
+        hitsTableController.tableView.register(SearchTableViewCell.self, forCellReuseIdentifier: tableCellId)
         
         // Dequeue and setup cell with hit data
         hitsTableController.dataSource = .init() { tableView, hit, indexPath in
-            let cell = tableView.dequeueReusableCell(withIdentifier: "cellID", for: indexPath) as! SearchTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: self.tableCellId, for: indexPath) as! SearchTableViewCell
             cell.usernameLabel.text = [String: Any](hit)?["username"] as? String
             let user = [String: Any](hit)?["userID"] as? String
             Api.Follow.isFollowing(userId: user!) { (bool) in
@@ -181,6 +276,7 @@ extension SearchController: SearchBarDelegate {
     func searchBarDidBeginEditing() {
         searchBarController.searchBar.showsCancelButton = true
         hitsTableController.tableView.alpha = 100
+        collectionView.alpha = 0
     }
     
     func searchBarCancelClicked() {
@@ -188,6 +284,7 @@ extension SearchController: SearchBarDelegate {
         searchBarController.searchBar.showsCancelButton = false
         searchBarController.searchBar.endEditing(true)
         hitsTableController.tableView.alpha = 0
+        collectionView.alpha = 100
     }
     
 }

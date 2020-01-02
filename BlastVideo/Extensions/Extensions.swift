@@ -65,10 +65,8 @@ extension UIView {
         layer.shouldRasterize = true
         layer.rasterizationScale = scale ? UIScreen.main.scale : 1
     }
-}
-
-extension UIView {
- func startShimmeringEffect() {
+    
+    func startShimmeringEffect() {
     let light = UIColor.gray.cgColor
     let alpha = UIColor(red: 206/255, green: 10/255, blue: 10/255, alpha: 0.7).cgColor
     let gradient = CAGradientLayer()
@@ -89,6 +87,7 @@ extension UIView {
         self.layer.mask = nil
     }
 }
+
 
 extension UIColor {
     
@@ -136,6 +135,8 @@ extension UIViewController {
 }
 
 extension UIImage {
+    
+    //******************************************************************************//
     func addFilter(filter : FilterType) -> UIImage {
         let filter = CIFilter(name: filter.rawValue)
         // convert UIImage to CIImage and set as input
@@ -148,8 +149,8 @@ extension UIImage {
         //Return the image
         return UIImage(cgImage: cgImage!)
     }
-}
-extension UIImage {
+    //******************************************************************************//
+    //******************************************************************************//
     func resizeImage(_ newSize: CGSize) -> UIImage? {
         func isSameSize(_ newSize: CGSize) -> Bool {
             return size == newSize
@@ -175,8 +176,103 @@ extension UIImage {
         
         return isSameSize(newSize) ? self : scaleImage(newSize)!
     }
+    //******************************************************************************//
+    //******************************************************************************//
+    func imageWithColor(color1: UIColor) -> UIImage {
+        UIGraphicsBeginImageContextWithOptions(self.size, false, self.scale)
+        color1.setFill()
+
+        let context = UIGraphicsGetCurrentContext()
+        context?.translateBy(x: 0, y: self.size.height)
+        context?.scaleBy(x: 1.0, y: -1.0)
+        context?.setBlendMode(CGBlendMode.normal)
+
+        let rect = CGRect(origin: .zero, size: CGSize(width: self.size.width, height: self.size.height))
+        context?.clip(to: rect, mask: self.cgImage!)
+        context?.fill(rect)
+
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return newImage!
+    }
 }
 
+extension UIImage {
+
+func fixImageOrientation() -> UIImage? {
+    var flip:Bool = false //used to see if the image is mirrored
+    var isRotatedBy90:Bool = false // used to check whether aspect ratio is to be changed or not
+
+    var transform = CGAffineTransform.identity
+
+    //check current orientation of original image
+    switch self.imageOrientation {
+    case .down, .downMirrored:
+        transform = transform.rotated(by: CGFloat(Double.pi));
+
+    case .left, .leftMirrored:
+        transform = transform.rotated(by: CGFloat(Double.pi/2));
+        isRotatedBy90 = true
+    case .right, .rightMirrored:
+        transform = transform.rotated(by: CGFloat(-Double.pi/2));
+        isRotatedBy90 = true
+    case .up, .upMirrored:
+        break
+    @unknown default:
+        fatalError()
+    }
+
+    switch self.imageOrientation {
+
+    case .upMirrored, .downMirrored:
+        transform = transform.translatedBy(x: self.size.width, y: 0)
+        flip = true
+
+    case .leftMirrored, .rightMirrored:
+        transform = transform.translatedBy(x: self.size.height, y: 0)
+        flip = true
+    default:
+        break;
+    }
+
+    // calculate the size of the rotated view's containing box for our drawing space
+    let rotatedViewBox = UIView(frame: CGRect(origin: CGPoint(x:0, y:0), size: size))
+    rotatedViewBox.transform = transform
+    let rotatedSize = rotatedViewBox.frame.size
+
+    // Create the bitmap context
+    UIGraphicsBeginImageContext(rotatedSize)
+    let bitmap = UIGraphicsGetCurrentContext()
+
+    // Move the origin to the middle of the image so we will rotate and scale around the center.
+    bitmap!.translateBy(x: rotatedSize.width / 2.0, y: rotatedSize.height / 2.0);
+
+    // Now, draw the rotated/scaled image into the context
+    var yFlip: CGFloat
+
+    if(flip){
+        yFlip = CGFloat(-1.0)
+    } else {
+        yFlip = CGFloat(1.0)
+    }
+
+    bitmap!.scaleBy(x: yFlip, y: -1.0)
+
+    //check if we have to fix the aspect ratio
+    if isRotatedBy90 {
+        bitmap?.draw(self.cgImage!, in: CGRect(x: -size.width / 2, y: -size.height / 2, width: size.height,height: size.width))
+    } else {
+        bitmap?.draw(self.cgImage!, in: CGRect(x: -size.width / 2, y: -size.height / 2, width: size.width,height: size.height))
+    }
+
+    let fixedImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+
+    return fixedImage
+    }
+    
+}
 
 extension UIScrollView {
     
@@ -195,4 +291,21 @@ extension UIScrollView {
         }
     }
     
+}
+
+extension FileManager {
+
+    open func secureCopyItem(at srcURL: URL, to dstURL: URL) -> Bool {
+        do {
+            if FileManager.default.fileExists(atPath: dstURL.path) {
+                try FileManager.default.removeItem(at: dstURL)
+            }
+            try FileManager.default.copyItem(at: srcURL, to: dstURL)
+        } catch (let error) {
+            print("Cannot copy item at \(srcURL) to \(dstURL): \(error)")
+            return false
+        }
+        return true
+    }
+
 }

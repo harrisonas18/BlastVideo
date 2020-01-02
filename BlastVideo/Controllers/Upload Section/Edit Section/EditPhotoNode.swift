@@ -18,6 +18,7 @@ class EditPhotoNode: ASDisplayNode {
     
     var livePhoto: PHLivePhoto
     var delegate: EditPhotoDelegate?
+    //var node: ASVideoNode
     
     let captionNode: ASEditableTextNode = {
         let node = ASEditableTextNode()
@@ -132,6 +133,7 @@ class EditPhotoNode: ASDisplayNode {
 extension EditPhotoNode: ASEditableTextNodeDelegate {
     
     func editableTextNode(_ editableTextNode: ASEditableTextNode, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        
         if text == "\n"{
             editableTextNode.resignFirstResponder()
         }
@@ -140,6 +142,7 @@ extension EditPhotoNode: ASEditableTextNodeDelegate {
         }
         let newLength = editableTextNode.textView.text.count + text.count - range.length
         return newLength <= 140
+        
     }
     
     func editableTextNodeDidUpdateText(_ editableTextNode: ASEditableTextNode) {
@@ -150,6 +153,7 @@ extension EditPhotoNode: ASEditableTextNodeDelegate {
         delegate?.getCaptionText(text: editableTextNode.textView.text)
         
         captionCount.attributedText = NSAttributedString(string: "\(countLeft)", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+        
     }
     
     

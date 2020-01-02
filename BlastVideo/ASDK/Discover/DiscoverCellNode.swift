@@ -25,8 +25,7 @@ class DiscoverCellNode: ASCellNode {
     
     override func didLoad() {
         super.didLoad()
-//            self.layer.borderColor = UIColor.containerBorderColor().cgColor
-//            self.layer.borderWidth = 1.0
+        
     }
     
     // MARK: - Layout
@@ -96,6 +95,7 @@ class DiscoverContentNode: ASDisplayNode {
     override func didLoad() {
         super.didLoad()
         postImageNode.backgroundColor = UIColor(red: 245/255, green: 245/255, blue: 245/255, alpha: 1.0)
+        
     }
     
     // MARK: - Layout

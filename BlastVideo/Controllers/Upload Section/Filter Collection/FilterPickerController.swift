@@ -5,11 +5,17 @@
 //  Created by Harrison Senesac on 6/5/19.
 //  Copyright © 2019 Harrison Senesac. All rights reserved.
 //
-
+import Foundation
 import UIKit
 import PhotosUI
 import AsyncDisplayKit
 import CoreImage
+import NextLevelSessionExporter
+import VideoToolbox
+
+//1. Extract Resources - async
+//2. Process Video (if needed) & Photo - sync
+//3. Push Upload View
 
 class FilterPickerController: ASViewController<FilterPickerNode> {
     
@@ -20,10 +26,25 @@ class FilterPickerController: ASViewController<FilterPickerNode> {
     var asset: PHAsset
     var editingInput: PHContentEditingInput?
     var selectedImage: UIImage
+    
     let identifier = Bundle.main.bundleIdentifier!
     let formatVersion = "1.0"
     var filter: String = ""
-
+    
+    var originalVideoURL = URL(string: "")
+    var originalPhotoURL = URL(string: "")
+    
+    var processingQueue = DispatchQueue(label: "UploadProcessingQueue")
+    var group = DispatchGroup()
+    
+    
+    let tmpVideoURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+    .appendingPathComponent(ProcessInfo().globallyUniqueString)
+    .appendingPathExtension("mov")
+    
+    let tmpPhotoURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+    .appendingPathComponent(ProcessInfo().globallyUniqueString)
+    .appendingPathExtension("jpeg")
     
     init(livePhoto: PHLivePhoto, asset: PHAsset, selectedImage: UIImage) {
         self.selectedFilter = 0
@@ -39,12 +60,27 @@ class FilterPickerController: ASViewController<FilterPickerNode> {
         super.viewDidLoad()
         getEditingInput(asset: self.asset)
         setupNavBar()
+        LivePhoto.extractResources(from: livePhoto) { (resources) in
+            if let videoURL = resources?.pairedVideo, let photoURL = resources?.pairedImage {
+                self.originalPhotoURL = photoURL
+                self.originalVideoURL = videoURL
+                PostManager.shared.photoURL = self.originalPhotoURL
+                PostManager.shared.videoURL = self.originalVideoURL
+                self.node.livePhotoNode.photoNode?.livePhoto = self.livePhoto
+                self.processPhoto(filter: nil, url: photoURL) {
+                    self.navigationItem.rightBarButtonItem?.isEnabled = true
+                }
+            }
+            
+        }
+        
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    //Gets editing input for asset ie live photo
     func getEditingInput(asset: PHAsset) {
         print("Get input called")
         asset.requestContentEditingInput(with: .none) { (input, status) in
@@ -56,54 +92,110 @@ class FilterPickerController: ASViewController<FilterPickerNode> {
     var context: PHLivePhotoEditingContext?
     var videoContext: CIContext?
     
-    func processVideo(){
-        LivePhoto.extractResources(from: self.livePhoto) { (livePhoto) in
-            let filter = CIFilter(name: "CIGaussianBlur")!
-            let asset = AVAsset(url: livePhoto?.pairedVideo ?? URL(string: "")!)
+    //adds filter to video supplied by tmp url
+    func processVideo(filterString: String?){
+        //Start loading animation here
+        //user tmp photo url
+        var filter: CIFilter?
+        let asset = AVAsset(url: self.originalVideoURL!)
+        let exporterFilter: AVAssetExportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality)!
+        
+        if let filString = filterString {
+            filter = CIFilter(name: filString)!
             let composition = AVVideoComposition(asset: asset) { (request) in
                 // Clamp to avoid blurring transparent pixels at the image edges
                 let source = request.sourceImage.clampedToExtent()
-                filter.setValue(source, forKey: kCIInputImageKey)
-
-                // Vary filter parameters based on video timing
-                let seconds = CMTimeGetSeconds(request.compositionTime)
-                filter.setValue(seconds * 10.0, forKey: kCIInputRadiusKey)
-
+                filter?.setValue(source, forKey: kCIInputImageKey)
                 // Crop the blurred output to the bounds of the original image
-                let output = filter.outputImage!.cropped(to: request.sourceImage.extent)
+                let output = filter?.outputImage!.cropped(to: request.sourceImage.extent)
 
                 // Provide the filter output to the composition
-                request.finish(with: output, context: nil)
+                request.finish(with: output!, context: nil)
             }
+            exporterFilter.videoComposition = composition
+            exporterFilter.outputFileType = AVFileType.mov
+            exporterFilter.outputURL = self.tmpVideoURL
             
-            let export = AVAssetExportSession(asset: asset, presetName: AVAssetExportPreset1920x1080)
-            export?.outputFileType = AVFileType.mov
-            let tmpURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            .appendingPathComponent(ProcessInfo().globallyUniqueString)
-            .appendingPathExtension("mp4")
-            export?.outputURL = tmpURL
-            export?.videoComposition = composition
-            export?.exportAsynchronously(completionHandler: {
+            exporterFilter.exportAsynchronously(completionHandler: {
                 
+                switch exporterFilter.status {
+                case .cancelled:
+                    print("Exporter was cancelled")
+                    break
+                case .completed:
+                    print("Exporter has completed")
+                    self.processPhoto(filter: filterString!, url: self.originalPhotoURL! ) {
+                        //Stop loading and push next vc
+                    }
+                    break
+                case .exporting:
+                    print("Exporter is exporting...")
+                    break
+                case .failed:
+                    print("Exporter has failed")
+                    break
+                case .waiting:
+                    print("Exporter was cancelled")
+                    break
+                default:
+                    print("Exporter: Something unknown has occurred")
+                    break
+                }
             })
             
+        } else {
+//            let exporterFilter: AVAssetExportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality)!
+//            exporterFilter.outputFileType = AVFileType.mov
+//            exporterFilter.outputURL = self.tmpVideoURL
         }
-    }
-    
-    func processPhoto(url: URL){
-        let context = CIContext()                                           // 1
-         
-        let filter = CIFilter(name: "CIGaussianBlur")!                      // 2
-        filter.setValue(1.0, forKey: kCIInputIntensityKey)
-        let image = CIImage(contentsOf: url)                                // 3
-        filter.setValue(image, forKey: kCIInputImageKey)
-        let result = filter.outputImage!                                    // 4
-        let cgImage = context.createCGImage(result, from: result.extent)    // 5
-        let content = UIImage(cgImage: cgImage!)
+        
         
     }
     
+    //adds filter to photo supplied by the url of the tmp location
+    func processPhoto(filter: String?, url: URL, completion: @escaping () -> Void){
+        
+        if let filter = filter {
+            let context = CIContext()                                           // 1
+            let filter = CIFilter(name: filter)!
+            let image = CIImage(contentsOf: url)                                // 3
+            filter.setValue(image, forKey: kCIInputImageKey)
+            let result = filter.outputImage!
+            let cgImage = context.createCGImage(result, from: result.extent)
+            var content = UIImage(cgImage: cgImage!, scale: 1.0, orientation: .right)
+            //content = (content.fixImageOrientation())!
+            content = content.resizeImage(CGSize(width: 750, height: 1334))!
+            
+            if let data = content.jpegData(compressionQuality: 0.65) {
+                try? data.write(to: tmpPhotoURL)
+            }
+            
+            completion()
+            
+        } else {
+            
+            let ciImage = CIImage(contentsOf: url)// 1
+            var image = UIImage(ciImage: ciImage!, scale: 1.0, orientation: .right)
+            //var content = UIImage(cgImage: image, scale: 1.0, orientation: .right)
+            //content = (content.fixImageOrientation())!
+            //image = resizeImage(image: image, targetSize: CGSize(width: 543.75, height: 725))
+            image = image.resizeImage(CGSize(width: 750, height: 1334))!
+            if let data = image.jpegData(compressionQuality: 0.65) {
+                print((Double(data.count) / 1048576.0), " mb")
+                try? data.write(to: tmpPhotoURL)
+            }
+            completion()
+        }
+
+    }
+    
+    func saveEdit(filter: String, completion: @escaping () -> Void) {
+        processVideo(filterString: filter)
+        completion()
+    }
+    
     func processLivePhoto(input: PHContentEditingInput, inputFilter: String) {
+        print("Begin")
         self.filter = inputFilter
         context = PHLivePhotoEditingContext(livePhotoEditingInput: self.editingInput!)
         context?.frameProcessor = { frame, _ in
@@ -114,35 +206,13 @@ class FilterPickerController: ASViewController<FilterPickerNode> {
             guard let livePhoto = livePhoto else { return }
             self.editedLivePhoto = livePhoto
             self.node.livePhotoNode.photoNode?.livePhoto = livePhoto
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "livePhotoFilterActivityOff"), object: nil)
+
         }
+        print("end")
     }
     
-    func saveEdit(completion: @escaping () -> Void) {
-        let output = PHContentEditingOutput(contentEditingInput: self.editingInput!)
-        let adjustmentData = PHAdjustmentData(formatIdentifier: identifier, formatVersion: formatVersion, data: filter.data(using: .utf8)!)
-        output.adjustmentData = adjustmentData
-        context?.saveLivePhoto(to: output, options: nil, completionHandler: { (success, error) in
-            if success {
-                PHPhotoLibrary.shared().performChanges({
-                    PHAssetChangeRequest(for: self.asset).contentEditingOutput = output
-                }, completionHandler: { (success, error) in
-                    if success {
-                        print("success saving processed live photo")
-                        completion()
-                    } else {
-                        print("error saving processed live photo")
-                        print(error.debugDescription)
-                        print(error!.localizedDescription)
-                        completion()
-                    }
-                })
-                print("Finished adding filter")
-            } else {
-                print("can't process live photo: \(error ?? "Err" as! Error)")
-                completion()
-            }
-        })
-    }
+    
     
 }
 
@@ -153,17 +223,21 @@ extension FilterPickerController: ASCollectionDelegate, ASCollectionDataSource, 
         return ASSizeRangeMake(CGSize(width: UIScreen.screenWidth() / 3.5, height: height), CGSize(width: UIScreen.screenWidth() / 3.5, height: height))
     }
     
+    //start
     func collectionNode(_ collectionNode: ASCollectionNode, didSelectItemAt indexPath: IndexPath) {
         let filter = FilterType.allValues[indexPath.row]
         selectedFilter = indexPath.row
+        self.filter = filter.rawValue
         if indexPath.row == 0 {
             self.node.livePhotoNode.photoNode?.livePhoto = self.livePhoto
             let rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(nextPressed))
             rightBarButtonItem.tintColor = UIColor.textColor()
             self.navigationItem.rightBarButtonItem = rightBarButtonItem
         } else {
-            processLivePhoto(input: editingInput!, inputFilter: filter.rawValue)
-            let rightBarButtonItem = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(savePressed))
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "livePhotoFilterActivity"), object: nil)
+            processLivePhoto(input: self.editingInput!, inputFilter: filter.rawValue)
+            self.node.livePhotoNode.photoNode?.livePhoto = self.livePhoto
+            let rightBarButtonItem = UIBarButtonItem(title: "Apply", style: .plain, target: self, action: #selector(savePressed))
             rightBarButtonItem.tintColor = UIColor.textColor()
             self.navigationItem.rightBarButtonItem = rightBarButtonItem
         }
@@ -194,12 +268,13 @@ extension FilterPickerController {
         
         let rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(nextPressed))
         rightBarButtonItem.tintColor = UIColor.textColor()
+        self.navigationItem.rightBarButtonItem?.isEnabled = false
         self.navigationItem.rightBarButtonItem = rightBarButtonItem
         
     }
     
     @objc func savePressed(){
-        saveEdit {
+        saveEdit(filter: filter ) {
             DispatchQueue.main.async {
                 let rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(self.nextPressed))
                 rightBarButtonItem.tintColor = UIColor.textColor()
@@ -211,11 +286,12 @@ extension FilterPickerController {
     @objc func nextPressed() {
         if selectedFilter == 0 {
             DispatchQueue.main.async {
-                let controller = EditPhotoViewController(livePhoto: self.livePhoto, displayPhoto: self.livePhoto)
+                //Call resize image
+                let controller = EditPhotoViewController(livePhoto: self.livePhoto, displayPhoto: self.livePhoto, tmpVideo: self.originalVideoURL!, tmpPhoto: self.originalPhotoURL!)
                 self.navigationController?.pushViewController(controller, animated: true)
             }
         } else {
-            let controller = EditPhotoViewController(livePhoto: self.livePhoto, displayPhoto: self.editedLivePhoto!)
+            let controller = EditPhotoViewController(livePhoto: self.livePhoto, displayPhoto: self.editedLivePhoto!, tmpVideo: tmpVideoURL, tmpPhoto: tmpPhotoURL)
             self.navigationController?.pushViewController(controller, animated: true)
         }
     }

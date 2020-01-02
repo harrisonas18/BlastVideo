@@ -12,11 +12,11 @@ import GradientLoadingBar
 import NotificationBannerSwift
 import DeepDiff
 import TwitterProfile
+import FirebaseAuth
 
 class PushProfileViewController : UIViewController, UIScrollViewDelegate, TPDataSource, TPProgressDelegate {
+    
     var tpScrollView: UIScrollView?
-    
-    
     var headerVC: PushProfileHeader?
     var user: UserObject?
     
@@ -29,7 +29,7 @@ class PushProfileViewController : UIViewController, UIScrollViewDelegate, TPData
         
     }
     
-    override var preferredStatusBarStyle: UIStatusBarStyle{
+    override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
     
@@ -41,7 +41,8 @@ class PushProfileViewController : UIViewController, UIScrollViewDelegate, TPData
     }
     
     func bottomViewController() -> UIViewController & PagerAwareProtocol {
-        let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "XLPagerTabStripExampleViewController") as! XLPagerTabStripExampleViewController
+        let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PushProfileTabController") as! PushProfileTabController
+        vc.user = user
         return vc
     }
     
@@ -64,6 +65,7 @@ class PushProfileViewController : UIViewController, UIScrollViewDelegate, TPData
 extension PushProfileViewController {
     
     func setupNavBar() {
+
         let navLabel = UILabel()
         let navTitle = NSMutableAttributedString(string: user?.username?.lowercased() ?? "Profile", attributes:[
             NSAttributedString.Key.foregroundColor: UIColor.black,
@@ -75,18 +77,19 @@ extension PushProfileViewController {
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         
-        let rightButton = UIBarButtonItem(image: #imageLiteral(resourceName: "profilePlus"), style: .plain, target: self, action: #selector(followID))
-        rightButton.tintColor = .black
-        self.navigationItem.rightBarButtonItem = rightButton
+        let rightBarItem = UIBarButtonItem(image: UIImage(named: "menuButton"), style: .plain, target: self, action: #selector(setMenu))
+        rightBarItem.tintColor = .black
+        self.navigationItem.rightBarButtonItem = rightBarItem
         
     }
     
-    
-    //MARK: TODO:
-    //Check to see if users page was pushed and configure settings/follow button
-    //Configure follow button 
-    @objc func followID(){
-        Api.Follow.followAction(withUser: self.user?.id ?? "")
+    @objc func setMenu(){
+        
+        let alert = UIAlertController(title: "Options", message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Report", style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+        
     }
     
 }

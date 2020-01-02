@@ -10,7 +10,7 @@ import UIKit
 import IGListKit
 import DeepDiff
 
-class FeedItem {
+class FeedItem: Codable {
     
     let id: String
     let post: Post

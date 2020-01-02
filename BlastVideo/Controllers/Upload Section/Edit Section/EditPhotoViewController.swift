@@ -14,7 +14,7 @@ import AsyncDisplayKit
 import GradientLoadingBar
 import NotificationBannerSwift
 import NextLevelSessionExporter
-
+import VideoToolbox
 
 class EditPhotoViewController: ASViewController<EditPhotoNode> {
     
@@ -28,8 +28,10 @@ class EditPhotoViewController: ASViewController<EditPhotoNode> {
     
     var queue = DispatchQueue(label: "com.liveme.editPhotoQueue.serial")
     
-    init(livePhoto: PHLivePhoto, displayPhoto: PHLivePhoto) {
+    init(livePhoto: PHLivePhoto, displayPhoto: PHLivePhoto, tmpVideo: URL, tmpPhoto: URL) {
         self.livePhoto = livePhoto
+        self.videoURL = tmpVideo
+        self.photoURL = tmpPhoto
         super.init(node: EditPhotoNode(livePhoto: displayPhoto))
     }
     
@@ -43,16 +45,8 @@ class EditPhotoViewController: ASViewController<EditPhotoNode> {
         self.setupNavBar()
         self.hideKeyboardWhenTappedAround()
         self.node.delegate = self
-        queue.async {
-            LivePhoto.extractResources(from: self.livePhoto, completion: { (resources) in
-                print("Resources extracted")
-                self.photoURL = resources?.pairedImage
-                self.videoURL = resources?.pairedVideo
-                
-            })
-        }
+
     }
-    
     
 }
 
@@ -74,151 +68,38 @@ extension EditPhotoViewController {
         
     }
     
-    //Resizes image to use less memory uploading and downloading
-    //TODO: -Add capability to export 1x 2x 3x images for different devices so images fit correctly
-    func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage {
-        let size = image.size
-        
-        let widthRatio  = targetSize.width  / size.width
-        let heightRatio = targetSize.height / size.height
-        
-        var newSize: CGSize
-        if(widthRatio > heightRatio) {
-            newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
-        } else {
-            newSize = CGSize(width: size.width * widthRatio, height: size.height *      widthRatio)
-        }
-        
-        let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
-        
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
-        image.draw(in: rect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage!
-    }
-    
-    //TODO: -Test to see how different settings affect file size
-    //      -Resize video so it fits cell
-    //Compresses video to use less data while uploading
-    func compressVideo(inputURL: URL, outputURL: URL, completion: @escaping (URL) -> Void) {
-        
-        let urlAsset = AVURLAsset(url: inputURL, options: nil)
-        let exportSession = AVAssetExportSession(asset: urlAsset, presetName: AVAssetExportPresetHEVC1920x1080)
-        let data = NSData(contentsOf: inputURL)!
-        print((Double(data.length) / 1048576.0), " mb")
-        
-        exportSession!.outputURL = outputURL
-        exportSession!.outputFileType = AVFileType.mov
-        //exportSession!.shouldOptimizeForNetworkUse = true
-        
-        exportSession!.exportAsynchronously { () -> Void in
-            let data = NSData(contentsOf: outputURL)!
-            print((Double(data.length) / 1048576.0), " mb")
-            completion(outputURL)
-            
-        }
-        
-    }
-
-    
-    //TODO: Refactor to use upload service and not helper service
+    //Bugs: Resizing doesn't account for landscape mode
     @objc func uploadPressed() {
         view.endEditing(true)
-            if let keyPhotoPath = self.photoURL {
-                if FileManager.default.fileExists(atPath: keyPhotoPath.path) {
-                    guard let keyPhotoImage = UIImage(contentsOfFile: keyPhotoPath.path) else {
-                        return
-                    }
-                    self.selectedImage = keyPhotoImage
-                    if let profileImg = self.selectedImage {
-                        let scaledImage = resizeImage(image: profileImg, targetSize: CGSize(width: 543.75, height: 725))
-                        let imgData = scaledImage.jpegData(compressionQuality: 0.5)
-                        let ratio = profileImg.size.width / profileImg.size.height
-                        print(NSTemporaryDirectory() + "video.mp4")
-                        DispatchQueue.main.async {
-                            GradientLoadingBar.shared.fadeIn()
-                        }
-                        
-                        let asset = AVURLAsset(url: self.videoURL!, options: nil)
-                        let data = NSData(contentsOf: self.videoURL!)!
-                        print((Double(data.length) / 1048576.0), " mb")
-                        let exporter = NextLevelSessionExporter(withAsset: asset)
-                        exporter.outputFileType = AVFileType.mp4
-                        
-                        let tmpURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-                            .appendingPathComponent(ProcessInfo().globallyUniqueString)
-                            .appendingPathExtension("mp4")
-                        exporter.outputURL = tmpURL
-                        
-                        let compressionDict: [String: Any] = [
-                            AVVideoAverageBitRateKey: NSNumber(integerLiteral: 5000000),
-                            AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel as String,
-                        ]
-                        //AVVideoProfileLevelH264HighAutoLevel
-                        exporter.videoOutputConfiguration = [
-                            AVVideoCodecKey: AVVideoCodecType.h264,
-                            AVVideoWidthKey: NSNumber(integerLiteral: 1920),
-                            AVVideoHeightKey: NSNumber(integerLiteral: 1080),
-                            AVVideoCompressionPropertiesKey: compressionDict
-                        ]
-                        exporter.audioOutputConfiguration = [
-                            AVFormatIDKey: kAudioFormatMPEG4AAC,
-                            AVEncoderBitRateKey: NSNumber(integerLiteral: 128000),
-                            AVNumberOfChannelsKey: NSNumber(integerLiteral: 2),
-                            AVSampleRateKey: NSNumber(value: Float(44100))
-                        ]
-                        
-                        exporter.export(progressHandler: { (progress) in
-                            print(progress)
-                        }, completionHandler: { result in
-                            switch result {
-                            case .success(let status):
-                                switch status {
-                                case .completed:
-                                    let data = NSData(contentsOf: tmpURL)!
-                                    print((Double(data.length) / 1048576.0), " mb")
-                                    HelperService.uploadDataToServer(data: imgData!, videoUrl: tmpURL, ratio: Float(ratio), caption: self.captionText!, onSuccess: {
-                                        
-                                        DispatchQueue.main.async {
-                                            GradientLoadingBar.shared.fadeOut()
-                                            let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Upload Succesful", attributes: [:]), style: .success, colors: nil)
-                                            success.show()
-                                        }
-                                        
-                                    })
-                                    break
-                                default:
-                                    print("NextLevelSessionExporter, did not complete")
-                                    break
-                                }
-                                break
-                            case .failure(let error):
-                                print("NextLevelSessionExporter, failed to export \(error)")
-                                break
-                            }
-                        })
-                         
-                    } else {
-                        print("upload failed")
-                        DispatchQueue.main.async {
-                            GradientLoadingBar.shared.fadeOut()
-                            let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Upload Failed", attributes: [:]), style: .danger, colors: nil)
-                            success.show()
-                        }
-                    }
-
-
-                } else {
-                        DispatchQueue.main.async {
-                            GradientLoadingBar.shared.fadeOut()
-                            let error = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Upload Failed", attributes: [:]), style: .danger, colors: nil)
-                            error.show()
-                        }
-                    }
+        self.navigationItem.rightBarButtonItem?.isEnabled = false
+        DispatchQueue.main.async {
+            GradientLoadingBar.shared.fadeIn()
+        }
+        Api.Upload.uploadPost(photoURL: PostManager.shared.photoURL ?? URL(string: "")!, videoURL: PostManager.shared.videoURL ?? URL(string: "")!, ratio: 0.75, caption: self.captionText ?? "") { success in
+            if success {
+                DispatchQueue.main.async {
+                    GradientLoadingBar.shared.fadeOut()
+                    let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Upload Succesful", attributes: [:]), style: .success, colors: nil)
+                    success.show()
+                    self.navigationItem.rightBarButtonItem?.isEnabled = true
+                    NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ChangeIndex"), object: nil)
+                    NotificationCenter.default.post(name: NSNotification.Name(rawValue: "scrollToTopDiscover"), object: nil)
+                    NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshDiscover"), object: nil)
+                    self.navigationController?.popToRootViewController(animated: true)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    GradientLoadingBar.shared.fadeOut()
+                    let failure = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Upload Failed", attributes: [:]), style: .danger, colors: nil)
+                    failure.show()
+                    self.navigationItem.rightBarButtonItem?.isEnabled = true
+                }
             }
+             
+        }
+
     }
+    
     
 }
 

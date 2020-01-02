@@ -13,6 +13,19 @@ import NotificationBannerSwift
 class FavoritesApi {
     var REF_MYPOSTS = Database.database().reference().child("favorites")
     
+    
+    func observeFavsCount(id: String, completion: @escaping (Int) -> Void){
+        Database.database().reference().child("favorites").child(id).child("myFavoritesCount").observeSingleEvent(of: .value) { (snapshot) in
+            //print("Value: ", snapshot.value)
+            if let value = snapshot.value as? Int {
+                //print("Value: ", value)
+                completion(value)
+            } else {
+                completion(0)
+            }
+        }
+    }
+    
     func loadFavButton(post: Post, completion: @escaping (Bool) -> Void){
         if let id = currentUserGlobal.id {
             let query = REF_MYPOSTS.child(id).child(post.id!)
@@ -31,7 +44,7 @@ class FavoritesApi {
         guard (user.id != nil) && (post.id != nil) else {
             return
         }
-        let ref = REF_MYPOSTS.child(user.id!).child(post.id!)
+        let ref = REF_MYPOSTS.child(user.id!).child("posts").child(post.id!)
         ref.setValue(["timestamp": post.timestamp]) { (error, ref) in
             if error == nil {
                 let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Added to Favorites", attributes: [:]), style: .success, colors: nil)
@@ -46,7 +59,7 @@ class FavoritesApi {
     }
     
     func removeFromFavorites(user: UserObject, post: Post) {
-        let ref = REF_MYPOSTS.child(user.id!).child(post.id!)
+        let ref = REF_MYPOSTS.child(user.id!).child("posts").child(post.id!)
         
         ref.removeValue { (error, ref) in
             if error == nil {
@@ -64,8 +77,8 @@ class FavoritesApi {
     
     func getFavorites(userId: String, start timestamp: Int? = nil, limit: UInt, completion: @escaping ([(Post, UserObject)]) -> Void) {
         
-        var feedQuery = REF_MYPOSTS.child(userId).queryOrdered(byChild: "timestamp")
-        feedQuery = feedQuery.queryLimited(toLast: limit)
+        let feedQuery = REF_MYPOSTS.child(userId).child("posts").queryLimited(toLast: limit)
+        //feedQuery = feedQuery.queryLimited(toLast: limit)
         
         feedQuery.observeSingleEvent(of: .value) { (snapshot) in
             let items = snapshot.children.allObjects
@@ -89,7 +102,7 @@ class FavoritesApi {
     
     func getOlderFavorites(userId: String, start timestamp: Int, limit: UInt, completion: @escaping ([(Post, UserObject)]) -> Void) {
         
-        let feedQuery = REF_MYPOSTS.child(userId).queryOrdered(byChild: "timestamp")
+        let feedQuery = REF_MYPOSTS.child(userId).child("posts").queryOrdered(byChild: "timestamp")
         let feedLimitedQuery = feedQuery.queryEnding(atValue: timestamp - 1, childKey: "timestamp").queryLimited(toLast: limit)
         
         feedLimitedQuery.observeSingleEvent(of: .value) { (snapshot) in

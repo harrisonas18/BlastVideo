@@ -90,7 +90,7 @@ extension HashtagSectionController {
         
         if !HashtagData.shared.isLoadingPost && !HashtagData.shared.firstFetch && HashtagData.shared.newItems > 7 {
             isLoading = true
-            HashtagData.shared.fetchMorePosts(hashtag: "vermont"){ (feedItems) in
+            HashtagData.shared.fetchMorePosts(hashtag: HashtagData.shared.currentHashtag!){ (feedItems) in
                 DispatchQueue.main.async {
                     self.delegate?.pushData(feedItems: feedItems)
                 }

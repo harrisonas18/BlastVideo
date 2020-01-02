@@ -55,12 +55,20 @@ class AuthService {
         
     }
     
+    //Path to set user information - Change this database reference here if needed 
     func setUserInfomation(profileImageUrl: String, username: String, email: String, uid: String, onSuccess: @escaping () -> Void) {
         let ref = Database.database().reference()
-        let usersReference = ref.child("users")
+        let usersReference = ref.child("users").child("users")
         let newUserReference = usersReference.child(uid)
         newUserReference.setValue(["username": username, "username_lowercase": username.lowercased(), "email": email, "profileImageUrl": profileImageUrl])
         onSuccess()
+        
+        let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
+        changeRequest?.displayName = username
+        changeRequest?.photoURL = URL(string: profileImageUrl)
+        changeRequest?.commitChanges { (error) in
+            
+        }
     }
     
     func updateUserInfor(username: String, email: String, imageData: Data, onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void) {
@@ -94,6 +102,68 @@ class AuthService {
         
     }
     
+    //Updates Users profile image
+    func updateProfileImage(image: UIImage, completion: @escaping (String?) -> Void){
+        let uid = Auth.auth().currentUser?.uid
+        let storageRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("profile_image").child(uid!)
+        let imageData = Data()
+        
+        storageRef.putData(imageData, metadata: nil, completion: { (metadata, error) in
+            if error != nil {
+                completion(nil)
+            }
+            var profileURL: String = ""
+            storageRef.downloadURL { (url, error) in
+                guard let downloadURL = url else {
+                    // Uh-oh, an error occurred!
+                    print("Error could not retrieve URL")
+                    return
+                }
+                profileURL = downloadURL.absoluteString
+                completion(profileURL)
+            }
+            
+        })
+    }
+    
+    //TODO: Add update to profile here with ability to specify specific fields that need to update
+    func updateProfile(profileImgURL: String?, username: String?, email: String?, realName: String?, bio: String?, FCMToken: String?, onSuccess: @escaping () -> Void, onError: @escaping (_ errorMessage: String?)->Void){
+        
+        var dict:[String: String] = [:]
+        
+        if let url = profileImgURL {
+            dict.updateValue(url, forKey: "profileImageUrl")
+        }
+        if let username = username {
+            dict.updateValue(username, forKey: "username")
+        }
+        if let email = email {
+            dict.updateValue(email, forKey: "email")
+        }
+        if let realName = realName {
+            dict.updateValue(realName, forKey: "realName")
+        }
+        if let bio = bio {
+            dict.updateValue(bio, forKey: "bio")
+        }
+        if let FCMToken = FCMToken {
+            dict.updateValue(FCMToken, forKey: "FCMToken")
+        }
+        
+        
+        
+        Api.User.REF_CURRENT_USER?.updateChildValues(dict, withCompletionBlock: { (error, ref) in
+            if error != nil {
+                onError(error!.localizedDescription)
+            } else {
+                onSuccess()
+            }
+            
+        })
+        
+        
+        
+    }
     
     
     func updateDatabase(profileImageUrl: String, username: String, email: String, onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void) {
@@ -107,6 +177,7 @@ class AuthService {
             
         })
     }
+    
     
     func logout(onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void) {
         do {

@@ -14,6 +14,8 @@ import AsyncDisplayKit
 class FilterPickerNode: ASDisplayNode {
     
     var livePhoto: PHLivePhoto
+    
+    let activity = UIActivityIndicatorView(style: .white)
 
     let livePhotoNode: LivePhotoNode = {
         let node = LivePhotoNode(height: 180.0, width: 140.0)
@@ -33,7 +35,8 @@ class FilterPickerNode: ASDisplayNode {
         layout.sectionInset = UIEdgeInsets(top: 4.0, left: 4.0, bottom: 4.0, right: 4.0)
         let node = ASCollectionNode(collectionViewLayout: layout)
         node.style.width = ASDimensionMake("100%")
-        node.style.height = ASDimensionMake("30%")
+        node.style.height = ASDimensionMake("25%")
+        node.showsHorizontalScrollIndicator = false
 //        node.layer.borderColor = UIColor.black.cgColor
 //        node.layer.borderWidth = 2.0
         return node
@@ -44,21 +47,52 @@ class FilterPickerNode: ASDisplayNode {
     init(livePhoto: PHLivePhoto) {
         self.livePhoto = livePhoto
         super.init()
-        automaticallyManagesSubnodes = true
+        addSubnode(livePhotoNode)
+        addSubnode(filterCollectionNode)
         self.backgroundColor = UIColor.white
         livePhotoNode.style.width = ASDimensionMake("100%")
         livePhotoNode.style.height = ASDimensionMake("100%")
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: Notification.Name("livePhotoFilterActivity"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: Notification.Name("livePhotoFilterActivityOff"), object: nil)
+    }
+    
     override func didLoad() {
         super.didLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(activityOn), name: Notification.Name("livePhotoFilterActivity"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(activityOff), name: Notification.Name("livePhotoFilterActivityOff"), object: nil)
         livePhotoNode.livePhoto = livePhoto
 //        self.layer.borderColor = UIColor.containerBorderColor().cgColor
 //        self.layer.borderWidth = 1.0
         
+        livePhotoNode.photoNode?.addSubview(activity)
+        activity.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            activity.centerYAnchor.constraint(equalTo: livePhotoNode.photoNode!.centerYAnchor),
+            activity.centerXAnchor.constraint(equalTo: livePhotoNode.photoNode!.centerXAnchor),
+            activity.widthAnchor.constraint(equalToConstant: 50),
+            activity.heightAnchor.constraint(equalToConstant: 50),
+            
+        ])
+        
     }
     
+    @objc func activityOn(){
+        activity.startAnimating()
+    }
+    
+    @objc func activityOff(){
+        activity.stopAnimating()
+    }
+    
+    
+    
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
+        
+        let filterInset = ASInsetLayoutSpec(insets: UIEdgeInsets(top: 0, left: 0, bottom: 35, right: 0), child: filterCollectionNode)
         
         let photoStack = ASStackLayoutSpec.vertical()
         photoStack.spacing = -1.0
@@ -73,7 +107,7 @@ class FilterPickerNode: ASDisplayNode {
         vertStack.alignItems = .start
         vertStack.justifyContent = .start
         vertStack.spacing = 8.0
-        vertStack.children = [photoStack, filterCollectionNode]
+        vertStack.children = [photoStack, filterInset]
         vertStack.style.preferredLayoutSize.width = ASDimensionMake("100%")
         vertStack.style.preferredLayoutSize.height = ASDimensionMake("100%")
         vertStack.style.flexShrink = 1.0

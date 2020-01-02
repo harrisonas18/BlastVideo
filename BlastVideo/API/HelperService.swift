@@ -13,11 +13,11 @@ import FirebaseAuth
 
 class HelperService {
     
-    static func uploadDataToServer(data: Data, videoUrl: URL? = nil, ratio: Float, caption: String, onSuccess: @escaping () -> Void) {
+    func uploadDataToServer(data: Data, videoUrl: URL? = nil, ratio: Float, caption: String, onSuccess: @escaping () -> Void) {
         if let videoUrl = videoUrl {
             self.uploadVideoToFirebaseStorage(videoUrl: videoUrl, onSuccess: { (videoUrl) in
-                uploadImageToFirebaseStorage(data: data, onSuccess: { (thumbnailImageUrl) in
-                    sendDataToDatabase(photoUrl: thumbnailImageUrl, videoUrl: videoUrl, ratio: ratio, caption: caption, onSuccess: onSuccess)
+                self.uploadImageToFirebaseStorage(data: data, onSuccess: { (thumbnailImageUrl) in
+                    self.sendDataToDatabase(photoUrl: thumbnailImageUrl, videoUrl: videoUrl, ratio: ratio, caption: caption, onSuccess: onSuccess)
                 })
             })
             
@@ -28,7 +28,7 @@ class HelperService {
         }
     }
     
-    static func uploadVideoToFirebaseStorage(videoUrl: URL, onSuccess: @escaping (_ videoUrl: String) -> Void) {
+    func uploadVideoToFirebaseStorage(videoUrl: URL, onSuccess: @escaping (_ videoUrl: String) -> Void) {
         let videoIdString = NSUUID().uuidString
         let storageRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(videoIdString)
         storageRef.putFile(from: videoUrl, metadata: nil) { (metadata, error) in
@@ -50,7 +50,7 @@ class HelperService {
         }
     }
     
-    static func uploadImageToFirebaseStorage(data: Data, onSuccess: @escaping (_ imageUrl: String) -> Void) {
+    func uploadImageToFirebaseStorage(data: Data, onSuccess: @escaping (_ imageUrl: String) -> Void) {
         let photoIdString = NSUUID().uuidString
         let storageRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(photoIdString)
         storageRef.putData(data, metadata: nil) { (metadata, error) in
@@ -73,7 +73,7 @@ class HelperService {
         }
     }
     
-    static func sendDataToDatabase(photoUrl: String, videoUrl: String? = nil, ratio: Float, caption: String, onSuccess: @escaping () -> Void) {
+    func sendDataToDatabase(photoUrl: String, videoUrl: String? = nil, ratio: Float, caption: String, onSuccess: @escaping () -> Void) {
         let newPostId = Api.Post.REF_POSTS.childByAutoId().key
         let newPostReference = Api.Post.REF_POSTS.child(newPostId!)
         

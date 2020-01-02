@@ -32,7 +32,7 @@ class SettingsController: ASViewController<ASCollectionNode> {
 
     init() {
         layout.itemSize = CGSize(width: UIScreen.screenWidth(), height: 44.0)
-        layout.minimumLineSpacing = 0.0
+        layout.minimumLineSpacing = 4.0
         layout.sectionInset = UIEdgeInsets(top: 4, left: 0, bottom: 0, right: 0)
         super.init(node: ASCollectionNode(collectionViewLayout: layout))
         
@@ -74,11 +74,11 @@ extension SettingsController: ASCollectionDataSource, ASCollectionDelegate {
             let cell = SettingsDisplayNode()
             cell.contentNode.settingIcon.contentMode = .scaleAspectFit
             cell.contentNode.settingIcon.image = UIImage(named: "user-group")
-            cell.contentNode.settingTitle.attributedText = NSAttributedString(string: "Follow and Invite Friends", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+            cell.contentNode.settingTitle.attributedText = NSAttributedString(string: "Invite Friends", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
             return cell
         case 1:
             let cell = SettingsDisplayNode()
-            cell.contentNode.settingIcon.image = UIImage(named: "Notification")
+            cell.contentNode.settingIcon.image = UIImage(named: "NotificationBlack")
             cell.contentNode.settingTitle.attributedText = NSAttributedString(string: "Notifications", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
             return cell
         case 2:
@@ -88,7 +88,7 @@ extension SettingsController: ASCollectionDataSource, ASCollectionDelegate {
             return cell
         case 3:
             let cell = SettingsDisplayNode()
-            cell.contentNode.settingIcon.image = UIImage(named: "user")
+            cell.contentNode.settingIcon.image = UIImage(named: "ProfileIcon")
             cell.contentNode.settingTitle.attributedText = NSAttributedString(string: "Account", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
             return cell
         case 4:
@@ -121,7 +121,7 @@ extension SettingsController: ASCollectionDataSource, ASCollectionDelegate {
             navigationController?.pushViewController(vc, animated: true)
             return
         case 3:
-            let vc = PrivacyController()
+            let vc = EditProfileScrollController()
             navigationController?.pushViewController(vc, animated: true)
             return
         case 4:
@@ -158,7 +158,8 @@ extension SettingsController {
                 Suggestions: \(error.localizedRecoverySuggestion ?? "")
                 """)
         }
-        
+        self.navigationController?.popViewController(animated: true)
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "tabToZero"), object: nil)
     }
     
 }

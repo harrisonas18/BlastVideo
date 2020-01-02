@@ -19,27 +19,32 @@ class FollowingData: NSObject {
     var newItems = 0
     var feedItems: [FeedItem] = [FeedItem]()
 
-    func fetchPosts(completion: @escaping ([FeedItem]) -> Void) {
+    func fetchPosts(with id: String, limit: UInt, completion: @escaping ([FeedItem]) -> Void) {
         if isLoadingPost {
             return
         }
-        isLoadingPost = true
         
-        Api.Feed.getRecentFeed(withId: "/7Fg8SurjSoh5y7J8g7gjNna45Rp2", limit: 8) { (results) in
-            self.firstFetch = false
-            self.isLoadingPost = false
-            
-            if results.count > 0 {
-                results.forEach({ (result) in
-                    let item = FeedItem(id: result.0.id!, post: result.0, user: result.1)
-                    self.feedItems.append(item)
-                })
-            } else {
-                return
-            }
-            self.newItems = results.count
+        if limit == 0 {
+            isLoadingPost = false
             completion(self.feedItems)
+        } else {
+            isLoadingPost = true
+            Api.Feed.getRecentFeed(withId: id, limit: limit) { (results) in
+                self.firstFetch = false
+                self.isLoadingPost = false
+                print("got feed")
+                if results.count > 0 {
+                    results.forEach({ (result) in
+                        let item = FeedItem(id: result.0.id!, post: result.0, user: result.1)
+                        self.feedItems.append(item)
+                    })
+                }
+                print("My Feed Results: ", results.count)
+                self.newItems = results.count
+                completion(self.feedItems)
+            }
         }
+        
     }
     
     func fetchMorePosts(completion: @escaping ([FeedItem]) -> Void) {
@@ -51,7 +56,7 @@ class FollowingData: NSObject {
             return
         }
         isLoadingPost = true
-        Api.Feed.getOldFeed(withId: "7Fg8SurjSoh5y7J8g7gjNna45Rp2", start: lastPostTimestamp, limit: 8) { (results) in
+        Api.Feed.getOldFeed(withId: currentUserGlobal.id ?? "", start: lastPostTimestamp, limit: 8) { (results) in
             self.isLoadingPost = false
             if results.count == 0 {
                 self.newItems = results.count

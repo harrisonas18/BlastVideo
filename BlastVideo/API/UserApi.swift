@@ -81,6 +81,6 @@ class UserApi {
             return nil
         }
         
-        return REF_USERS.child(currentUser.uid)
+        return REF_USERS.child("users").child(currentUser.uid)
     }
 }
