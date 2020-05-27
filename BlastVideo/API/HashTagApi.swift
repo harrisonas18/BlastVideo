@@ -45,7 +45,7 @@ class HashTagApi {
     
     func getHashtagPosts(hashtag: String, start timestamp: Int? = nil, limit: UInt, completion: @escaping ([(Post, UserObject)]) -> Void) {
         
-        var feedQuery = REF_HASHTAG.child(hashtag.lowercased()).queryOrdered(byChild: "timestamp")
+        var feedQuery = REF_HASHTAG.child(hashtag.lowercased()).child("posts").queryOrdered(byChild: "timestamp")
         feedQuery = feedQuery.queryLimited(toLast: limit)
         
         feedQuery.observeSingleEvent(of: .value) { (snapshot) in

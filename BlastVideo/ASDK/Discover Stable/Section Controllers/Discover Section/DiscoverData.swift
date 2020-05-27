@@ -55,7 +55,7 @@ class DiscoverData: NSObject {
     func fetchMorePosts(completion: @escaping ([FeedItem]) -> Void) {
         guard let lastPostTimestamp = feedItems.last?.post.timestamp else {
             isLoadingPost = false
-            return
+            return//return statements need to change to completions
         }
         if isLoadingPost {
             return
@@ -73,6 +73,7 @@ class DiscoverData: NSObject {
             }
             self.newItems = results.count
         }
+        print("Feed items data count: ", self.feedItems.count)
         completion(self.feedItems)
     }
     

@@ -40,7 +40,7 @@ class HeaderViewController: UIViewController {
             currentUserGlobal = user
         }
     }
-    
+    let placeholder = UIImage(named: "ProfilePlaceholder")
     //TODO: Add checks to make sure information is available
     //Add didset to user object to reset header when a new user object is downloaded and displayed
     //Also add loading animation
@@ -55,7 +55,7 @@ class HeaderViewController: UIViewController {
         self.username.text = self.user?.bio ?? "Livin' in VT"
         let url = URL(string: self.user?.profileImageUrl ?? "")
         //self.userImageView.kf.setImage(with: url)
-        let placeholder = UIImage(named: "ProfilePlaceholder")
+        
         self.userImageView.contentMode = .scaleAspectFill
         self.userImageView.kf.setImage(with: url, placeholder: placeholder)
         
@@ -112,7 +112,20 @@ class HeaderViewController: UIViewController {
             view.trailingAnchor.constraint(equalTo: self.imgContainer.trailingAnchor, constant: 4.0),
         ])
         
+        NotificationCenter.default.addObserver(self, selector: #selector(refreshContent), name: Notification.Name("refreshProfile"), object: nil)
+        
     }
+    
+    @objc func refreshContent(){
+        self.fullName.text = currentUserGlobal.realName
+        self.username.text = currentUserGlobal.username
+        let url = URL(string: currentUserGlobal.profileImageUrl ?? "")
+        //self.userImageView.kf.setImage(with: url)
+        
+        self.userImageView.contentMode = .scaleAspectFill
+        self.userImageView.kf.setImage(with: url, placeholder: placeholder)
+    }
+    
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()

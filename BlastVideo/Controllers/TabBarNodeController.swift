@@ -43,16 +43,9 @@ class TabBarNodeController: UIViewController, UIScrollViewDelegate {
         //view.addSubview(imgView)
         view.addSubview(videoNode.view)
         view.addSubview(chooseImgButton)
-        
-        
-        //view.addSubview(scrollView)
-        
         imgView.isUserInteractionEnabled = true
         let pinchMethod = UIPinchGestureRecognizer(target: self, action: #selector(zoom(gesture:)))
         imgView.addGestureRecognizer(pinchMethod)
-
-        
-        
         scrollView.delegate = self
         scrollView.backgroundColor = UIColor(red: 90, green: 90, blue: 90, alpha: 0.90)
         scrollView.alwaysBounceVertical = false
@@ -88,12 +81,7 @@ class TabBarNodeController: UIViewController, UIScrollViewDelegate {
             chooseImgButton.heightAnchor.constraint(equalToConstant: 55),
             chooseImgButton.widthAnchor.constraint(equalToConstant: 300),
             chooseImgButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            
-//            imgView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44),
-//            imgView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-//            imgView.widthAnchor.constraint(equalToConstant: UIScreen.screenWidth()),
-//            imgView.heightAnchor.constraint(equalToConstant: 400),
-            
+
         ])
         
         photoURL = NSURL(fileURLWithPath: NSTemporaryDirectory(),isDirectory: true)
@@ -112,7 +100,7 @@ class TabBarNodeController: UIViewController, UIScrollViewDelegate {
         .appendingPathComponent("\(uniformTypeID)/photo")
         .appendingPathExtension("jpeg")
         
-        download(id: uniformTypeID)
+        //download(id: uniformTypeID)
         
     }
     
@@ -233,7 +221,7 @@ class TabBarNodeController: UIViewController, UIScrollViewDelegate {
         guard let ext = maybeExt else {
             return nil
         }
-        var fileUrl = inDirectory.appendingPathComponent(NSUUID().uuidString)
+        var fileUrl = inDirectory.appendingPathComponent("Adjustments")
         fileUrl = fileUrl!.appendingPathExtension(ext as String)
       
         if(!buffer.write(to: fileUrl!, atomically: true)) {
@@ -245,6 +233,7 @@ class TabBarNodeController: UIViewController, UIScrollViewDelegate {
         } else {
             return nil
         }
+        
     }
     
     func generateFolderForLivePhotoResources() -> NSURL? {
@@ -297,7 +286,7 @@ class TabBarNodeController: UIViewController, UIScrollViewDelegate {
         let group = DispatchGroup()
         
         group.enter()
-        let uploadPhoto = photoRef.putFile(from: photoURL, metadata: nil) { (meta, error) in
+        _ = photoRef.putFile(from: photoURL, metadata: nil) { (meta, error) in
             guard meta != nil else {
               // Uh-oh, an error occurred!
               return
@@ -314,7 +303,7 @@ class TabBarNodeController: UIViewController, UIScrollViewDelegate {
         }
         
         group.enter()
-        let uploadVideo = videoRef.putFile(from: videoURL, metadata: nil) { (meta, error) in
+        _ = videoRef.putFile(from: videoURL, metadata: nil) { (meta, error) in
             guard meta != nil else {
               // Uh-oh, an error occurred!
               return
@@ -349,14 +338,14 @@ class TabBarNodeController: UIViewController, UIScrollViewDelegate {
         let videoRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(id).child("video")
         let photoRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("posts").child(id).child("photo")
         // Download to the local filesystem
-        let downloadTask = photoRef.write(toFile: self.tmpPhotoURL!) { url, error in
-          if let error = error {
+        _ = photoRef.write(toFile: self.tmpPhotoURL!) { url, error in
+            if error != nil {
             // Uh-oh, an error occurred!
           } else {
             // Local file URL for "images/island.jpg" is returned
             print("Photo download success")
-            let down = videoRef.write(toFile: self.tmpVideoURL!) { url, error in
-              if let error = error {
+                _ = videoRef.write(toFile: self.tmpVideoURL!) { url, error in
+                    if error != nil {
                 // Uh-oh, an error occurred!
               } else {
                 // Local file URL for "images/island.jpg" is returned
@@ -378,9 +367,120 @@ class TabBarNodeController: UIViewController, UIScrollViewDelegate {
         
     }
     
+    //Step 2: Trim Video - Trim the video of a live photo to the timerange of a bounce
+    //                     For full 3 second videos: Begin at the Key photo and use .9 seconds
+    // ////////////////    for the time range; from the key photo.
+    //This code block declares the time range in which a movie shall be written
+//    let startTime = CMTime(seconds: Double(start ?? 0), preferredTimescale: 1000)
+//    let endTime = CMTime(seconds: Double(end ?? length), preferredTimescale: 1000)
+//    let timeRange = CMTimeRange(start: startTime, end: endTime)
+//
+//    exportSession.timeRange = timeRange
     
     
+    public var videoPlayer:AVQueuePlayer?
+    public var videoPlayerLayer:AVPlayerLayer?
+    var playerLooper: NSObject?
+    var queuePlayer: AVQueuePlayer?
     
+    class func reverseVideo(inURL: URL, outURL: URL, queue: DispatchQueue, _ completionBlock: ((Bool)->Void)?) {
+        let asset = AVAsset.init(url: inURL)
+        guard
+            let reader = try? AVAssetReader.init(asset: asset),
+            let videoTrack = asset.tracks(withMediaType: .video).first
+        else {
+            assert(false)
+            completionBlock?(false)
+            return
+        }
+
+        let width = videoTrack.naturalSize.width
+        let height = videoTrack.naturalSize.height
+
+        let readerSettings: [String : Any] = [
+            String(kCVPixelBufferPixelFormatTypeKey) : kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+        ]
+        let readerOutput = AVAssetReaderTrackOutput.init(track: videoTrack, outputSettings: readerSettings)
+        reader.add(readerOutput)
+        reader.startReading()
+
+        var buffers = [CMSampleBuffer]()
+        while let nextBuffer = readerOutput.copyNextSampleBuffer() {
+            buffers.append(nextBuffer)
+        }
+        let status = reader.status
+        reader.cancelReading()
+        guard status == .completed, let firstBuffer = buffers.first else {
+            assert(false)
+            completionBlock?(false)
+            return
+        }
+        let sessionStartTime = CMSampleBufferGetPresentationTimeStamp(firstBuffer)
+
+        let writerSettings: [String:Any] = [
+            AVVideoCodecKey : AVVideoCodecType.h264,
+            AVVideoWidthKey : width,
+            AVVideoHeightKey: height,
+        ]
+        let writerInput: AVAssetWriterInput
+        if let formatDescription = videoTrack.formatDescriptions.last {
+            writerInput = AVAssetWriterInput.init(mediaType: .video, outputSettings: writerSettings, sourceFormatHint: (formatDescription as! CMFormatDescription))
+        } else {
+            writerInput = AVAssetWriterInput.init(mediaType: .video, outputSettings: writerSettings)
+        }
+        writerInput.transform = videoTrack.preferredTransform
+        writerInput.expectsMediaDataInRealTime = false
+
+        guard
+            let writer = try? AVAssetWriter.init(url: outURL, fileType: .mp4),
+            writer.canAdd(writerInput)
+        else {
+            assert(false)
+            completionBlock?(false)
+            return
+        }
+
+        let pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor.init(assetWriterInput: writerInput, sourcePixelBufferAttributes: nil)
+        let group = DispatchGroup.init()
+
+        group.enter()
+        writer.add(writerInput)
+        writer.startWriting()
+        writer.startSession(atSourceTime: sessionStartTime)
+
+        var currentSample = 0
+        writerInput.requestMediaDataWhenReady(on: queue) {
+            for i in currentSample..<buffers.count {
+                currentSample = i
+                if !writerInput.isReadyForMoreMediaData {
+                    return
+                }
+                let presentationTime = CMSampleBufferGetPresentationTimeStamp(buffers[i])
+                guard let imageBuffer = CMSampleBufferGetImageBuffer(buffers[buffers.count - i - 1]) else {
+                    print("VideoWriter reverseVideo: warning, could not get imageBuffer from SampleBuffer...")
+                    continue
+                }
+                if !pixelBufferAdaptor.append(imageBuffer, withPresentationTime: presentationTime) {
+                    print("VideoWriter reverseVideo: warning, could not append imageBuffer...")
+                }
+            }
+
+            // finish
+            writerInput.markAsFinished()
+            group.leave()
+        }
+
+        group.notify(queue: queue) {
+            writer.finishWriting {
+                if writer.status != .completed {
+                    print("VideoWriter reverseVideo: error - \(String(describing: writer.error))")
+                    completionBlock?(false)
+                } else {
+                    completionBlock?(true)
+                }
+            }
+        }
+    }
     
 }
 
@@ -395,24 +495,319 @@ extension TabBarNodeController: UIImagePickerControllerDelegate, UINavigationCon
             self.dismiss(animated:true) {
                 if let style = asset?.playbackStyle {
                     switch style {
-                        
                     case .imageAnimated:
                         print("Image animated")
                         break
                     case .videoLooping:
                         print("Video looping")
+//                        PHCachingImageManager().requestAVAsset(forVideo: asset!, options: nil) { (avAsset, avAudio, info) in
+//                            if let asset = avAsset as? AVURLAsset {
+//                                DispatchQueue.main.async {
+//                                    let playerItem = AVPlayerItem(url: asset.url)
+//                                    let inView = UIView()
+//                                    inView.frame = CGRect(x: 100, y: 100, width: 300, height: 300)
+//                                    self.view.addSubview(inView)
+//
+//                                    self.videoPlayer = AVQueuePlayer(items: [playerItem])
+//                                    self.playerLooper = AVPlayerLooper(player: self.videoPlayer!, templateItem: playerItem)
+//
+//                                    self.videoPlayerLayer = AVPlayerLayer(player: self.videoPlayer)
+//                                    self.videoPlayerLayer!.frame = inView.bounds
+//                                    self.videoPlayerLayer!.videoGravity = AVLayerVideoGravity.resizeAspectFill
+//
+//                                    inView.layer.addSublayer(self.videoPlayerLayer!)
+//
+//                                    self.videoPlayer?.play()
+//                                    print("Video Did Begin Playing")
+//                                }
+//                            } else {
+//                                print("Failed to return asset")
+//                            }
+//                        }
+                        
+                        if let subtype = asset?.mediaSubtypes {
+                            switch subtype {
+                            case .photoDepthEffect:
+                                print("Photo Depth")
+                                print(subtype.rawValue)
+                                break
+                            case .photoHDR:
+                                print("Photo HDR")
+                                print(subtype.rawValue)
+                                break
+                            case .photoLive:
+                                print("Photo Live")
+                                print(subtype.rawValue)
+                                break
+                            case .photoPanorama:
+                                print("Photo Pano")
+                                print(subtype.rawValue)
+                                break
+                            case .photoScreenshot:
+                                print("Photo Pano")
+                                print(subtype.rawValue)
+                                break
+                            case .videoHighFrameRate:
+                                print("Video High Frame Rate")
+                                print(subtype.rawValue)
+                                break
+                            case .videoStreamed:
+                                print("Video Streamed")
+                                print(subtype.rawValue)
+                                break
+                            case .videoTimelapse:
+                                print("Video Timelapse")
+                                print(subtype.rawValue)
+                                break
+                            default:
+                                print("Couldn't Identify")
+                                break
+                            }
+                        }
+                        
+                        let resources = PHAssetResource.assetResources(for: asset!)
+                        
+                        for resource in resources {
+                            switch resource.type {
+                            case .adjustmentBasePairedVideo:
+                                print("Adjustment Base Paired Video")
+                                break
+                            case .adjustmentBasePhoto:
+                                print("Adjustment Base Photo")
+                                break
+                            case .adjustmentBaseVideo:
+                                print("Adjustment Base Video")
+                                break
+                            case .adjustmentData:
+                                print("Adjustment Data")
+                                print("Asset Local ID",resource.assetLocalIdentifier)
+                                print("Asset Original Filename",resource.originalFilename)
+                                print("Asset Uniform Type ID", resource.uniformTypeIdentifier)
+                                break
+                            case .alternatePhoto:
+                                print("Alternate Photo")
+                                break
+                            case .audio:
+                                print("Audio")
+                                break
+                            case .fullSizePairedVideo:
+                                //Download video to file and play video
+//                                let buffer = NSMutableData()
+//                                PHAssetResourceManager.default().requestData(for: resource, options: nil, dataReceivedHandler: { (data) in
+//                                    buffer.append(data)
+//                                }) { (error) in
+//                                    if error != nil {
+//                                        print(error!)
+//
+//                                    } else {
+//                                        print("go for save")
+//                                        self.videoURL = self.saveAssetResource(resource: resource, inDirectory: self.videoURL ?? NSURL(), buffer: buffer)
+//                                        DispatchQueue.main.async {
+//                                            let playerItem = AVPlayerItem(url: URL(string: (self.videoURL?.absoluteString)!)!)
+//                                            let inView = UIView()
+//                                            inView.frame = CGRect(x: 100, y: 100, width: 300, height: 300)
+//                                            self.view.addSubview(inView)
+//
+//                                            self.videoPlayer = AVQueuePlayer(items: [playerItem])
+//                                            self.playerLooper = AVPlayerLooper(player: self.videoPlayer!, templateItem: playerItem)
+//
+//                                            self.videoPlayerLayer = AVPlayerLayer(player: self.videoPlayer)
+//                                            self.videoPlayerLayer!.frame = inView.bounds
+//                                            self.videoPlayerLayer!.videoGravity = AVLayerVideoGravity.resizeAspectFill
+//
+//                                            inView.layer.addSublayer(self.videoPlayerLayer!)
+//
+//                                            self.videoPlayer?.play()
+//                                            print("Video Did Begin Playing")
+//                                        }
+//                                    }
+//                                }
+                                print("Full Size Paired Video")
+                                print("Asset Local ID",resource.assetLocalIdentifier)
+                                print("Asset Original Filename",resource.originalFilename)
+                                print("Asset Uniform Type ID",resource.uniformTypeIdentifier)
+                                break
+                            case .fullSizePhoto:
+                                print("Full Size Photo")
+                                print("Asset Local ID",resource.assetLocalIdentifier)
+                                print("Asset Original Filename",resource.originalFilename)
+                                print("Asset Uniform Type ID",resource.uniformTypeIdentifier)
+                                break
+                            case .fullSizeVideo:
+                                print("Full Size Video")
+                                print("Asset Local ID",resource.assetLocalIdentifier)
+                                print("Asset Original Filename",resource.originalFilename)
+                                print("Asset Uniform Type ID",resource.uniformTypeIdentifier)
+//                                let buffer = NSMutableData()
+//                                PHAssetResourceManager.default().requestData(for: resource, options: nil, dataReceivedHandler: { (data) in
+//                                    buffer.append(data)
+//                                }) { (error) in
+//                                    if error != nil {
+//                                        print(error!)
+//
+//                                    } else {
+//                                        print("go for save")
+//                                        self.videoURL = self.saveAssetResource(resource: resource, inDirectory: self.videoURL ?? NSURL(), buffer: buffer)
+//                                        DispatchQueue.main.async {
+//                                            let playerItem = AVPlayerItem(url: URL(string: (self.videoURL?.absoluteString)!)!)
+//                                            let inView = UIView()
+//                                            inView.frame = CGRect(x: 100, y: 100, width: 300, height: 300)
+//                                            self.view.addSubview(inView)
+//
+//                                            self.videoPlayer = AVQueuePlayer(items: [playerItem])
+//                                            self.playerLooper = AVPlayerLooper(player: self.videoPlayer!, templateItem: playerItem)
+//
+//                                            self.videoPlayerLayer = AVPlayerLayer(player: self.videoPlayer)
+//                                            self.videoPlayerLayer!.frame = inView.bounds
+//                                            self.videoPlayerLayer!.videoGravity = AVLayerVideoGravity.resizeAspectFill
+//
+//                                            inView.layer.addSublayer(self.videoPlayerLayer!)
+//
+//                                            self.videoPlayer?.play()
+//                                            print("Video Did Begin Playing")
+//                                        }
+//                                    }
+//                                }
+                                break
+                            case .pairedVideo:
+                                print("Paired Video")
+                                print("Asset Local ID",resource.assetLocalIdentifier)
+                                print("Asset Original Filename",resource.originalFilename)
+                                print("Asset Uniform Type ID",resource.uniformTypeIdentifier)
+                                let buffer = NSMutableData()
+                                PHAssetResourceManager.default().requestData(for: resource, options: nil, dataReceivedHandler: { (data) in
+                                    buffer.append(data)
+                                }) { (error) in
+                                    if error != nil {
+                                        print(error!)
+                                        
+                                    } else {
+                                        print("go for save")
+                                        self.videoURL = self.saveAssetResource(resource: resource, inDirectory: self.videoURL ?? NSURL(), buffer: buffer)
+                                        DispatchQueue.main.async {
+                                            let playerItem = AVPlayerItem(url: URL(string: (self.videoURL?.absoluteString)!)!)
+                                            let duration = Int64( ( (Float64(CMTimeGetSeconds(AVAsset(url: URL(string: (self.videoURL?.absoluteString)!)!).duration)) *  10.0) - 1) / 10.0 )
+                                            let inView = UIView()
+                                            inView.frame = CGRect(x: 50, y: 100, width: 300, height: 300)
+                                            self.view.addSubview(inView)
+
+                                            self.videoPlayer = AVQueuePlayer(items: [playerItem])
+                                            //self.playerLooper = AVPlayerLooper(player: self.videoPlayer!, templateItem: playerItem)
+                                            self.playerLooper = AVPlayerLooper(player: self.videoPlayer!, templateItem: playerItem, timeRange: CMTimeRange(start: CMTime.zero, end: CMTimeMake(value: duration/2, timescale: 1)) )
+                                            
+                                            self.videoPlayerLayer = AVPlayerLayer(player: self.videoPlayer)
+                                            self.videoPlayerLayer!.frame = inView.bounds
+                                            self.videoPlayerLayer!.videoGravity = AVLayerVideoGravity.resizeAspectFill
+
+                                            inView.layer.addSublayer(self.videoPlayerLayer!)
+
+                                            self.videoPlayer?.play()
+                                            print("Video Did Begin Playing")
+                                        }
+                                    }
+                                }
+                                break
+                            case .photo:
+                                print("Photo")
+                                print("Asset Local ID",resource.assetLocalIdentifier)
+                                print("Asset Original Filename",resource.originalFilename)
+                                print("Asset Uniform Type ID",resource.uniformTypeIdentifier)
+                                break
+                            case .video:
+                                print("Video")
+                                break
+                            default:
+                                print("Couldn't find media type")
+                                break
+                            }
+                        }
+                           
                         break
                     case .livePhoto:
                         if live != nil {
+                            if let subtype = asset?.mediaSubtypes {
+                                switch subtype {
+                                case .photoDepthEffect:
+                                    print("Photo Depth")
+                                    print(subtype.rawValue)
+                                    break
+                                case .photoHDR:
+                                    print("Photo HDR")
+                                    print(subtype.rawValue)
+                                    break
+                                case .photoLive:
+                                    print("Photo Live")
+                                    print(subtype.rawValue)
+                                    break
+                                case .photoPanorama:
+                                    print("Photo Pano")
+                                    print(subtype.rawValue)
+                                    break
+                                case .photoScreenshot:
+                                    print("Photo Pano")
+                                    print(subtype.rawValue)
+                                    break
+                                case .videoHighFrameRate:
+                                    print("Video High Frame Rate")
+                                    print(subtype.rawValue)
+                                    break
+                                case .videoStreamed:
+                                    print("Video Streamed")
+                                    print(subtype.rawValue)
+                                    break
+                                case .videoTimelapse:
+                                    print("Video Timelapse")
+                                    print(subtype.rawValue)
+                                    break
+                                default:
+                                    print("Couldn't Identify")
+                                    break
+                                }
+                            }
                             
-                            LivePhoto.extractResources(from: live!) { (resources) in
-                                self.upload(photoURL: resources!.pairedImage, videoURL: resources!.pairedVideo) { (photo, video) in
-                                    if let pic = photo, let vide = video {
-                                        print("Upload Successful")
-                                    } else {
-                                        print("Upload Failed")
-                                    }
-                                    //self.download(photo: photo, video: <#T##URL#>, id: <#T##String#>)
+                            let resources = PHAssetResource.assetResources(for: asset!)
+                            
+                            for resource in resources {
+                                switch resource.type {
+                                case .adjustmentBasePairedVideo:
+                                    print("Adjustment Base Paired Video")
+                                    break
+                                case .adjustmentBasePhoto:
+                                    print("Adjustment Base Photo")
+                                    break
+                                case .adjustmentBaseVideo:
+                                    print("Adjustment Base Video")
+                                    break
+                                case .adjustmentData:
+                                    print("Adjustment Data")
+                                    break
+                                case .alternatePhoto:
+                                    print("Alternate Photo")
+                                    break
+                                case .audio:
+                                    print("Audio")
+                                    break
+                                case .fullSizePairedVideo:
+                                    print("Full Size Paired Video")
+                                    break
+                                case .fullSizePhoto:
+                                    print("Full Size Photo")
+                                    break
+                                case .fullSizeVideo:
+                                    print("Full Size Video")
+                                    break
+                                case .pairedVideo:
+                                    print("Paired Video")
+                                    break
+                                case .photo:
+                                    print("Photo")
+                                    break
+                                case .video:
+                                    print("Video")
+                                    break
+                                default:
+                                    print("Couldn't find media type")
+                                    break
                                 }
                             }
                             
@@ -422,14 +817,10 @@ extension TabBarNodeController: UIImagePickerControllerDelegate, UINavigationCon
                             
                             let assetResources = PHAssetResource.assetResources(for: live!)
                             for resource in assetResources {
-                                var buffer = NSMutableData()
+                                let buffer = NSMutableData()
                                 group.enter()
                                 
                                 if resource.type == PHAssetResourceType.pairedVideo {
-                                    print("Retreiving live photo data for : paired video")
-                                    print("Video UTI ",resource.uniformTypeIdentifier)
-                                    print("Video ALI ",resource.assetLocalIdentifier)
-                                    print("Video OFN ",resource.originalFilename)
                                     PHAssetResourceManager.default().requestData(for: resource, options: nil, dataReceivedHandler: { (data) in
                                         buffer.append(data)
                                     }) { (error) in
@@ -445,10 +836,6 @@ extension TabBarNodeController: UIImagePickerControllerDelegate, UINavigationCon
                                 }
 
                                 if resource.type == PHAssetResourceType.photo {
-                                    print("Retreiving live photo data for : photo")
-                                    print("Photo UTI ",resource.uniformTypeIdentifier)
-                                    print("Photo ALI ",resource.assetLocalIdentifier)
-                                    print("Photo OFN ",resource.originalFilename)
                                     PHAssetResourceManager.default().requestData(for: resource, options: nil, dataReceivedHandler: { (data) in
                                         buffer.append(data)
                                     }) { (error) in
@@ -474,19 +861,10 @@ extension TabBarNodeController: UIImagePickerControllerDelegate, UINavigationCon
                                             
                                         }) { (livePhoto, resources) in
                                             if let pairImg = resources?.pairedImage, let pairVid = resources?.pairedVideo {
-//                                                self.upload(photoURL: pairImg, videoURL: pairVid) { (photo, video) in
-//                                                    if let pic = photo, let vide = video {
-//                                                        print("Upload Successful")
-//                                                    } else {
-//                                                        print("Upload Failed")
-//                                                    }
-//                                                    //self.download(photo: photo, video: <#T##URL#>, id: <#T##String#>)
-//                                                }
+                                                
                                             } else {
                                                 print("No resources")
                                             }
-                                            
-                                            
                                         }
                                         
                                     }

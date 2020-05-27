@@ -410,7 +410,7 @@ fileprivate extension AVAsset {
                             for item in group?.items ?? [] {
                                 if item.key as? String == keyStillImageTime && item.keySpace!.rawValue == keySpaceQuickTimeMetadata {
                                     stillTime = group?.timeRange.start
-                                    //print("stillImageTime = \(CMTimeGetSeconds(stillTime!))")
+                                    print("stillImageTime = \(CMTimeGetSeconds(stillTime!))")
                                     found = true
                                     break
                                 }
@@ -444,7 +444,7 @@ fileprivate extension AVAsset {
         
         time.value = Int64(Float(time.value) * percent)
         
-        //print("stillImageTime = \(CMTimeGetSeconds(time))")
+        print("stillImageTime = \(CMTimeGetSeconds(time))")
         
         return CMTimeRangeMake(start: time, duration: CMTimeMake(value: frameDuration, timescale: time.timescale))
     }

@@ -30,6 +30,7 @@ extension UserObject {
         user.id = key
         return user
     }
+    
 }
 
 extension UserObject: ListDiffable {

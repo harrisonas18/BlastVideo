@@ -8,10 +8,12 @@
 
 import Foundation
 import AsyncDisplayKit
+import GradientLoadingBar
 
 class EditProfileScrollController: ASViewController<ASScrollNode> {
     
-    let scrollNode:ASScrollNode
+    let scrollNode : ASScrollNode
+    var gradientBar : GradientActivityIndicatorView?
     
     init() {
       
@@ -28,7 +30,7 @@ class EditProfileScrollController: ASViewController<ASScrollNode> {
             stack.alignContent = .start
             
             stack.spacing = 8
-            stack.children = [EditProfileScrollNode(user: UserObject())]
+            stack.children = [EditProfileScrollNode(user: currentUserGlobal)]
             
             return stack
         }
@@ -64,7 +66,39 @@ class EditProfileScrollController: ASViewController<ASScrollNode> {
         title = "Edit Profile"
         self.hideKeyboardWhenTappedAround()
         
+        let rightButton = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveSettings))
+        rightButton.tintColor = .black
+        self.navigationItem.rightBarButtonItem = rightButton
+        
     }
+    
+    var imgData = Data()
+    
+    @objc func pushImagePicker(){
+        ImagePickerManager().pickImage(self) { (image) in
+            //Update ui with newly chosen photo
+            self.imgData = image.jpegData(compressionQuality: 0.5) ?? Data()
+            
+        }
+    }
+    
+    @objc func saveSettings(){
+        //Save currentUser
+        //Save to database
+        //Begin Loading animation
+        gradientBar?.fadeIn()
+        Api.Helper.uploadImageToFirebaseStorage(data: self.imgData) { (url) in
+            var imgURL: String?
+            if url == "" {
+               imgURL = nil
+            }
+            
+            
+        }
+        
+        
+    }
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

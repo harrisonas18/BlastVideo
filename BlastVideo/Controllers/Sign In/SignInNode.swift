@@ -90,7 +90,7 @@ class SignInNode: ASDisplayNode {
     @objc func loginButtonTapped(){
         view.endEditing(true)
         print("Login tapped")
-        signInDelegate?.getSignInInfo(username: usernameNode.textView.text!, password: passwordNode.textView.text!)
+        signInDelegate?.getSignInInfo(username: usernameNode.textView.text!, password: (passwordNode.textView.text!) )
         
     }
     
@@ -128,11 +128,11 @@ class SignInNode: ASDisplayNode {
         automaticallyManagesSubnodes = true
         self.backgroundColor = UIColor.white
         loginButton.addTarget(self, action: #selector(loginButtonTapped), forControlEvents: .touchUpInside)
-        let string1 = NSAttributedString(string: "Forgot Password? ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
-        let string2 = NSAttributedString(string: "We can Help.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.blue, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+        let string1 = NSAttributedString(string: "Forgot Password? ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.blue, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+        //let string2 = NSAttributedString(string: "We can Help.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.blue, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
         let final = NSMutableAttributedString()
         final.append(string1)
-        final.append(string2)
+        //final.append(string2)
         forgotPasswordNode.attributedText = final
     }
     
@@ -140,11 +140,16 @@ class SignInNode: ASDisplayNode {
         super.didLoad()
         usernameNode.delegate = self
         passwordNode.delegate = self
+        passwordNode.isSecureTextEntry = true
+        passwordNode.textView.isSecureTextEntry = true
         //passwordNode.addTarget(self, action: #selector(self.textFieldDidChange), for: UIControl.Event.editingChanged)
-        
+        forgotPasswordNode.addTarget(self, action: #selector(self.forgotPasswordTouched), forControlEvents: ASControlNodeEvent.touchUpInside)
         
     }
     
+    @objc func forgotPasswordTouched(){
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "forgotPasswordTouched"), object: nil)
+    }
     
     @objc func textFieldDidChange() {
         guard let _ = usernameNode.textView.text, !usernameNode.textView.text.isEmpty,

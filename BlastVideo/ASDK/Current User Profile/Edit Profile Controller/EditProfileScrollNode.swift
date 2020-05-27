@@ -252,6 +252,7 @@ class EditProfileScrollNode: ASDisplayNode {
         profImageBack.url = URL(string: user.profileImageUrl ?? "")
         profImageBack.defaultImage = UIImage(named: "ProfilePlaceholder")
         nameNode.attributedText = NSAttributedString(string: user.realName ?? "", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular)])
+        usernameNode.attributedText = NSAttributedString(string: user.username ?? "", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular)])
         bioNode.attributedText = NSAttributedString(string: user.bio ?? "", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular)])
     }
     

@@ -23,6 +23,32 @@ class SignInDisplayController: ASViewController<SignInNode> {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.node.signInDelegate = self
+        
+        //Add notification listener to listen to when the forgot password label is pressed then present
+        NotificationCenter.default.addObserver(self, selector: #selector(pushForgotPassword), name: Notification.Name("forgotPasswordTouched"), object: nil)
+    }
+    
+    @objc func pushForgotPassword(){
+        let alert = UIAlertController(title: "Enter Email Associated with Account", message: nil, preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            //textField.text = ""
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Reset Password", style: .default, handler: { (action) in
+            let textField = alert.textFields![0]
+            Auth.auth().sendPasswordReset(withEmail: textField.text ?? "") { (error) in
+                if error != nil {
+                    print(error.debugDescription)
+                    //ui feedback
+                } else {
+                    print("Email sent")
+                    //ui feedback
+                }
+            }
+        }))
+        
+        self.present(alert, animated: true, completion: nil)
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

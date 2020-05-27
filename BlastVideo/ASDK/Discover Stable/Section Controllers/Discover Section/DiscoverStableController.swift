@@ -71,8 +71,10 @@ class DiscoverStableController: ASViewController<ASCollectionNode> {
     }
     
     func fetchPosts(limit: UInt){
+        self.isLoading = true
         data.fetchPosts(limit: limit) { (feedItems) in
             print("results in")
+            self.isLoading = false
             if feedItems.count == 0 {
                 let label = UILabel()
                 label.textAlignment = .center
@@ -179,7 +181,9 @@ extension DiscoverStableController: ASCollectionDataSource, ASCollectionDelegate
     func collectionNode(_ collectionNode: ASCollectionNode, willBeginBatchFetchWith context: ASBatchContext) {
         if !DiscoverData.shared.isLoadingPost && !DiscoverData.shared.firstFetch && DiscoverData.shared.newItems > 7 {
             isLoading = true
+            print("Fetching more")
             DiscoverData.shared.fetchMorePosts{ (feedItems) in
+                print("New Feed Items Count: ",feedItems.count)
                 DispatchQueue.main.async {
                     let results = diff(old: self.feedItems, new: feedItems)
                     self.collectionNode.view.reload(changes: results, updateData: ({

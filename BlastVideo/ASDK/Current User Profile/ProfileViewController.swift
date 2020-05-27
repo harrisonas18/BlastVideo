@@ -35,6 +35,11 @@ class ProfileViewController : UIViewController, UIScrollViewDelegate, TPDataSour
         
         NotificationCenter.default.addObserver(self, selector: #selector(scrollToTop), name: Notification.Name("ToTopProfilePost"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(endRefresh), name: Notification.Name("endRefreshProfile"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(changeIndexFromProfile), name: Notification.Name("ChangeIndexFromProfile"), object: nil)
+    }
+    
+    @objc func changeIndexFromProfile(notification: Notification){
+        self.tabBarController?.selectedIndex = 0
     }
     
     @objc func scrollToTop(notification: Notification){

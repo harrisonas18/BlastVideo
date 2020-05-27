@@ -84,12 +84,12 @@ extension SettingsController: ASCollectionDataSource, ASCollectionDelegate {
         case 2:
             let cell = SettingsDisplayNode()
             cell.contentNode.settingIcon.image = UIImage(named: "Security")
-            cell.contentNode.settingTitle.attributedText = NSAttributedString(string: "Privacy", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+            cell.contentNode.settingTitle.attributedText = NSAttributedString(string: "Account Security", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
             return cell
         case 3:
             let cell = SettingsDisplayNode()
             cell.contentNode.settingIcon.image = UIImage(named: "ProfileIcon")
-            cell.contentNode.settingTitle.attributedText = NSAttributedString(string: "Account", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+            cell.contentNode.settingTitle.attributedText = NSAttributedString(string: "Edit Profile", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
             return cell
         case 4:
             let cell = SettingsDisplayNode()
@@ -147,19 +147,38 @@ extension SettingsController {
     }
     
     @objc func logoutUser(){
-        do {
-            try Auth.auth().signOut()
-        } catch let error as NSError {
-            fatalError("""
-                Domain: \(error.domain)
-                Code: \(error.code)
-                Description: \(error.localizedDescription)
-                Failure Reason: \(error.localizedFailureReason ?? "")
-                Suggestions: \(error.localizedRecoverySuggestion ?? "")
-                """)
+        
+        let alert = UIAlertController(title: "Sign Out", message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Sign Out", style: .default, handler: { (action) in
+            do {
+                try Auth.auth().signOut()
+            } catch let error as NSError {
+                let alert = UIAlertController(title: "Error", message: "There was an error logging out.", preferredStyle: .actionSheet)
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+               
+                fatalError("""
+                    Domain: \(error.domain)
+                    Code: \(error.code)
+                    Description: \(error.localizedDescription)
+                    Failure Reason: \(error.localizedFailureReason ?? "")
+                    Suggestions: \(error.localizedRecoverySuggestion ?? "")
+                    """)
+                
+            }
+            
+            self.navigationController?.popViewController(animated: true)
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ChangeIndexFromProfile"), object: nil)
+            
+        }))
+        
+        guard let currentUser = Auth.auth().currentUser else {
+            return
         }
-        self.navigationController?.popViewController(animated: true)
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "tabToZero"), object: nil)
+        self.present(alert, animated: true, completion: nil)
+        
     }
     
 }
