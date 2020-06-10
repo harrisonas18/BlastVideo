@@ -11,6 +11,7 @@ import UIKit
 import TwitterProfile
 import XLPagerTabStrip
 import GradientLoadingBar
+import FirebaseAuth
 
 class PagerTabController: ButtonBarPagerTabStripViewController, PagerAwareProtocol {
     
@@ -49,6 +50,8 @@ class PagerTabController: ButtonBarPagerTabStripViewController, PagerAwareProtoc
         //gradientBar = GradientActivityIndicatorView(frame: CGRect(x: 0, y: 44, width: UIScreen.screenWidth(), height: 3))
         //view.addSubview(gradientBar!)
         //gradientBar?.fadeIn()
+        
+        
         delegate = self
         
         self.changeCurrentIndexProgressive = { [weak self] (oldCell: ButtonBarViewCell?, newCell: ButtonBarViewCell?, progressPercentage: CGFloat, changeCurrentIndex: Bool, animated: Bool) -> Void in
@@ -62,17 +65,37 @@ class PagerTabController: ButtonBarPagerTabStripViewController, PagerAwareProtoc
     }
     
     // MARK: - PagerTabStripDataSource
+    //Figure out how to reload or load new data and reload view 
     override func viewControllers(for pagerTabStripController: PagerTabStripViewController) -> [UIViewController] {
         
         let vc1 = DiscoverStableController()
         vc1.pageTitle = "Discover"
-        let child_1 = vc1
+        var viewcontrollers : [UIViewController] = [vc1]
         
         let vc2 = FollowingStableController()
         vc2.pageTitle = "Following"
-        let child_3 = vc2
+        viewcontrollers = [vc1,vc2]
+//        Auth.auth().addStateDidChangeListener { (auth, user) in
+//                if user != nil {
+//                    //self.signedIn = true
+//
+//                    let vc2 = FollowingStableController()
+//                    vc2.pageTitle = "Following"
+//
+//                    self.viewcontrollers = [vc1, vc2]
+//                    DispatchQueue.main.async {
+//                        self.reloadPagerTabStripView()
+//                    }
+//                } else {
+//                    //self.signedIn = false
+//                    self.viewcontrollers = [vc1]
+//                    self.reloadPagerTabStripView()
+//
+//                }
+//            }
         
-        return [child_1, child_3]
+        return viewcontrollers
+        
     }
     
     override func reloadPagerTabStripView() {

@@ -28,6 +28,8 @@ class SignInDisplayController: ASViewController<SignInNode> {
         NotificationCenter.default.addObserver(self, selector: #selector(pushForgotPassword), name: Notification.Name("forgotPasswordTouched"), object: nil)
     }
     
+    //MARK: Recover Password
+    
     @objc func pushForgotPassword(){
         let alert = UIAlertController(title: "Enter Email Associated with Account", message: nil, preferredStyle: .alert)
         alert.addTextField { (textField) in
@@ -38,11 +40,18 @@ class SignInDisplayController: ASViewController<SignInNode> {
             let textField = alert.textFields![0]
             Auth.auth().sendPasswordReset(withEmail: textField.text ?? "") { (error) in
                 if error != nil {
+                    //Password reset failed
                     print(error.debugDescription)
                     //ui feedback
+                    let failure = NotificationBanner.init(attributedTitle: NSAttributedString(string: "Password Reset Failed, Try Again.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0, weight: .medium)]), attributedSubtitle: nil, leftView: nil, rightView: nil, style: .danger, colors: nil)
+                    failure.show()
                 } else {
                     print("Email sent")
                     //ui feedback
+                    //Password reset email Succeeded
+                    let success = NotificationBanner.init(attributedTitle: NSAttributedString(string: "Password Reset Email Sent", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0, weight: .medium)]), attributedSubtitle: nil, leftView: nil, rightView: nil, style: .success, colors: nil)
+                    success.show()
+
                 }
             }
         }))
@@ -63,6 +72,8 @@ class SignInDisplayController: ASViewController<SignInNode> {
 }
 
 extension SignInDisplayController: SignInInfoDelegate {
+    
+    //MARK: Sign User In
     func getSignInInfo(username: String, password: String) {
         Auth.auth().signIn(withEmail: username, password: password) { (result, error) in
             if error == nil {

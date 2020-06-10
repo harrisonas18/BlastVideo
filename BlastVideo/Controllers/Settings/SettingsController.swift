@@ -148,11 +148,12 @@ extension SettingsController {
     
     @objc func logoutUser(){
         
-        let alert = UIAlertController(title: "Sign Out", message: nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "Are you Sure?", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Sign Out", style: .default, handler: { (action) in
             do {
                 try Auth.auth().signOut()
+                currentUserGlobal = UserObject()
             } catch let error as NSError {
                 let alert = UIAlertController(title: "Error", message: "There was an error logging out.", preferredStyle: .actionSheet)
                 alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))

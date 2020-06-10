@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -12,7 +12,7 @@
         <!--Bottom Page Container View Controller-->
         <scene sceneID="t7y-Df-lHJ">
             <objects>
-                <viewController storyboardIdentifier="BottomPageContainerViewController" id="NDT-lk-O4J" customClass="BottomPageContainerViewController" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="BottomPageContainerViewController" id="NDT-lk-O4J" customClass="BottomPageContainerViewController" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="2oW-hM-iAt">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -89,7 +89,7 @@
         <!--Bottom Page View Controller-->
         <scene sceneID="jHf-DQ-9Yv">
             <objects>
-                <pageViewController storyboardIdentifier="BottomPageViewController" autoresizesArchivedViewToFullSize="NO" transitionStyle="scroll" navigationOrientation="horizontal" spineLocation="none" id="rZX-gL-n9M" customClass="BottomPageViewController" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController"/>
+                <pageViewController storyboardIdentifier="BottomPageViewController" autoresizesArchivedViewToFullSize="NO" transitionStyle="scroll" navigationOrientation="horizontal" spineLocation="none" id="rZX-gL-n9M" customClass="BottomPageViewController" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SS2-xb-iAW" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2556" y="945"/>
@@ -97,7 +97,7 @@
         <!--Sign Up Popover Controller-->
         <scene sceneID="aZI-5g-pL8">
             <objects>
-                <viewController storyboardIdentifier="SignUpPopover" id="vou-Gl-QL7" customClass="SignUpPopoverController" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SignUpPopover" id="vou-Gl-QL7" customClass="SignUpPopoverController" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="OYa-22-x9X">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -266,7 +266,7 @@
         <!--View Controller-->
         <scene sceneID="U6k-r2-IEX">
             <objects>
-                <viewController id="GdE-fV-F6c" customClass="ViewController" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="GdE-fV-F6c" customClass="ViewController" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Yge-jE-LzT">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -281,7 +281,7 @@
         <!--Pager Tab Strip Example View Controller-->
         <scene sceneID="qge-LQ-wUu">
             <objects>
-                <viewController storyboardIdentifier="XLPagerTabStripExampleViewController" id="wlX-ap-eRF" customClass="XLPagerTabStripExampleViewController" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="XLPagerTabStripExampleViewController" id="wlX-ap-eRF" customClass="XLPagerTabStripExampleViewController" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="dQO-UT-c93">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -296,7 +296,7 @@
         <!--Pager Tab Controller-->
         <scene sceneID="VS9-yW-p5l">
             <objects>
-                <viewController storyboardIdentifier="PagerTabController" id="2YK-ob-695" customClass="PagerTabController" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PagerTabController" id="2YK-ob-695" customClass="PagerTabController" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="jfg-Gc-TmK">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -311,7 +311,7 @@
         <!--Empty Header-->
         <scene sceneID="4A0-em-Th0">
             <objects>
-                <viewController storyboardIdentifier="EmptyHeader" id="SWi-Lt-EAM" customClass="EmptyHeader" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="EmptyHeader" id="SWi-Lt-EAM" customClass="EmptyHeader" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="TPg-85-1H5">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="200"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -342,7 +342,7 @@
         <!--Push Profile Tab Controller-->
         <scene sceneID="xrK-UO-ied">
             <objects>
-                <viewController storyboardIdentifier="PushProfileTabController" id="ePo-mf-zUF" customClass="PushProfileTabController" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PushProfileTabController" id="ePo-mf-zUF" customClass="PushProfileTabController" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="1sc-fZ-e4S">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -357,7 +357,7 @@
         <!--Push Profile Header-->
         <scene sceneID="bjL-wD-bJ3">
             <objects>
-                <viewController storyboardIdentifier="PushProfileHeader" id="uiG-IU-ln1" customClass="PushProfileHeader" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PushProfileHeader" id="uiG-IU-ln1" customClass="PushProfileHeader" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="dUs-GX-qT9">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="200"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -464,7 +464,7 @@
         <!--Header View Controller-->
         <scene sceneID="fL8-T0-lnk">
             <objects>
-                <viewController storyboardIdentifier="HeaderViewController" id="hsw-tF-9SK" customClass="HeaderViewController" customModule="Art_Photography_Media" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="HeaderViewController" id="hsw-tF-9SK" customClass="HeaderViewController" customModule="myLIVE" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="XdX-gn-mPc">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="200"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

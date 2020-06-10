@@ -50,10 +50,12 @@ class EditProfileScrollController: ASViewController<ASScrollNode> {
     }
     
     @objc func offsetEmail(){
+        //Animate so it looks smoother
         scrollNode.view.contentOffset = CGPoint(x: 0, y: 200)
     }
     
     @objc func offsetPhone(){
+        //Animate so it looks smoother of a transition
         scrollNode.view.contentOffset = CGPoint(x: 0, y: 240)
     }
     

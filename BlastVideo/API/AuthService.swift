@@ -13,6 +13,8 @@ import FirebaseDatabase
 
 class AuthService {
     
+    //MARK: Sign In
+    
     func signIn(email: String, password: String, onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password, completion: { (user, error) in
             if error != nil {
@@ -24,6 +26,40 @@ class AuthService {
         
     }
     
+    
+    
+    
+    //Check to see if username is taken
+    //Rules - Max Character Limit: 30
+    //At least one character, no spaces
+    
+    private func verifyUsername(username: String, onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void){
+        
+        let ref = Database.database().reference()
+        let usersReference = ref.child("usernames").child(username)
+        
+        usersReference.observeSingleEvent(of: .value, with: { (snapshot) in
+          // Get user value
+          let value = snapshot.value as? NSDictionary
+          let username = value?["username"] as? String ?? ""
+          // ...
+          //Check to see if username is equal to nil and return empty string
+          // Else return success function
+            if username != "" {
+                onSuccess()
+                print("Success")
+            } else {
+                onError("Username is taken")
+            }
+          }) { (error) in
+            print(error.localizedDescription)
+        }
+        
+        
+    }
+    
+    
+    //MARK: Sign Up
     func signUp(username: String, email: String, password: String, completion: AuthDataResultCallback? = nil, imageData: Data, onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void) {
         
         Auth.auth().createUser(withEmail: email, password: password) { (authResult, error) in
@@ -178,7 +214,7 @@ class AuthService {
         })
     }
     
-    
+    //MARK: Log Out
     func logout(onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void) {
         do {
             try Auth.auth().signOut()

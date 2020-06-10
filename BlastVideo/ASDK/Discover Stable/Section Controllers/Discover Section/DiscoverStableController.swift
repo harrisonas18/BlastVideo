@@ -183,7 +183,7 @@ extension DiscoverStableController: ASCollectionDataSource, ASCollectionDelegate
             isLoading = true
             print("Fetching more")
             DiscoverData.shared.fetchMorePosts{ (feedItems) in
-                print("New Feed Items Count: ",feedItems.count)
+                print("New Feed Items Count: ", feedItems.count)
                 DispatchQueue.main.async {
                     let results = diff(old: self.feedItems, new: feedItems)
                     self.collectionNode.view.reload(changes: results, updateData: ({

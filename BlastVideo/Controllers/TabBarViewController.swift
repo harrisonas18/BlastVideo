@@ -30,7 +30,7 @@ class TabBarController: UITabBarController {
     var searchController = SearchController()
     var searchNavController = UINavigationController()
     
-    var notificationController = TabBarNodeController()//TabBarNodeController()//NotificationTableController()//
+    var notificationController = NotificationTableController()//TabBarNodeController()//NotificationTableController()//
     var notificationNavController = UINavigationController()
     
     let pop1 = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SignUpPopover") as! SignUpPopoverController
