@@ -15,7 +15,7 @@ class MasterViewController : UIViewController, UIScrollViewDelegate {
     
     var currentIndex: Int = 0
     
-    var pagerTabHeight: CGFloat = 44
+    var pagerTabHeight: CGFloat = 55
     
     var dataSource: TPDataSource!
     var delegate: TPProgressDelegate?
@@ -43,7 +43,7 @@ class MasterViewController : UIViewController, UIScrollViewDelegate {
         headerView = headerVC.view
         var bottomVC = dataSource.bottomViewController()
         bottomVC.pageDelegate = self
-        self.pagerTabHeight = bottomVC.pagerTabHeight ?? 44
+        self.pagerTabHeight = bottomVC.pagerTabHeight ?? 55
 
         add(bottomVC, to: scrollView, frame: CGRect(x: f.minX, y: dataSource.headerHeight().upperBound, width: f.width, height: f.height))
         if let vc = bottomVC.currentViewController{

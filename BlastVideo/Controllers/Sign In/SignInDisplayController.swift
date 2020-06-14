@@ -14,7 +14,6 @@ import FirebaseAuth
 class SignInDisplayController: ASViewController<SignInNode> {
     
     
-    
     init() {
         super.init(node: SignInNode())
         

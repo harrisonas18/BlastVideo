@@ -10,8 +10,10 @@ import AsyncDisplayKit
 import GradientLoadingBar
 import NotificationBannerSwift
 import TwitterProfile
+import XLPagerTabStrip
 
 class DiscoverPageController : UIViewController, UIScrollViewDelegate, TPDataSource, TPProgressDelegate {
+    
     
     var headerVC: EmptyHeader?
     var scrollView = UIScrollView()
@@ -19,7 +21,9 @@ class DiscoverPageController : UIViewController, UIScrollViewDelegate, TPDataSou
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupNavBar()
+        //setupNavBar()
+        scrollView.backgroundColor = .white
+        self.navigationController?.navigationBar.isHidden = true
         gradientBar = GradientActivityIndicatorView(frame: CGRect(x: 0, y: navigationController?.navigationBar.bounds.maxY ?? 0, width: UIScreen.screenWidth(), height: 3))
         navigationController?.navigationBar.addSubview(gradientBar!)
         gradientBar?.fadeIn()
@@ -31,18 +35,28 @@ class DiscoverPageController : UIViewController, UIScrollViewDelegate, TPDataSou
         NotificationCenter.default.addObserver(self, selector: #selector(endRefresh), name: Notification.Name("endRefreshDiscover"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(pushSignInVC), name: Notification.Name("PushSignInVC"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(pushSignUpVC), name: Notification.Name("PushSignUpVC"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(pushCTAController), name: Notification.Name("pushCTAController"), object: nil)
         //add push username tapped
         //add Push hashtag
     }
     
+    @objc func pushCTAController(){
+        let vc = SignInUpCTAController()
+        self.navigationController?.modalPresentationStyle = .fullScreen
+        self.navigationController?.present(vc, animated: true, completion: nil)
+    }
+    
     @objc func pushSignUpVC(){
-        let vc = SignUpDisplayController()
-        self.navigationController?.pushViewController(vc, animated: true)
+//        let vc = SignUpPopoverMVP()
+//        let navVC = UINavigationController(rootViewController: vc)
+//        self.navigationController?.modalPresentationStyle = .overCurrentContext
+//        self.navigationController?.present(navVC, animated: true)
     }
     
     @objc func pushSignInVC(){
-        let vc = SignInDisplayController()
-        self.navigationController?.pushViewController(vc, animated: true)
+//        let vc = SignInDisplayController()
+//        //self.navigationController?.hidesBottomBarWhenPushed = true
+//        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     @objc func scrollToTop(notification: Notification){
@@ -67,6 +81,7 @@ class DiscoverPageController : UIViewController, UIScrollViewDelegate, TPDataSou
     
     func bottomViewController() -> UIViewController & PagerAwareProtocol {
         let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PagerTabController") as! PagerTabController
+        vc.navigationController?.navigationBar.isHidden = false
         return vc
     }
     
@@ -108,10 +123,10 @@ extension DiscoverPageController {
         navLabel.attributedText = navTitle
         self.navigationItem.titleView = navLabel
         
-        navigationController?.navigationBar.isTranslucent = false
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-        self.navigationController?.navigationBar.shadowImage = UIImage()
-        
+//        navigationController?.navigationBar.isTranslucent = false
+//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+//        self.navigationController?.navigationBar.shadowImage = UIImage()
+//
         let rightButton = UIBarButtonItem(image: #imageLiteral(resourceName: "refreshIcon"), style: .plain, target: self, action: #selector(pushSettings))
         rightButton.tintColor = .black
         self.navigationItem.rightBarButtonItem = rightButton

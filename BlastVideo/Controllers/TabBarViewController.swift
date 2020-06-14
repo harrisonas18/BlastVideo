@@ -136,14 +136,26 @@ class TabBarController: UITabBarController {
 extension TabBarController: UITabBarControllerDelegate {
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SignUpPopover") as! SignUpPopoverController
-        vc.modalPresentationStyle = .overCurrentContext
+//        let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SignUpPopover") as! SignUpPopoverController
+//        vc.modalPresentationStyle = .overCurrentContext
+//        let vc = SignUpDisplayController()
+//        vc.modalPresentationStyle = .fullScreen
+        //self.navigationController?.present(vc, animated: true, completion: nil)
         
         if viewController == tabBarController.viewControllers?[2] && signedIn == false {
-            self.present(vc, animated: true, completion: nil)
+            //self.present(vc, animated: true, completion: nil)
+            //Post notification to discover controller to go to index zero and present popover controller
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "pushCTAController"), object: nil)
+            return false
+        } else if viewController == tabBarController.viewControllers?[3] && signedIn == false {
+            //self.present(vc, animated: true, completion: nil)
+            //Post notification to discover controller to go to index zero and present popover controller
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "pushCTAController"), object: nil)
             return false
         } else if viewController == tabBarController.viewControllers?[4] && signedIn == false {
-            self.present(vc, animated: true, completion: nil)
+            //self.present(vc, animated: true, completion: nil)
+            //Post notification to discover controller to go to index zero and present popover controller
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "pushCTAController"), object: nil)
             return false
         }  else {
             return true

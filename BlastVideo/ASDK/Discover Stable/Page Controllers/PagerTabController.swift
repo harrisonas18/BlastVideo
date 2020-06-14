@@ -24,7 +24,7 @@ class PagerTabController: ButtonBarPagerTabStripViewController, PagerAwareProtoc
     }
     
     var pagerTabHeight: CGFloat?{
-        return 25
+        return 55
     }
     
     //MARK: Properties
@@ -32,6 +32,7 @@ class PagerTabController: ButtonBarPagerTabStripViewController, PagerAwareProtoc
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
         settings.style.buttonBarBackgroundColor = .white
         
         settings.style.buttonBarItemTitleColor = .black
@@ -42,6 +43,8 @@ class PagerTabController: ButtonBarPagerTabStripViewController, PagerAwareProtoc
         
         settings.style.buttonBarMinimumInteritemSpacing = 0
         settings.style.buttonBarMinimumLineSpacing = 0
+        self.navigationController?.navigationBar.isHidden = true
+        
     }
     
     //MARK: Life cycle
@@ -75,24 +78,6 @@ class PagerTabController: ButtonBarPagerTabStripViewController, PagerAwareProtoc
         let vc2 = FollowingStableController()
         vc2.pageTitle = "Following"
         viewcontrollers = [vc1,vc2]
-//        Auth.auth().addStateDidChangeListener { (auth, user) in
-//                if user != nil {
-//                    //self.signedIn = true
-//
-//                    let vc2 = FollowingStableController()
-//                    vc2.pageTitle = "Following"
-//
-//                    self.viewcontrollers = [vc1, vc2]
-//                    DispatchQueue.main.async {
-//                        self.reloadPagerTabStripView()
-//                    }
-//                } else {
-//                    //self.signedIn = false
-//                    self.viewcontrollers = [vc1]
-//                    self.reloadPagerTabStripView()
-//
-//                }
-//            }
         
         return viewcontrollers
         

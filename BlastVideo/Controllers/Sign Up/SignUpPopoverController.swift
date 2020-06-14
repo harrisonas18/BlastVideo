@@ -20,6 +20,8 @@ class SignUpPopoverController: UIViewController {
     @IBAction func signInButton(_ sender: Any) {
         
         self.dismiss(animated: true, completion: nil)
+        //Write locations of view controllers that are subbed to these values
+        //DiscoverPageController - "PushSignInVC"
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "tabToZero"), object: nil)
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PushSignInVC"), object: nil)
     }
@@ -32,6 +34,8 @@ class SignUpPopoverController: UIViewController {
     
     @IBAction func signUpButton(_ sender: Any) {
         self.dismiss(animated: true, completion: nil)
+        //Write locations of view controllers that are subbed to these values
+        //DiscoverPageController - "PushSignUpVC"
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "tabToZero"), object: nil)
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PushSignUpVC"), object: nil)
     }

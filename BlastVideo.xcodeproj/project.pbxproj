@@ -50,6 +50,8 @@
 		4A1B41C923295258001ED374 /* DiscoverPageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1B41C823295258001ED374 /* DiscoverPageController.swift */; };
 		4A1B41CB232952FF001ED374 /* PagerTabController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1B41CA232952FF001ED374 /* PagerTabController.swift */; };
 		4A1B41D1232981C0001ED374 /* SignUpPopoverController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1B41D0232981C0001ED374 /* SignUpPopoverController.swift */; };
+		4A2419F72491B0D30048D23E /* SignInUpCTAController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2419F62491B0D30048D23E /* SignInUpCTAController.swift */; };
+		4A2419F92491B16B0048D23E /* SignInUpCTANode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2419F82491B16B0048D23E /* SignInUpCTANode.swift */; };
 		4A241DAD21418D59001DD423 /* PinterestLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A241DAC21418D59001DD423 /* PinterestLayout.swift */; };
 		4A26043A214350D900079F3B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A260439214350D900079F3B /* Main.storyboard */; };
 		4A2604462144520F00079F3B /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2604452144520F00079F3B /* Post.swift */; };
@@ -93,6 +95,11 @@
 		4A589C3923AEAD5A0025202D /* LoopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A589C3823AEAD5A0025202D /* LoopView.swift */; };
 		4A5C4A52233C2E5D005DE36A /* SettingsDisplayNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5C4A51233C2E5D005DE36A /* SettingsDisplayNode.swift */; };
 		4A6F5A9A235A247600B92E87 /* SearchBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6F5A99235A247600B92E87 /* SearchBarController.swift */; };
+		4A83FBE32492ADDF0006110B /* LabelNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A83FBE22492ADDF0006110B /* LabelNode.swift */; };
+		4A83FBE5249553C70006110B /* FeedCellOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A83FBE4249553C70006110B /* FeedCellOverlay.swift */; };
+		4A83FBEA249572EA0006110B /* NewFeedDesignController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A83FBE9249572EA0006110B /* NewFeedDesignController.swift */; };
+		4A83FBEE2495C4030006110B /* SignInMVPNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A83FBED2495C4030006110B /* SignInMVPNode.swift */; };
+		4A83FBF02495C4170006110B /* SignInMVPController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A83FBEF2495C4170006110B /* SignInMVPController.swift */; };
 		4A86D28A22AAD8070077CA90 /* FilterPickerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A86D28922AAD8070077CA90 /* FilterPickerNode.swift */; };
 		4A9101E22299FF59009639C4 /* UploadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9101E12299FF59009639C4 /* UploadService.swift */; };
 		4A9CE9CD2387441E00650435 /* HashtagSearchCellNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9CE9CC2387441E00650435 /* HashtagSearchCellNode.swift */; };
@@ -108,6 +115,8 @@
 		4A9CE9E2239DE30B00650435 /* PushProfilePosts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9CE9E1239DE30B00650435 /* PushProfilePosts.swift */; };
 		4A9CE9E4239DE31E00650435 /* PushProfileFavs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9CE9E3239DE31E00650435 /* PushProfileFavs.swift */; };
 		4A9CE9E6239DE33900650435 /* PushProfileData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9CE9E5239DE33900650435 /* PushProfileData.swift */; };
+		4A9EE6902491634A0006B365 /* SignUpPopoverMVP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9EE68F2491634A0006B365 /* SignUpPopoverMVP.swift */; };
+		4A9EE692249164740006B365 /* SignUpPopoverMVPNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9EE691249164740006B365 /* SignUpPopoverMVPNode.swift */; };
 		4AAF5D782364FB68000551F2 /* SignUpDisplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF5D772364FB68000551F2 /* SignUpDisplayController.swift */; };
 		4AAF5D7B23666DF0000551F2 /* HashtagCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF5D7A23666DF0000551F2 /* HashtagCell.swift */; };
 		4AAF5D7E236740D7000551F2 /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAF5D7D236740D7000551F2 /* NotificationController.swift */; };
@@ -194,6 +203,8 @@
 		4A1B41C823295258001ED374 /* DiscoverPageController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverPageController.swift; sourceTree = "<group>"; };
 		4A1B41CA232952FF001ED374 /* PagerTabController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagerTabController.swift; sourceTree = "<group>"; };
 		4A1B41D0232981C0001ED374 /* SignUpPopoverController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpPopoverController.swift; sourceTree = "<group>"; };
+		4A2419F62491B0D30048D23E /* SignInUpCTAController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInUpCTAController.swift; sourceTree = "<group>"; };
+		4A2419F82491B16B0048D23E /* SignInUpCTANode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInUpCTANode.swift; sourceTree = "<group>"; };
 		4A241DAC21418D59001DD423 /* PinterestLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinterestLayout.swift; sourceTree = "<group>"; };
 		4A260439214350D900079F3B /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		4A2604452144520F00079F3B /* Post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
@@ -237,6 +248,11 @@
 		4A589C3823AEAD5A0025202D /* LoopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopView.swift; sourceTree = "<group>"; };
 		4A5C4A51233C2E5D005DE36A /* SettingsDisplayNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDisplayNode.swift; sourceTree = "<group>"; };
 		4A6F5A99235A247600B92E87 /* SearchBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBarController.swift; sourceTree = "<group>"; };
+		4A83FBE22492ADDF0006110B /* LabelNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelNode.swift; sourceTree = "<group>"; };
+		4A83FBE4249553C70006110B /* FeedCellOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCellOverlay.swift; sourceTree = "<group>"; };
+		4A83FBE9249572EA0006110B /* NewFeedDesignController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewFeedDesignController.swift; sourceTree = "<group>"; };
+		4A83FBED2495C4030006110B /* SignInMVPNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInMVPNode.swift; sourceTree = "<group>"; };
+		4A83FBEF2495C4170006110B /* SignInMVPController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInMVPController.swift; sourceTree = "<group>"; };
 		4A86D28922AAD8070077CA90 /* FilterPickerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPickerNode.swift; sourceTree = "<group>"; };
 		4A9101E12299FF59009639C4 /* UploadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadService.swift; sourceTree = "<group>"; };
 		4A9CE9CC2387441E00650435 /* HashtagSearchCellNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HashtagSearchCellNode.swift; sourceTree = "<group>"; };
@@ -253,6 +269,8 @@
 		4A9CE9E1239DE30B00650435 /* PushProfilePosts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushProfilePosts.swift; sourceTree = "<group>"; };
 		4A9CE9E3239DE31E00650435 /* PushProfileFavs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushProfileFavs.swift; sourceTree = "<group>"; };
 		4A9CE9E5239DE33900650435 /* PushProfileData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushProfileData.swift; sourceTree = "<group>"; };
+		4A9EE68F2491634A0006B365 /* SignUpPopoverMVP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpPopoverMVP.swift; sourceTree = "<group>"; };
+		4A9EE691249164740006B365 /* SignUpPopoverMVPNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpPopoverMVPNode.swift; sourceTree = "<group>"; };
 		4AAF5D772364FB68000551F2 /* SignUpDisplayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpDisplayController.swift; sourceTree = "<group>"; };
 		4AAF5D7A23666DF0000551F2 /* HashtagCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HashtagCell.swift; sourceTree = "<group>"; };
 		4AAF5D7D236740D7000551F2 /* NotificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationController.swift; sourceTree = "<group>"; };
@@ -329,6 +347,7 @@
 		4A03B9CB2155771C00A938F7 /* ASDK */ = {
 			isa = PBXGroup;
 			children = (
+				4A83FBE8249572CD0006110B /* New Feed Design */,
 				4AAF5D7C236740B9000551F2 /* Notifications */,
 				4AFD114022F26A1300C6C108 /* OnBoarding */,
 				4A040EE922A1A70E0020020F /* Discover Stable */,
@@ -362,6 +381,7 @@
 				4A9CE9D92398B94400650435 /* TextFieldNode.swift */,
 				4AC6E79D23ABE60A00189A42 /* ZoomView.swift */,
 				4A589C3823AEAD5A0025202D /* LoopView.swift */,
+				4A83FBE22492ADDF0006110B /* LabelNode.swift */,
 			);
 			path = "Component Nodes";
 			sourceTree = "<group>";
@@ -397,6 +417,7 @@
 		4A0D3FA8234A791400280E51 /* Sign In */ = {
 			isa = PBXGroup;
 			children = (
+				4A83FBEC2495C3DD0006110B /* New Update */,
 				4A0D3FAC234A79AD00280E51 /* SignInNode.swift */,
 				4A100E692363833C00AD6CB1 /* SignInDisplayController.swift */,
 			);
@@ -406,6 +427,7 @@
 		4A0D3FA9234A792600280E51 /* Sign Up */ = {
 			isa = PBXGroup;
 			children = (
+				4A2419F52491B0AC0048D23E /* New Update */,
 				4A1B41D0232981C0001ED374 /* SignUpPopoverController.swift */,
 				4A0D3FAA234A799F00280E51 /* SignUpNode.swift */,
 				4AAF5D772364FB68000551F2 /* SignUpDisplayController.swift */,
@@ -418,6 +440,7 @@
 			children = (
 				4A387BDE22BC658100B737CE /* CollectionPostCellNode.swift */,
 				4A0C430D23A1C4FA00F10A46 /* DiscoverFullCell.swift */,
+				4A83FBE4249553C70006110B /* FeedCellOverlay.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -496,6 +519,17 @@
 				4A9CE9DD2399C1F100650435 /* FollowingStableController.swift */,
 			);
 			path = "Following Section";
+			sourceTree = "<group>";
+		};
+		4A2419F52491B0AC0048D23E /* New Update */ = {
+			isa = PBXGroup;
+			children = (
+				4A9EE68F2491634A0006B365 /* SignUpPopoverMVP.swift */,
+				4A9EE691249164740006B365 /* SignUpPopoverMVPNode.swift */,
+				4A2419F62491B0D30048D23E /* SignInUpCTAController.swift */,
+				4A2419F82491B16B0048D23E /* SignInUpCTANode.swift */,
+			);
+			path = "New Update";
 			sourceTree = "<group>";
 		};
 		4A241DAE21418D5D001DD423 /* Layouts */ = {
@@ -586,6 +620,23 @@
 				4A9CE9CC2387441E00650435 /* HashtagSearchCellNode.swift */,
 			);
 			path = "Search - InstantSearch";
+			sourceTree = "<group>";
+		};
+		4A83FBE8249572CD0006110B /* New Feed Design */ = {
+			isa = PBXGroup;
+			children = (
+				4A83FBE9249572EA0006110B /* NewFeedDesignController.swift */,
+			);
+			path = "New Feed Design";
+			sourceTree = "<group>";
+		};
+		4A83FBEC2495C3DD0006110B /* New Update */ = {
+			isa = PBXGroup;
+			children = (
+				4A83FBED2495C4030006110B /* SignInMVPNode.swift */,
+				4A83FBEF2495C4170006110B /* SignInMVPController.swift */,
+			);
+			path = "New Update";
 			sourceTree = "<group>";
 		};
 		4A86D28B22AB06D70077CA90 /* Filter Collection */ = {
@@ -974,7 +1025,9 @@
 				4A9CE9E2239DE30B00650435 /* PushProfilePosts.swift in Sources */,
 				4A4644F52214FB5B00DB3BAB /* LivePhoto.swift in Sources */,
 				4A0D3F952348053B00280E51 /* PrivacyController.swift in Sources */,
+				4A83FBF02495C4170006110B /* SignInMVPController.swift in Sources */,
 				4A040EE822A064720020020F /* DiscoverData.swift in Sources */,
+				4A83FBEA249572EA0006110B /* NewFeedDesignController.swift in Sources */,
 				4A2FC52922399EA400DD307F /* DetailCellNode.swift in Sources */,
 				4A1B41CB232952FF001ED374 /* PagerTabController.swift in Sources */,
 				4A0D3F992348064600280E51 /* NotificationSettingController.swift in Sources */,
@@ -995,6 +1048,7 @@
 				4AF8D1C223316A2C00F1206F /* HashtagSectionController.swift in Sources */,
 				4A4644F72214FC4B00DB3BAB /* AVAsset-extensions.swift in Sources */,
 				4AF8D1C62332A79000F1206F /* HashtagCellNode.swift in Sources */,
+				4A2419F92491B16B0048D23E /* SignInUpCTANode.swift in Sources */,
 				4A100E6A2363833C00AD6CB1 /* SignInDisplayController.swift in Sources */,
 				4A48DB92234145E400A98CCE /* FollowingViewController.swift in Sources */,
 				4A03B9CA215574FB00A938F7 /* DetailController.swift in Sources */,
@@ -1028,6 +1082,7 @@
 				4A00F225228361E900EB5309 /* LivePhotoNode.swift in Sources */,
 				4A9CE9CD2387441E00650435 /* HashtagSearchCellNode.swift in Sources */,
 				4A2604602144524C00079F3B /* HashTagApi.swift in Sources */,
+				4A9EE6902491634A0006B365 /* SignUpPopoverMVP.swift in Sources */,
 				4AB08138248F110500B16810 /* BasicSearchController.swift in Sources */,
 				4A0FE6752265526F00724A56 /* ProfilePostsLayout.swift in Sources */,
 				4A0D3FA52348070300280E51 /* HelpController.swift in Sources */,
@@ -1041,6 +1096,7 @@
 				4A1B41C623271AF7001ED374 /* EmptyViewController.swift in Sources */,
 				4A040EEB22A1A7230020020F /* DiscoverTestController.swift in Sources */,
 				4ADB572A228F49A300F1D61F /* ActiveTextNode.swift in Sources */,
+				4A2419F72491B0D30048D23E /* SignInUpCTAController.swift in Sources */,
 				4A040EE0229B76BF0020020F /* HashtagViewController.swift in Sources */,
 				4A9CE9DE2399C1F100650435 /* FollowingStableController.swift in Sources */,
 				4AB64CE922DD426B00B51F27 /* KFImageNode.swift in Sources */,
@@ -1060,19 +1116,23 @@
 				4A9CE9DC2399AED300650435 /* DiscoverStableController.swift in Sources */,
 				4AF8D1BB232BFCA200F1206F /* PushProfileViewController.swift in Sources */,
 				4AC6E79C23AA968100189A42 /* VideoCompressionWrapper.swift in Sources */,
+				4A83FBE32492ADDF0006110B /* LabelNode.swift in Sources */,
 				4A2604612144524C00079F3B /* HelperService.swift in Sources */,
 				4A0D3FA72348071200280E51 /* HelpNode.swift in Sources */,
 				4A0C430E23A1C4FA00F10A46 /* DiscoverFullCell.swift in Sources */,
 				4A040EF322A1B2EF0020020F /* FeedSectionController.swift in Sources */,
 				4A1B41C923295258001ED374 /* DiscoverPageController.swift in Sources */,
+				4A83FBEE2495C4030006110B /* SignInMVPNode.swift in Sources */,
 				4A26045C2144524C00079F3B /* Config.swift in Sources */,
 				4A3C3282223AB051004A0BDE /* StorageCacheController.swift in Sources */,
 				4A2604582144524C00079F3B /* Api.swift in Sources */,
 				4A589C3923AEAD5A0025202D /* LoopView.swift in Sources */,
 				4A100E642362586000AD6CB1 /* ProfileNotSignedInController.swift in Sources */,
 				4A0D3FAD234A79AD00280E51 /* SignInNode.swift in Sources */,
+				4A9EE692249164740006B365 /* SignUpPopoverMVPNode.swift in Sources */,
 				4A0D3F9F234806D700280E51 /* FollowAndInviteNode.swift in Sources */,
 				4A4877FB22A82C7500B7CF4D /* FilterNode.swift in Sources */,
+				4A83FBE5249553C70006110B /* FeedCellOverlay.swift in Sources */,
 				4AAF5D8B237DCC6D000551F2 /* EditProfileNode.swift in Sources */,
 				4A0D3F9323459AC100280E51 /* InviteNode.swift in Sources */,
 				4A0FE67322653C2200724A56 /* ProfileViewController.swift in Sources */,
