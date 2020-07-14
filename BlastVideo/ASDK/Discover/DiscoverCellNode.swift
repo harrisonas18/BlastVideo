@@ -65,11 +65,14 @@ class DiscoverContentNode: ASDisplayNode {
     }()
     
     @objc func segueToUserProfile(){
+        print("Username tapped")
         //set up delegate to call viewcontroller navigation controller push
         guard (user != nil) else {
             print("user is nil")
             return
         }
+        print(user?.username)
+//        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PushProfileController"), object: nil, userInfo: ["user": user!])
         delegate?.pushUser(user: user!)
     }
     

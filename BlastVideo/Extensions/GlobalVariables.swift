@@ -10,7 +10,7 @@ import Foundation
 
 //The user object of the current user
 var currentUserGlobal = UserObject()
-
+var isSignedIn = false
 //Delegates
 //Tracks when a username was tapped and pushes corresponding User profile view controller
 protocol PushUsernameDelegate {

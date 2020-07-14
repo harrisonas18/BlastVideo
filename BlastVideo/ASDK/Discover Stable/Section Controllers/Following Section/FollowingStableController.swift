@@ -22,6 +22,9 @@ class FollowingStableController: ASViewController<ASCollectionNode> {
     var newPosts = 0
     var isLoading = false
     var count = 0
+    var pushUsernameDelegate: PushUsernameDelegate?
+    var pushViewControllerDelegate: PushViewControllerDelegate?
+    var refresh = UIRefreshControl()
     
     var pageTitle: String?
     
@@ -33,16 +36,30 @@ class FollowingStableController: ASViewController<ASCollectionNode> {
         super.init(node: ASCollectionNode(collectionViewLayout: layout))
     }
     
+    @objc func handleRefreshControl() {
+        //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshDiscover"), object: nil)
+        refreshContent()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        refresh.addTarget(self, action: #selector(handleRefreshControl), for: .valueChanged)
+        
+        let refreshView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+        collectionNode.view.addSubview(refreshView)
+        refreshView.addSubview(refresh)
+        
         collectionNode.delegate = self
         collectionNode.dataSource = self
+        collectionNode.contentInset.top = 55.0
+        
         Api.Feed.observeFeedCount { (count) in
-            print(count)
+            print("Following Post Count",count)
             if count > 7 {
                 self.fetchPosts(limit: 8)
             } else {
                 self.fetchPosts(limit: UInt(bitPattern: count))
+                //self.collectionNode.reloadData()
             }
             
         }
@@ -57,29 +74,34 @@ class FollowingStableController: ASViewController<ASCollectionNode> {
                 self.fetchPosts(limit: 8)
             } else {
                 self.fetchPosts(limit: UInt(bitPattern: count))
+                //self.collectionNode.reloadData()
             }
             
         }
     }
+    
+    let label = UILabel()
     
     func fetchPosts(limit: UInt){
         
         if let id = currentUserGlobal.id {
             data.fetchPosts(with: id, limit: limit) { (feedItems) in
                 if feedItems.count == 0 {
-                    let label = UILabel()
-                    label.textAlignment = .center
-                    label.translatesAutoresizingMaskIntoConstraints = false
+                    
+                    self.label.textAlignment = .center
+                    self.label.translatesAutoresizingMaskIntoConstraints = false
                     //label.frame = CGRect(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY, width: 120, height: 45)
-                    label.frame = .zero
-                    label.attributedText = NSAttributedString(string: "You aren't following anyone", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
-                    self.node.view.addSubview(label)
+                    self.label.frame = .zero
+                    self.label.attributedText = NSAttributedString(string: "You aren't following anyone", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+                    self.node.view.addSubview(self.label)
                     NSLayoutConstraint.activate([
-                        label.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
-                        label.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor, constant: -100),
-                        label.heightAnchor.constraint(equalToConstant: 45),
-                        label.widthAnchor.constraint(equalToConstant: UIScreen.screenWidth())
+                        self.label.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
+                        self.label.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor, constant: -100),
+                        self.label.heightAnchor.constraint(equalToConstant: 45),
+                        self.label.widthAnchor.constraint(equalToConstant: UIScreen.screenWidth())
                     ])
+                } else {
+                    self.label.removeFromSuperview()
                 }
                 
                 DispatchQueue.main.async {
@@ -122,6 +144,7 @@ extension FollowingStableController: PushViewControllerDelegate {
         let detailViewController = ASDetailViewController(post: post, user: user)
         detailViewController.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(detailViewController, animated: true)
+        
     }
 }
 //TODO: Add code to set up header and two view controllers which contains users posts and favorites
@@ -129,9 +152,7 @@ extension FollowingStableController: PushViewControllerDelegate {
 //Update model to reflect if user has posts/favorites - check this then make network call
 extension FollowingStableController: PushUsernameDelegate {
     func pushUser(user: UserObject) {
-        let vc = PushProfileViewController()
-        vc.user = user
-        self.navigationController?.pushViewController(vc, animated: true)
+        pushUsernameDelegate?.pushUser(user: user)
     }
 }
 
@@ -152,6 +173,21 @@ extension FollowingStableController {
 
 extension FollowingStableController: ASCollectionDataSource, ASCollectionDelegate, UICollectionViewDelegateFlowLayout {
     
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+
+         if(velocity.y>0) {
+             //Code will work without the animation block.I am using animation block incase if you want to set any delay to it.
+            //print(velocity.y)
+            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "HideBarOnSwipe"), object: nil)
+
+         } else {
+            //print(velocity.y)
+            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ShowBarOnSwipe"), object: nil)
+            
+         }
+        
+    }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 10.0, left: 10.0, bottom: 140.0, right: 10.0)
     }
@@ -163,14 +199,13 @@ extension FollowingStableController: ASCollectionDataSource, ASCollectionDelegat
     func collectionView(_ collectionView: ASCollectionView, nodeForItemAt indexPath: IndexPath) -> ASCellNode {
         let feedItem = feedItems[indexPath.row]
         let cell = DiscoverCellNode(post: feedItem.post, user: feedItem.user)
+        cell.contentNode.delegate = self
         return cell
     }
     
     func collectionView(_ collectionNode: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let feedItem = feedItems[indexPath.row]
-        let detailViewController = ASDetailViewController(post: feedItem.post, user: feedItem.user)
-        detailViewController.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(detailViewController, animated: true)
+        pushViewControllerDelegate?.pushViewController(post: feedItem.post, user: feedItem.user)
     }
     
     func shouldBatchFetch(for collectionNode: ASCollectionNode) -> Bool {

@@ -75,7 +75,9 @@ class SignInUpCTAController: ASViewController<ASScrollNode> {
           NotificationCenter.default.addObserver(self, selector: #selector(pushSignUp), name: Notification.Name("PushSignUpVCfromCTA"), object: nil)
           NotificationCenter.default.addObserver(self, selector: #selector(pushSignIn), name: Notification.Name("PushSignInVCfromCTA"), object: nil)
         
+        
     }
+    
     
     @objc func pushSignUp(){
         let vc = SignUpPopoverMVP()

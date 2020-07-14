@@ -31,21 +31,26 @@ class AuthService {
     
     //Check to see if username is taken
     //Rules - Max Character Limit: 30
-    //At least one character, no spaces
+    //At least two characters, no spaces
+    //MARK: Verify Username
     
-    private func verifyUsername(username: String, onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void){
+    func verifyUsername(username: String, onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void){
+        
+        print("Username", username)
         
         let ref = Database.database().reference()
-        let usersReference = ref.child("usernames").child(username)
+        let usersReference = ref.child("usernames").child(username.lowercased())
         
         usersReference.observeSingleEvent(of: .value, with: { (snapshot) in
           // Get user value
           let value = snapshot.value as? NSDictionary
           let username = value?["username"] as? String ?? ""
+            print("Value ", value)
+            print("Username ", username)
           // ...
           //Check to see if username is equal to nil and return empty string
           // Else return success function
-            if username != "" {
+            if value == nil {
                 onSuccess()
                 print("Success")
             } else {
@@ -60,7 +65,7 @@ class AuthService {
     
     
     //MARK: Sign Up
-    func signUp(username: String, email: String, password: String, completion: AuthDataResultCallback? = nil, imageData: Data, onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void) {
+    func signUp(username: String, email: String, password: String, completion: AuthDataResultCallback? = nil, imageData: Data?, onSuccess: @escaping () -> Void, onError:  @escaping (_ errorMessage: String?) -> Void) {
         
         Auth.auth().createUser(withEmail: email, password: password) { (authResult, error) in
             if error != nil {
@@ -70,40 +75,55 @@ class AuthService {
             let uid = authResult?.user.uid
             let storageRef = Storage.storage().reference(forURL: Config.STORAGE_ROOF_REF).child("profile_image").child(uid!)
             
-            storageRef.putData(imageData, metadata: nil, completion: { (metadata, error) in
-                if error != nil {
-                    return
-                }
-
-                var profileURL: String = ""
-                storageRef.downloadURL { (url, error) in
-                    guard let downloadURL = url else {
-                        // Uh-oh, an error occurred!
-                        print("Error could not retrieve URL")
+            if let data = imageData {
+                storageRef.putData(data, metadata: nil, completion: { (metadata, error) in
+                    if error != nil {
                         return
                     }
-                    profileURL = downloadURL.absoluteString
-                }
-                
-                self.setUserInfomation(profileImageUrl: profileURL , username: username, email: email, uid: uid!, onSuccess: onSuccess)
-            })
+
+                    var profileURL: String = ""
+                    storageRef.downloadURL { (url, error) in
+                        guard let downloadURL = url else {
+                            // Uh-oh, an error occurred!
+                            print("Error could not retrieve URL")
+                            return
+                        }
+                        profileURL = downloadURL.absoluteString
+                    }
+                    
+                    self.setUserInfomation(profileImageUrl: profileURL , username: username, email: email, uid: uid!, onSuccess: onSuccess)
+                })
+            } else {
+                self.setUserInfomation(profileImageUrl: nil, username: username, email: email, uid: uid!, onSuccess: onSuccess)
+            }
+            
         }
         
     }
     
     //Path to set user information - Change this database reference here if needed 
-    func setUserInfomation(profileImageUrl: String, username: String, email: String, uid: String, onSuccess: @escaping () -> Void) {
+    func setUserInfomation(profileImageUrl: String?, username: String, email: String, uid: String, onSuccess: @escaping () -> Void) {
+        
         let ref = Database.database().reference()
         let usersReference = ref.child("users").child("users")
-        let newUserReference = usersReference.child(uid)
-        newUserReference.setValue(["username": username, "username_lowercase": username.lowercased(), "email": email, "profileImageUrl": profileImageUrl])
-        onSuccess()
-        
         let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
         changeRequest?.displayName = username
-        changeRequest?.photoURL = URL(string: profileImageUrl)
+        
+        if let url = profileImageUrl {
+            changeRequest?.photoURL = URL(string: url)
+            let newUserReference = usersReference.child(uid)
+            newUserReference.setValue(["username": username, "username_lowercase": username.lowercased(), "email": email, "profileImageUrl": profileImageUrl])
+        } else {
+            let newUserReference = usersReference.child(uid)
+            newUserReference.setValue(["username": username, "username_lowercase": username.lowercased(), "email": email])
+        }
+        
+        
+        onSuccess()
+        
+        
         changeRequest?.commitChanges { (error) in
-            
+            print(error?.localizedDescription)
         }
     }
     

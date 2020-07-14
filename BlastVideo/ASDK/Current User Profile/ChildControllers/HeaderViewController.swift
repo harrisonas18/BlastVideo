@@ -50,9 +50,9 @@ class HeaderViewController: UIViewController {
         if let name = self.user?.realName {
             self.fullName.text = name
         } else {
-            self.fullName.text = "Harrison Senesac"
+            self.fullName.text = ""
         }
-        self.username.text = self.user?.bio ?? "Livin' in VT"
+        self.username.text = self.user?.username ?? ""
         let url = URL(string: self.user?.profileImageUrl ?? "")
         //self.userImageView.kf.setImage(with: url)
         
@@ -124,6 +124,7 @@ class HeaderViewController: UIViewController {
         
         self.userImageView.contentMode = .scaleAspectFill
         self.userImageView.kf.setImage(with: url, placeholder: placeholder)
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "endRefreshProfile"), object: nil)
     }
     
     

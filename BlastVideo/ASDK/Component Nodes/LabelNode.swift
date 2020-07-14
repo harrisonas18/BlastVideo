@@ -17,6 +17,7 @@ class LabelNode: ASDisplayNode {
     
     init(height: CGFloat, width: CGFloat) {
         super.init()
+        isUserInteractionEnabled = true
         self.setViewBlock({
             let textField: UILabel = .init(frame: CGRect(x: 0, y: 0, width: width, height: height))
             return textField

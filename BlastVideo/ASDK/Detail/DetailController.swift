@@ -99,8 +99,9 @@ extension ASDetailViewController {
         }
         if currentUser.uid == post.uid {
             alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { (action) in
-                Api.MyPosts.deletePost(post: self.post)
-                Api.Post.deletePost(post: self.post)
+                //Api.MyPosts.deletePost(post: self.post)
+                //Api.Post.deletePost(post: self.post)
+                Api.Delete.deletePost(post: self.post)
                 let delete = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Post Deleted",                                                   attributes: [:]),
                                                           style: .danger,
                                                           colors: nil)

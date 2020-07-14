@@ -82,6 +82,7 @@ extension SignInDisplayController: SignInInfoDelegate {
                 }
                 let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Login Succesful", attributes: [:]), style: .success, colors: nil)
                 success.show()
+                currentUserGlobal.username = username
                 self.navigationController?.popViewController(animated: true)
                 
             } else {

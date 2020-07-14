@@ -154,6 +154,7 @@ extension SettingsController {
             do {
                 try Auth.auth().signOut()
                 currentUserGlobal = UserObject()
+                isSignedIn = false
             } catch let error as NSError {
                 let alert = UIAlertController(title: "Error", message: "There was an error logging out.", preferredStyle: .actionSheet)
                 alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))

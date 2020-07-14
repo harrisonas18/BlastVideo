@@ -122,6 +122,7 @@ extension UIScreen {
     }
 }
 
+//@available(iOS 13.0, *)
 extension UIViewController {
     func hideKeyboardWhenTappedAround() {
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
@@ -132,6 +133,12 @@ extension UIViewController {
     @objc func dismissKeyboard() {
         view.endEditing(true)
     }
+
+//    var topbarHeight: CGFloat {
+//        return (view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0.0) +
+//            (self.navigationController?.navigationBar.frame.height ?? 0.0)
+//    }
+    
 }
 
 extension UIImage {

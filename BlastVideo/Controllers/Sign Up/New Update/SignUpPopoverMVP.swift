@@ -9,6 +9,7 @@
 import Foundation
 import AsyncDisplayKit
 import GradientLoadingBar
+import NotificationBannerSwift
 
 class SignUpPopoverMVP: ASViewController<ASScrollNode> {
     
@@ -29,8 +30,11 @@ class SignUpPopoverMVP: ASViewController<ASScrollNode> {
             let stack = ASStackLayoutSpec.vertical()
             stack.alignContent = .start
             
+            let child = SignUpPopoverMVPNode()
+            child.signUpDelegate = self
+            
             stack.spacing = 8
-            stack.children = [SignUpPopoverMVPNode()]
+            stack.children = [child]
             
             return stack
         }
@@ -63,8 +67,6 @@ class SignUpPopoverMVP: ASViewController<ASScrollNode> {
         })
     }
     
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -76,8 +78,6 @@ class SignUpPopoverMVP: ASViewController<ASScrollNode> {
 //        self.navigationItem.rightBarButtonItem = rightButton
         
     }
-    
-    
     
     @objc func saveSettings(){
         //Save currentUser
@@ -95,3 +95,31 @@ class SignUpPopoverMVP: ASViewController<ASScrollNode> {
     
 }
 
+extension SignUpPopoverMVP: SignUpInfoDelegate {
+    
+    func getSignUpInfo(username: String, email: String, password: String) {
+        print("Get sign up info delegate called")
+        Api.Auth.signUp(username: username, email: email, password: password, imageData: nil, onSuccess: {
+            let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Sign Up Succesful", attributes: [:]), style: .success, colors: nil)
+            success.show()
+            isSignedIn = true
+            currentUserGlobal.username = username
+            self.dismiss(animated: true, completion: nil)
+        }, onError: { (error) in
+            
+            if let error = error {
+                let alert = UIAlertController(title: "Error", message: error.description, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+            } else {
+                let alert = UIAlertController(title: "Error", message: "Something went wrong, please try again later.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+
+            }
+            
+        })
+    }
+    
+    
+}

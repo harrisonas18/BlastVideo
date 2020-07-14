@@ -50,7 +50,7 @@ class SignInUpCTANode: ASDisplayNode {
         node.isUserInteractionEnabled = false
         //node.style.preferredLayoutSize.width = ASDimensionMake("65%")
         //node.style.preferredLayoutSize.height = ASDimensionMake("90%")
-        node.labelNode?.attributedText = NSAttributedString(string: "Get access to exclusive content and enjoy A+’s Live Photo experience! Connect with friends and see their Live Photo’s.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont(name: "HelveticaNeue-Light", size: 18)!])
+        node.labelNode?.attributedText = NSAttributedString(string: "Get access to exclusive content and enjoy APM’s Live Photo experience! Connect with friends and see their Live Photo’s.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont(name: "HelveticaNeue-Light", size: 18)!])
         node.labelNode?.numberOfLines = 0
         node.labelNode?.textAlignment = .center
 //        node.borderColor = UIColor.black.cgColor
@@ -103,6 +103,7 @@ class SignInUpCTANode: ASDisplayNode {
         self.backgroundColor = UIColor.white
         joinButton.addTarget(self, action: #selector(joinButtonPressed), forControlEvents: .touchUpInside)
         signInButton.addTarget(self, action: #selector(signInButtonPressed), forControlEvents: .touchUpInside)
+        exitButton.addTarget(self, action: #selector(exitButtonPressed), forControlEvents: .touchUpInside)
     }
     
     override func didLoad() {
@@ -111,14 +112,20 @@ class SignInUpCTANode: ASDisplayNode {
     
     }
     
+    @objc func exitButtonPressed(){
+        //print("Exit button pressed")
+        //Observer located in NewFeedDesignController
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "DismissCTANode"), object: nil)
+    }
+    
     @objc func joinButtonPressed(){
-        print("Join button pressed")
+        //print("Join button pressed")
         //Observer located in SignInUpCTAController 
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PushSignUpVCfromCTA"), object: nil)
     }
     
     @objc func signInButtonPressed(){
-        print("Sign In button pressed")
+        //print("Sign In button pressed")
         //Observer located in SignInUpCTAController
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PushSignInVCfromCTA"), object: nil)
     }

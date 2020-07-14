@@ -59,6 +59,7 @@ class FavoritesApi {
     }
     
     func removeFromFavorites(user: UserObject, post: Post) {
+        //Bug: App crashes when user not logged in and toggles favorite button
         let ref = REF_MYPOSTS.child(user.id!).child("posts").child(post.id!)
         
         ref.removeValue { (error, ref) in

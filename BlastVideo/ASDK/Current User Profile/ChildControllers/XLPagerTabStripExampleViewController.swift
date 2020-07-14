@@ -64,7 +64,7 @@ class XLPagerTabStripExampleViewController: ButtonBarPagerTabStripViewController
         
         self.changeCurrentIndexProgressive = { [weak self] (oldCell: ButtonBarViewCell?, newCell: ButtonBarViewCell?, progressPercentage: CGFloat, changeCurrentIndex: Bool, animated: Bool) -> Void in
             oldCell?.label.textColor = .gray
-            let view = UIView(frame: CGRect(x: 0, y: 42, width: UIScreen.screenWidth(), height: 3))
+            let view = UIView(frame: CGRect(x: 0, y: 52, width: UIScreen.screenWidth(), height: 3))
             view.backgroundColor = UIColor(red: 170/255, green: 170/255, blue: 170/255, alpha: 1.0)
             oldCell?.addSubview(view)
             newCell?.label.textColor = .black

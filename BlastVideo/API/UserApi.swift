@@ -10,7 +10,7 @@ import Foundation
 import FirebaseDatabase
 import FirebaseAuth
 class UserApi {
-    var REF_USERS = Database.database().reference().child("users")
+    var REF_USERS = Database.database().reference().child("users").child("users")
     
     func observeUserByUsername(username: String, completion: @escaping (UserObject) -> Void) {
         REF_USERS.queryOrdered(byChild: "username_lowercase").queryEqual(toValue: username).observeSingleEvent(of: .childAdded, with: {
@@ -81,6 +81,6 @@ class UserApi {
             return nil
         }
         
-        return REF_USERS.child("users").child(currentUser.uid)
+        return REF_USERS.child(currentUser.uid)
     }
 }

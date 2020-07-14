@@ -11,6 +11,8 @@ import AsyncDisplayKit
 
 class SignInMVPNode: ASDisplayNode {
     
+    var signInDelegate: SignInInfoDelegate?
+    
     let logoNode: ASImageNode = {
         let node = ASImageNode()
         node.isUserInteractionEnabled = false
@@ -58,14 +60,14 @@ class SignInMVPNode: ASDisplayNode {
     }()
     
     
-    let forgotPassword: LabelNode = {
-        let node = LabelNode(height: 60, width: UIScreen.screenWidth()*0.75)
+    let forgotPassword: ASButtonNode = {
+        let node = ASButtonNode()
         node.isUserInteractionEnabled = true
-        node.labelNode?.attributedText = NSAttributedString(string: "Forgot Password?", attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray, NSAttributedString.Key.font: UIFont(name: "HelveticaNeue-Thin", size: 18)!])
-        node.style.preferredLayoutSize.width = ASDimensionMake("100%")
+        node.setTitle("Forgot Password?", with: UIFont(name: "HelveticaNeue-Thin", size: 18)!, with: .gray, for: .normal)
+        node.style.preferredLayoutSize.width = ASDimensionMake("150pt")
         node.style.preferredLayoutSize.height = ASDimensionMake("30pt")
-        node.labelNode?.textAlignment = .right
-        node.labelNode?.numberOfLines = 0
+//        node.borderColor = UIColor.black.cgColor
+//        node.borderWidth = 1.0
         return node
     }()
 
@@ -80,7 +82,7 @@ class SignInMVPNode: ASDisplayNode {
         return node
     }()
     
-    let signUpButton: ASButtonNode = {
+    let signInButton: ASButtonNode = {
         let node = ASButtonNode()
         node.isUserInteractionEnabled = true
         node.setTitle("Sign In", with: UIFont.systemFont(ofSize: 24), with: .white, for: .normal)
@@ -91,7 +93,14 @@ class SignInMVPNode: ASDisplayNode {
         return node
     }()
     
-    let SignInLabel: LabelNode = {
+    @objc func SignInButtonTapped(){
+        view.endEditing(true)
+        print("Login tapped")
+        signInDelegate?.getSignInInfo(username: (emailAddress.textFieldNode?.text!)!, password: (password.textFieldNode?.text!)! )
+        
+    }
+    
+    let SignUpLabel: LabelNode = {
         let node = LabelNode(height: 30, width: UIScreen.screenWidth()*0.90)
         node.isUserInteractionEnabled = true
         node.labelNode?.attributedText = NSAttributedString(string: "Not a member? Sign Up", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0, weight: .light)])
@@ -106,20 +115,37 @@ class SignInMVPNode: ASDisplayNode {
         automaticallyManagesSubnodes = true
         self.backgroundColor = UIColor.white
         
+        
+        signInButton.addTarget(self, action: #selector(SignInButtonTapped), forControlEvents: .touchUpInside)
+        forgotPassword.addTarget(self, action: #selector(forgotPasswordTouched), forControlEvents: .touchUpInside)
+
+        
     }
     
     override func didLoad() {
         super.didLoad()
+        username.textFieldNode?.delegate = self
+        password.textFieldNode?.delegate = self
         
+    }
+    
+    @objc func forgotPasswordTouched(){
+        print("Password touched")
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "forgotPasswordTouched"), object: nil)
     }
     
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
         
         let logoStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 8, justifyContent: .start, alignItems: .center, children: [logoNode])
         
-        let formStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 8, justifyContent: .start, alignItems: .center, children: [emailAddress, username, password, forgotPassword])
+        let forgotPassStack = ASStackLayoutSpec.init(direction: .horizontal, spacing: 0, justifyContent: .end, alignItems: .end, children: [forgotPassword])
+        forgotPassStack.style.width = ASDimensionMake("100%")
+        forgotPassStack.style.flexGrow = 1.0
         
-        let buttonStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 12, justifyContent: .start, alignItems: .center, children: [tosPrivacyLabel, signUpButton, SignInLabel])
+        
+        let formStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 8, justifyContent: .start, alignItems: .center, children: [emailAddress, password, forgotPassStack])
+        
+        let buttonStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 12, justifyContent: .start, alignItems: .center, children: [tosPrivacyLabel, signInButton, SignUpLabel])
         buttonStack.style.width = ASDimensionMake("100%")
         
         let finalStack = ASStackLayoutSpec.init(direction: .vertical, spacing: 30, justifyContent: .start, alignItems: .center, children: [logoStack, formStack, buttonStack])
@@ -128,6 +154,21 @@ class SignInMVPNode: ASDisplayNode {
         
     }
     
+}
+
+extension SignInMVPNode: UITextFieldDelegate {
+    
+    func editableTextNodeDidFinishEditing(_ editableTextNode: ASEditableTextNode) {
+        
+        switch editableTextNode{
+        case username.textFieldNode:
+            password.becomeFirstResponder()
+        case password.textFieldNode:
+            password.resignFirstResponder()
+        default:
+            break
+        }
+    }
 }
 
 //extension SignUpPopoverMVPNode: UITextFieldDelegate {

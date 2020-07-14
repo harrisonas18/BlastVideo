@@ -55,8 +55,6 @@ class SignInNode: ASDisplayNode {
         node.style.preferredSize.width = UIScreen.screenWidth()
         node.style.preferredSize.height = 22
         node.returnKeyType = .done
-        node.textView.isSecureTextEntry = true
-        node.isSecureTextEntry = true
         return node
     }()
     
@@ -140,14 +138,13 @@ class SignInNode: ASDisplayNode {
         super.didLoad()
         usernameNode.delegate = self
         passwordNode.delegate = self
-        passwordNode.isSecureTextEntry = true
-        passwordNode.textView.isSecureTextEntry = true
         //passwordNode.addTarget(self, action: #selector(self.textFieldDidChange), for: UIControl.Event.editingChanged)
         forgotPasswordNode.addTarget(self, action: #selector(self.forgotPasswordTouched), forControlEvents: ASControlNodeEvent.touchUpInside)
         
     }
     
     @objc func forgotPasswordTouched(){
+        //Observer in SignInDisplayController
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "forgotPasswordTouched"), object: nil)
     }
     

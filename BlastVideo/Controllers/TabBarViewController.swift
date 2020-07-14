@@ -18,7 +18,7 @@ class TabBarController: UITabBarController {
     var signedIn = false
     
     var discoverTestNav = UINavigationController()
-    var discoverTest = DiscoverPageController()
+    var discoverTest = NewFeedDesignController()
     
     var profileNavController = UINavigationController()
     
@@ -60,6 +60,8 @@ class TabBarController: UITabBarController {
         NotificationCenter.default.addObserver(self, selector: #selector(tabToZero), name: Notification.Name("tabToZero"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(addBadge), name: Notification.Name("AddNotificationBadgeOnTabBarIcon"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(removeBadge), name: Notification.Name("RemoveNotificationBadgeOnTabBarIcon"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(hideBarOnSwipe), name: Notification.Name("HideBarOnSwipe"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ShowBarOnSwipe), name: Notification.Name("ShowBarOnSwipe"), object: nil)
         
         self.discoverTestNav = UINavigationController(rootViewController: self.discoverTest)
         self.discoverTestNav.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "feedIcon"), selectedImage: #imageLiteral(resourceName: "feedIcon"))
@@ -77,7 +79,7 @@ class TabBarController: UITabBarController {
         self.notificationNavController = UINavigationController(rootViewController: self.notificationController)
         self.notificationNavController.tabBarItem = UITabBarItem(title: "", image: #imageLiteral(resourceName: "Notification"), selectedImage: #imageLiteral(resourceName: "Notification"))
         
-        self.viewControllers = [self.discoverTestNav, self.searchNavController, self.livePhotoSlctNav, self.notificationNavController, self.profileNavController]
+        self.viewControllers = [self.discoverTestNav, self.livePhotoSlctNav, self.notificationNavController, self.profileNavController]
         
         
         
@@ -96,17 +98,35 @@ class TabBarController: UITabBarController {
                     }
                 }
                 self.signedIn = true
+                isSignedIn = true
                 
             } else {
                 
                 currentUserGlobal = UserObject()
                 self.signedIn = false
-                
+                isSignedIn = false
                 
             }
         }
         
         
+    }
+    
+    @objc func hideBarOnSwipe(){
+        //Presents the Call to Action form when not logged in
+        //Triggered from tabbarviewcontroller
+        UIView.animate(withDuration: 0.2) {
+            //self.tabBar.isHidden = true
+            self.tabBar.alpha = 0.0
+        }
+    }
+    @objc func ShowBarOnSwipe(){
+        //Presents the Call to Action form when not logged in
+        //Triggered from tabbarviewcontroller
+        UIView.animate(withDuration: 0.2) {
+            //self.tabBar.isHidden = false
+            self.tabBar.alpha = 1.0
+        }
     }
     
     @objc func tabToZero(){
@@ -136,23 +156,18 @@ class TabBarController: UITabBarController {
 extension TabBarController: UITabBarControllerDelegate {
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-//        let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "SignUpPopover") as! SignUpPopoverController
-//        vc.modalPresentationStyle = .overCurrentContext
-//        let vc = SignUpDisplayController()
-//        vc.modalPresentationStyle = .fullScreen
-        //self.navigationController?.present(vc, animated: true, completion: nil)
         
-        if viewController == tabBarController.viewControllers?[2] && signedIn == false {
+        if viewController == tabBarController.viewControllers?[1] && signedIn == false {
+            //self.present(vc, animated: true, completion: nil)
+            //Post notification to discover controller to go to index zero and present popover controller
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "pushCTAController"), object: nil)
+            return false
+        } else if viewController == tabBarController.viewControllers?[2] && signedIn == false {
             //self.present(vc, animated: true, completion: nil)
             //Post notification to discover controller to go to index zero and present popover controller
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "pushCTAController"), object: nil)
             return false
         } else if viewController == tabBarController.viewControllers?[3] && signedIn == false {
-            //self.present(vc, animated: true, completion: nil)
-            //Post notification to discover controller to go to index zero and present popover controller
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "pushCTAController"), object: nil)
-            return false
-        } else if viewController == tabBarController.viewControllers?[4] && signedIn == false {
             //self.present(vc, animated: true, completion: nil)
             //Post notification to discover controller to go to index zero and present popover controller
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "pushCTAController"), object: nil)

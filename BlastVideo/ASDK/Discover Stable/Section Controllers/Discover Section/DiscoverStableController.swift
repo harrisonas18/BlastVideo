@@ -28,6 +28,8 @@ class DiscoverStableController: ASViewController<ASCollectionNode> {
     var isLoading = false
     var count = 0
     var dataDelegate: PushDiscoverDataDelegate?
+    var refresh = UIRefreshControl()
+    var previous: CGFloat = 0.0
     
     var pageTitle: String?
     
@@ -39,10 +41,22 @@ class DiscoverStableController: ASViewController<ASCollectionNode> {
         super.init(node: ASCollectionNode(collectionViewLayout: layout))
     }
     
+    @objc func handleRefreshControl() {
+        //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshDiscover"), object: nil)
+        refreshContent()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        refresh.addTarget(self, action: #selector(handleRefreshControl), for: .valueChanged)
+        
+        let refreshView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+        collectionNode.view.addSubview(refreshView)
+        refreshView.addSubview(refresh)
+        
         collectionNode.delegate = self
         collectionNode.dataSource = self
+        collectionNode.contentInset.top = 55.0
         //collectionNode.view.isPagingEnabled = true
         collectionNode.allowsSelection = false
         //collectionNode.leadingScreensForBatching = 1.0
@@ -96,7 +110,7 @@ class DiscoverStableController: ASViewController<ASCollectionNode> {
                 self.collectionNode.view.reload(changes: results, updateData: ({
                     self.feedItems = feedItems
                     NotificationCenter.default.post(name: NSNotification.Name(rawValue: "endRefreshDiscover"), object: nil)
-                    
+                    self.refresh.endRefreshing()
                 }))
                 
             }
@@ -143,10 +157,41 @@ extension DiscoverStableController {
 
     }
     
+    
 }
 // MARK: ASTableDataSource / ASTableDelegate
 
 extension DiscoverStableController: ASCollectionDataSource, ASCollectionDelegate, UICollectionViewDelegateFlowLayout {
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        //self.previous = scrollView.contentOffset.y
+        
+//        if (scrollView.contentOffset.y - self.previous) > 0 {
+//
+//            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "HideBarOnSwipe"), object: nil)
+//        }
+        
+        
+    }
+    
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+
+        
+        if(velocity.y>0.0) {
+             //Code will work without the animation block.I am using animation block incase if you want to set any delay to it.
+            //print(velocity.y)
+            //print("target:",targetContentOffset)
+            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "HideBarOnSwipe"), object: nil)
+
+         } else {
+            
+            //print(velocity.y)
+            //print("target:",targetContentOffset)
+            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ShowBarOnSwipe"), object: nil)
+            
+         }
+        
+    }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 0, left: 0, bottom: 140.0, right: 0)
@@ -158,7 +203,8 @@ extension DiscoverStableController: ASCollectionDataSource, ASCollectionDelegate
 
     func collectionView(_ collectionView: ASCollectionView, nodeForItemAt indexPath: IndexPath) -> ASCellNode {
         let feedItem = feedItems[indexPath.row]
-        let cell = DiscoverFullCell(post: feedItem.post, user: feedItem.user)
+        //let cell = DiscoverFullCell(post: feedItem.post, user: feedItem.user)
+        let cell = NewDiscoverFullCell(post: feedItem.post, user: feedItem.user)
         cell.contentNode.delegate = self
         return cell
     }
