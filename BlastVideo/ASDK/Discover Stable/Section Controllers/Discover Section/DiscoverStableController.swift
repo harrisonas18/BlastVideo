@@ -30,7 +30,7 @@ class DiscoverStableController: ASViewController<ASCollectionNode> {
     var dataDelegate: PushDiscoverDataDelegate?
     var refresh = UIRefreshControl()
     var previous: CGFloat = 0.0
-    
+    var pushUserDelegate: PushUsernameDelegate?
     var pageTitle: String?
     
     private var collectionNode: ASCollectionNode {
@@ -61,7 +61,7 @@ class DiscoverStableController: ASViewController<ASCollectionNode> {
         collectionNode.allowsSelection = false
         //collectionNode.leadingScreensForBatching = 1.0
         Api.Post.observePostCount { (count) in
-            print("Post Count Discover: ", count)
+            //print("Post Count Discover: ", count)
             if count > 7 {
                 self.fetchPosts(limit: 8)
             } else {
@@ -70,6 +70,7 @@ class DiscoverStableController: ASViewController<ASCollectionNode> {
             
         }
         NotificationCenter.default.addObserver(self, selector: #selector(refreshContent), name: Notification.Name("refreshDiscover"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(scrollToTop), name: Notification.Name("scrollToTopDiscover"), object: nil)
     }
     
     @objc func refreshContent(){
@@ -84,10 +85,15 @@ class DiscoverStableController: ASViewController<ASCollectionNode> {
         }
     }
     
+    @objc func scrollToTop(){
+        collectionNode.setContentOffset(CGPoint(x: 0, y: -75), animated: true)
+    }
+    
+    
     func fetchPosts(limit: UInt){
         self.isLoading = true
         data.fetchPosts(limit: limit) { (feedItems) in
-            print("results in")
+            //print("results in")
             self.isLoading = false
             if feedItems.count == 0 {
                 let label = UILabel()
@@ -139,10 +145,12 @@ extension DiscoverStableController: PushUsernameDelegate {
         //Add delegate that feeds data to parent = DiscoverPageController
         //Forward user to DiscoverPageController and Push user profile from there
         //dataDelegate?.pushUser(user: user)
-        let vc = PushProfileViewController()
+        //let vc = PushProfileViewController()
         //vc.hidesBottomBarWhenPushed = true
-        vc.user = user
-        self.navigationController?.pushViewController(vc, animated: true)
+//        vc.user = user
+//        self.navigationController?.pushViewController(vc, animated: true)
+        //print("username pressed 3")
+        self.pushUserDelegate?.pushUser(user: user)
     }
 }
 
@@ -163,36 +171,6 @@ extension DiscoverStableController {
 
 extension DiscoverStableController: ASCollectionDataSource, ASCollectionDelegate, UICollectionViewDelegateFlowLayout {
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        //self.previous = scrollView.contentOffset.y
-        
-//        if (scrollView.contentOffset.y - self.previous) > 0 {
-//
-//            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "HideBarOnSwipe"), object: nil)
-//        }
-        
-        
-    }
-    
-    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-
-        
-        if(velocity.y>0.0) {
-             //Code will work without the animation block.I am using animation block incase if you want to set any delay to it.
-            //print(velocity.y)
-            //print("target:",targetContentOffset)
-            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "HideBarOnSwipe"), object: nil)
-
-         } else {
-            
-            //print(velocity.y)
-            //print("target:",targetContentOffset)
-            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ShowBarOnSwipe"), object: nil)
-            
-         }
-        
-    }
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 0, left: 0, bottom: 140.0, right: 0)
     }
@@ -203,6 +181,7 @@ extension DiscoverStableController: ASCollectionDataSource, ASCollectionDelegate
 
     func collectionView(_ collectionView: ASCollectionView, nodeForItemAt indexPath: IndexPath) -> ASCellNode {
         let feedItem = feedItems[indexPath.row]
+        //print(feedItem.post.id ?? "No ID")
         //let cell = DiscoverFullCell(post: feedItem.post, user: feedItem.user)
         let cell = NewDiscoverFullCell(post: feedItem.post, user: feedItem.user)
         cell.contentNode.delegate = self
@@ -227,9 +206,9 @@ extension DiscoverStableController: ASCollectionDataSource, ASCollectionDelegate
     func collectionNode(_ collectionNode: ASCollectionNode, willBeginBatchFetchWith context: ASBatchContext) {
         if !DiscoverData.shared.isLoadingPost && !DiscoverData.shared.firstFetch && DiscoverData.shared.newItems > 7 {
             isLoading = true
-            print("Fetching more")
+            //print("Fetching more")
             DiscoverData.shared.fetchMorePosts{ (feedItems) in
-                print("New Feed Items Count: ", feedItems.count)
+                //print("New Feed Items Count: ", feedItems.count)
                 DispatchQueue.main.async {
                     let results = diff(old: self.feedItems, new: feedItems)
                     self.collectionNode.view.reload(changes: results, updateData: ({

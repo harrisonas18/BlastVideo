@@ -39,7 +39,9 @@ class ProfileViewController : UIViewController, UIScrollViewDelegate, TPDataSour
     }
     
     @objc func changeIndexFromProfile(notification: Notification){
-        self.tabBarController?.selectedIndex = 0
+        UIView.animate(withDuration: 0.3) {
+            self.tabBarController?.selectedIndex = 0
+        }
     }
     
     @objc func scrollToTop(notification: Notification){

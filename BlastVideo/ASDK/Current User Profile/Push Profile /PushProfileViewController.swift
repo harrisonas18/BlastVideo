@@ -16,7 +16,7 @@ import FirebaseAuth
 
 class PushProfileViewController : UIViewController, UIScrollViewDelegate, TPDataSource, TPProgressDelegate {
     
-    var tpScrollView: UIScrollView?
+    var scrollView: UIScrollView?
     var headerVC: PushProfileHeader?
     var user: UserObject?
     
@@ -26,7 +26,7 @@ class PushProfileViewController : UIViewController, UIScrollViewDelegate, TPData
         //implement data source to configure tp controller with header and bottom child viewControllers
         //observe header scroll progress with TPProgressDelegate
         self.tp_configure(with: self, delegate: self)
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(endRefreshControl), name: Notification.Name("endRefreshProfile"), object: nil)
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -56,8 +56,32 @@ class PushProfileViewController : UIViewController, UIScrollViewDelegate, TPData
         //headerVC?.adjustBannerView(with: progress, headerHeight: headerHeight())
     }
     
+    let refresh = UIRefreshControl()
+
     func tp_scrollViewDidLoad(_ scrollView: UIScrollView) {
+        refresh.addTarget(self, action: #selector(handleRefreshControl), for: .valueChanged)
         
+        let refreshView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+        scrollView.addSubview(refreshView)
+        refreshView.addSubview(refresh)
+        
+        self.scrollView = scrollView
+        
+    }
+    
+    @objc func handleRefreshControl() {
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshProfile"), object: nil)
+    }
+    
+    @objc func endRefreshControl() {
+        refresh.endRefreshing()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(true)
+        //This should clear data cache fixing a data issue where the last viewed users posts would show up in a different
+        //users posts.
+        PushProfileData.shared.clearData()
     }
 }
 

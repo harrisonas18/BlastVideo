@@ -30,9 +30,9 @@ class FeedApi {
     
     func observeFeedCount(completion: @escaping (Int) -> Void){
         Database.database().reference().child("feed").child(currentUserGlobal.id ?? "").child("myFeedCount").observeSingleEvent(of: .value) { (snapshot) in
-            print("Value: ", snapshot.value)
+            //print("Value: ", snapshot.value)
             if let value = snapshot.value as? Int {
-                print("Value: ", value)
+                //print("Value: ", value)
                 completion(value)
             } else {
                 completion(0)
@@ -51,11 +51,11 @@ class FeedApi {
             let items = snapshot.children.allObjects
             
             let value = snapshot.value as? NSDictionary
-            print(value)
+            //print(value)
             let username = value?["username"] as? String ?? ""
             
             let myGroup = DispatchGroup()
-            print("Items: ",items.count)
+            //print("Items: ",items.count)
             
             var results: [(post: Post, user: UserObject)] = []
 

@@ -22,6 +22,7 @@ class PushProfilePosts: ASViewController<ASCollectionNode> {
     var isLoading = false
     var count = 0
     var user: UserObject?
+    var refresh = UIRefreshControl()
     
     var pageTitle: String?
     
@@ -34,8 +35,19 @@ class PushProfilePosts: ASViewController<ASCollectionNode> {
         super.init(node: ASCollectionNode(collectionViewLayout: layout))
     }
     
+    @objc func handleRefreshControl() {
+        //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshDiscover"), object: nil)
+        refreshContent()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        refresh.addTarget(self, action: #selector(handleRefreshControl), for: .valueChanged)
+        
+        let refreshView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+        collectionNode.view.addSubview(refreshView)
+        refreshView.addSubview(refresh)
         
         collectionNode.delegate = self
         collectionNode.dataSource = self
@@ -51,6 +63,7 @@ class PushProfilePosts: ASViewController<ASCollectionNode> {
             
         }
         NotificationCenter.default.addObserver(self, selector: #selector(refreshContent), name: Notification.Name("refreshProfile"), object: nil)
+        
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -73,7 +86,11 @@ class PushProfilePosts: ASViewController<ASCollectionNode> {
     }
     
     func fetchPosts(limit: UInt){
-        data.fetchUserPosts(user: user ?? UserObject(), limit: limit) { (feedItems) in
+        guard let user = user else {
+            print("user nil")
+            return
+        }
+        data.fetchUserPosts(user: user, limit: limit) { (feedItems) in
             print("Feed items count profile ",feedItems.count)
             if feedItems.count == 0 {
                 let label = ASTextNode()
@@ -94,7 +111,9 @@ class PushProfilePosts: ASViewController<ASCollectionNode> {
                 let results = diff(old: self.feedItems, new: feedItems)
                 self.collectionNode.view.reload(changes: results, updateData: ({
                     self.feedItems = feedItems
+                    //self.collectionNode.reloadData()
                     NotificationCenter.default.post(name: NSNotification.Name(rawValue: "endRefreshProfile"), object: nil)
+                    self.refresh.endRefreshing()
                 }))
                 
             }

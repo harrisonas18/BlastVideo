@@ -13,19 +13,19 @@ class HelpNode: ASDisplayNode {
     
     let helpTitle: ASTextNode = {
         let node = ASTextNode()
-        node.attributedText = NSAttributedString(string: "About", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 26.0, weight: .medium)])
+        node.attributedText = NSAttributedString(string: "Help", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 26.0, weight: .medium)])
         return node
     }()
     
     let helpParaOne: ASTextNode = {
         let node = ASTextNode()
-        node.attributedText = NSAttributedString(string: "Report a Problem", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+        node.attributedText = NSAttributedString(string: "", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
         return node
     }()
     
     let helpParaTwo: ASTextNode = {
         let node = ASTextNode()
-        node.attributedText = NSAttributedString(string: "We would like to thank the following libraries and technologies for help making this app possible.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+        node.attributedText = NSAttributedString(string: "Email: senesac4@yahoo.com\n Report any problem you may have or feature suggestions to the email above. Please provide the nature of the request in the subject line i.e. feature suggestion or bug report", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
         return node
     }()
     
@@ -50,9 +50,9 @@ class HelpNode: ASDisplayNode {
                                            spacing: 4.0,
                                            justifyContent: .center,
                                            alignItems: .center,
-                                           children: [])
+                                           children: [helpParaTwo])
         
-        return ASInsetLayoutSpec.init(insets: .zero, child: stack)
+        return ASInsetLayoutSpec.init(insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16), child: stack)
     }
     
     

@@ -38,6 +38,8 @@ class NewFeedDesignNode: ASDisplayNode, ASPagerDataSource, ASPagerDelegate {
     
     override func didLoad() {
         super.didLoad()
+        //Add subscription to refresh data when logged out
+        NotificationCenter.default.addObserver(self, selector: #selector(refreshFeedCollection), name: Notification.Name("refreshFeedCntrlrData"), object: nil)
         pagerNode.zPosition = 0
         pagerNode.style.width = ASDimensionMake("100%")
         pagerNode.style.height = ASDimensionMake("100%")
@@ -53,6 +55,15 @@ class NewFeedDesignNode: ASDisplayNode, ASPagerDataSource, ASPagerDelegate {
             isUserSignedIn = false
         }
         
+    }
+    
+    @objc func refreshFeedCollection(){
+        if Api.User.CURRENT_USER != nil {
+            isUserSignedIn = true
+        } else {
+            isUserSignedIn = false
+        }
+        pagerNode.reloadData()
     }
     
     required init?(coder: NSCoder) {
@@ -80,18 +91,18 @@ class NewFeedDesignNode: ASDisplayNode, ASPagerDataSource, ASPagerDelegate {
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         
-        print("Content offset",pagerNode.contentOffset.x)
+        //print("Content offset",pagerNode.contentOffset.x)
         
         if pagerNode.contentOffset.x == 0 && self.previousNum != 0.0 {
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "tabAnimation"), object: nil)
             self.previousNum = 0.0
-            print("Previous num: ", previousNum)
+            //print("Previous num: ", previousNum)
         }
         
         if pagerNode.contentOffset.x == 375 && self.previousNum != 375.0 {
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "tabAnimation"), object: nil)
             self.previousNum = 375.0
-            print("Previous num: ", previousNum)
+            //print("Previous num: ", previousNum)
         }
     }
     
@@ -112,7 +123,9 @@ class NewFeedDesignNode: ASDisplayNode, ASPagerDataSource, ASPagerDelegate {
         if index == 0 {
             
             let node = ASCellNode(viewControllerBlock: { () -> UIViewController in
-              return DiscoverStableController()
+              let controller = DiscoverStableController()
+              controller.pushUserDelegate = self
+              return controller
             }, didLoad: nil)
 
             node.style.preferredSize = pagerNode.bounds.size
@@ -137,6 +150,7 @@ class NewFeedDesignNode: ASDisplayNode, ASPagerDataSource, ASPagerDelegate {
 extension NewFeedDesignNode: PushUsernameDelegate {
     
     func pushUser(user: UserObject) {
+        //print("push user new feed design node")
         pushUsernameDelegate?.pushUser(user: user)
     }
     

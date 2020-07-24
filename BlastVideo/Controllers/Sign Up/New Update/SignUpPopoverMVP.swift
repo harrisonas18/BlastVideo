@@ -103,6 +103,7 @@ extension SignUpPopoverMVP: SignUpInfoDelegate {
             let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Sign Up Succesful", attributes: [:]), style: .success, colors: nil)
             success.show()
             isSignedIn = true
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshFeedCntrlrData"), object: nil)
             currentUserGlobal.username = username
             self.dismiss(animated: true, completion: nil)
         }, onError: { (error) in

@@ -36,8 +36,14 @@ class NewFeedCellOverlay: ASDisplayNode {
         node.cornerRadius = 22.5
         node.borderColor = UIColor.white.cgColor
         node.borderWidth = 1.0
+        node.defaultImage = #imageLiteral(resourceName: "ProfilePlaceholder")
+        node.isUserInteractionEnabled = true
         return node
     }()
+    
+    @objc func profileImgTouched(){
+        delegate?.pushUser(user: user)
+    }
     
     //Set up Username Node
     let usernameNode: ASButtonNode = {
@@ -54,6 +60,7 @@ class NewFeedCellOverlay: ASDisplayNode {
     }()
     
     @objc func usernamePressed() {
+        print("username pressed 1")
         delegate?.pushUser(user: user)
     }
     
@@ -156,8 +163,11 @@ class NewFeedCellOverlay: ASDisplayNode {
         addSubnode(caption)
         addSubnode(timeStampNode)
         self.placeholderEnabled = true
+        
         profileImageNode.url = URL(string: user.profileImageUrl ?? "" )
-        profileImageNode.defaultImage = (UIImage(named: "PlaceHolderImage"))        //self.view.isUserInteractionEnabled = false
+        profileImageNode.defaultImage = (UIImage(named: "ProfilePlaceholder"))
+        profileImageNode.addTarget(self, action: #selector(profileImgTouched), forControlEvents: .touchUpInside)
+        //self.view.isUserInteractionEnabled = false
         usernameNode.setAttributedTitle(NSAttributedString(string: user.username?.lowercased() ?? "", attributes: [NSAttributedString.Key.foregroundColor: UIColor.white, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 24.0)]), for: .normal)
 //        let padding = (44.0 - usernameNode.bounds.size.height)/2.0
 //        usernameNode.hitTestSlop = UIEdgeInsets(top: -padding, left: -10, bottom: -padding, right: -10)

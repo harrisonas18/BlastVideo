@@ -33,9 +33,11 @@ class PushProfileData: NSObject {
     //Fetches Current users posts - based on timestamp in descending order
     func fetchUserPosts(user: UserObject, limit: UInt, completion: @escaping ([FeedItem]) -> Void) {
         if isLoadingPost {
-            return
+            print("isLoadingPost = true")
+            completion(self.feedItems)
         }
         if limit == 0 {
+            print("Profile Post count 0")
             firstFetchPosts = false
             self.isLoadingPost = true
             completion(self.feedItems)
@@ -48,6 +50,7 @@ class PushProfileData: NSObject {
                 if results.count > 0 {
                     results.forEach({ (result) in
                         let item = FeedItem(id: result.id!, post: result, user: user)
+                        print(item.post.id)
                         self.feedItems.append(item)
                     })
                 } else {
@@ -124,13 +127,13 @@ class PushProfileData: NSObject {
             self.isLoadingPost = false
             return
         }
-        Api.MyPosts.getOlderProfilePosts(userId: user.id ?? "", start: lastPostTimestamp, limit: 8) { (results) in
+        Api.Favorites.getOlderFavorites(userId: user.id ?? "", start: lastPostTimestamp, limit: 8) { (results) in
             if results.count == 0 {
                 return
             }
             self.newItems = results.count
             for result in results {
-                let item = FeedItem(id: result.id!, post: result, user: currentUserGlobal)
+                let item = FeedItem(id: result.0.id!, post: result.0, user: result.1)
                 self.favFeedItems.append(item)
             }
             self.isLoadingPost = false

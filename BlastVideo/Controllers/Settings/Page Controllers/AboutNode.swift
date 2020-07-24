@@ -17,22 +17,27 @@ class AboutNode: ASDisplayNode {
         return node
     }()
     
-    let aboutParaOne: ASTextNode = {
-        let node = ASTextNode()
-        node.attributedText = NSAttributedString(string: "MyLive was built by Harry, Designed by Josh and Harry, and Made for Everyone.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+    let aboutParaOne: LabelNode = {
+        let node = LabelNode(height: 50, width: UIScreen.screenWidth())
+        node.labelNode?.attributedText = NSAttributedString(string: "MyLive was built by Harry, Designed by Josh and Harry, and Made for Everyone.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .light)])
+        node.labelNode?.textAlignment = .center
+        node.labelNode?.numberOfLines = 0
         return node
     }()
     
-    let aboutParaTwo: ASTextNode = {
-        let node = ASTextNode()
-        node.attributedText = NSAttributedString(string: "We would like to thank the following libraries and technologies for help making this app possible.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+    let aboutParaTwo: LabelNode = {
+        let node = LabelNode(height: 50, width: UIScreen.screenWidth())
+        node.labelNode?.attributedText = NSAttributedString(string: "We would like to thank the following libraries and technologies for help making this app possible.", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .light)])
+        node.labelNode?.textAlignment = .center
+        node.labelNode?.numberOfLines = 0
         return node
     }()
     
-    let aboutParaThree: ASTextNode = {
-        let node = ASTextNode()
-        node.attributedText = NSAttributedString(string: "ActiveLabel,\n Disk,\n NotificationBannerSwift,\n GradientLoadingBar,\n Texture,\n DeepDiff,\n SJSegmentedScrollView,\n KingFisher,\n NextLevelSessionExporter,\n TwitterProfile,\n XLPagerTabStrip,\n InstantSearch,\n Cache\n",
-                                                 attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)])
+    let aboutParaThree: LabelNode = {
+        let node = LabelNode(height: 300, width: UIScreen.screenWidth())
+        node.labelNode?.attributedText = NSAttributedString(string: "ActiveLabel,\nDisk,\nNotificationBannerSwift,\nGradientLoadingBar,\nTexture,\nDeepDiff,\nSJSegmentedScrollView,\nKingFisher,\nNextLevelSessionExporter,\nTwitterProfile,\nXLPagerTabStrip,\nInstantSearch,\nCache\n",
+                                                            attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .regular)])
+        node.labelNode?.numberOfLines = 0
         return node
     }()
     
@@ -50,7 +55,7 @@ class AboutNode: ASDisplayNode {
                                            spacing: 8.0,
                                            justifyContent: .start,
                                            alignItems: .start,
-                                           children: [aboutTitle,aboutParaOne,aboutParaTwo,aboutParaThree])
+                                           children: [aboutParaOne, aboutParaTwo, aboutParaThree])
         
         return ASInsetLayoutSpec.init(insets: UIEdgeInsets(top: 10, left: 8, bottom: 10, right: 8), child: stack)
     }

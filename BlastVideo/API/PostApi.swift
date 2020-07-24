@@ -41,6 +41,9 @@ class PostApi {
         }
     }
     
+    
+    //MARK: BUG: where if no id then no post is returned
+    //
     func observePost(withId id: String, completion: @escaping (Post) -> Void) {
         REF_POSTS.child("posts").child(id).observeSingleEvent(of: DataEventType.value, with: {
             snapshot in

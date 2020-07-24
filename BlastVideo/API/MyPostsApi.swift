@@ -15,13 +15,13 @@ class MyPostsApi {
     var REF_MYPOSTS = Database.database().reference().child("myPosts")
     
     func observeMyPostsCount(id: String, completion: @escaping (Int) -> Void){
-        print("Observe posts id: ",id)
+        //print("Observe posts id: ",id)
         REF_MYPOSTS.child(id).child("myPostsCount").observeSingleEvent(of: .value) { (snapshot) in
             if let value = snapshot.value as? Int {
-                print("Value from api my posts count: ", value)
+                //print("Value from api my posts count: ", value)
                 completion(value)
             } else {
-                print("Value from api my posts count: ", snapshot.value as? Int)
+                //print("Value from api my posts count: ", snapshot.value as? Int)
                 completion(0)
             }
         }
@@ -36,18 +36,20 @@ class MyPostsApi {
             let items = snapshot.children.allObjects
             let myGroup = DispatchGroup()
             var results: [Post] = []
-            print(snapshot.key)
-            print(snapshot.ref)
-            print("Snapshot object count: ",snapshot.children.allObjects.count)
+            //print(snapshot.key)
+            //print(snapshot.ref)
+            //print("Snapshot object count: ",snapshot.children.allObjects.count)
             for (_, item) in (items as! [DataSnapshot]).enumerated() {
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
+                    print(post.id ?? "no id for post")
                     results.append(post)
                     myGroup.leave()
                 })
             }
             myGroup.notify(queue: .main) {
                 results.sort(by: {$0.timestamp! > $1.timestamp! })
+                print(results.count)
                 completion(results)
             }
         }

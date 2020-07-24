@@ -32,14 +32,14 @@ class FollowingData: NSObject {
             Api.Feed.getRecentFeed(withId: id, limit: limit) { (results) in
                 self.firstFetch = false
                 self.isLoadingPost = false
-                print("got feed")
+                //print("got feed")
                 if results.count > 0 {
                     results.forEach({ (result) in
                         let item = FeedItem(id: result.0.id!, post: result.0, user: result.1)
                         self.feedItems.append(item)
                     })
                 }
-                print("My Feed Results: ", results.count)
+                //print("My Feed Results: ", results.count)
                 self.newItems = results.count
                 completion(self.feedItems)
             }

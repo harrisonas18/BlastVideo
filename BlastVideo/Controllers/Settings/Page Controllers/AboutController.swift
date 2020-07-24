@@ -32,7 +32,7 @@ extension AboutController {
     
     func setupNavBar() {
         let navLabel = UILabel()
-        let navTitle = NSMutableAttributedString(string: "Feed", attributes:[
+        let navTitle = NSMutableAttributedString(string: "About", attributes:[
             NSAttributedString.Key.foregroundColor: UIColor.black,
             NSAttributedString.Key.font: UIFont.systemFont(ofSize: 20.0, weight: UIFont.Weight.medium)])
         navLabel.attributedText = navTitle
@@ -42,9 +42,9 @@ extension AboutController {
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         
-        let rightButton = UIBarButtonItem(image: #imageLiteral(resourceName: "refreshIcon"), style: .plain, target: self, action: #selector(pushSettings))
-        rightButton.tintColor = .black
-        self.navigationItem.rightBarButtonItem = rightButton
+//        let rightButton = UIBarButtonItem(image: #imageLiteral(resourceName: "refreshIcon"), style: .plain, target: self, action: #selector(pushSettings))
+//        rightButton.tintColor = .black
+//        self.navigationItem.rightBarButtonItem = rightButton
         
     }
     

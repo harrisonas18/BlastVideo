@@ -41,7 +41,13 @@ class NewDiscoverFullCell: ASCellNode {
     
 }
 
-class NewDiscoverFullCellContent: ASDisplayNode {
+class NewDiscoverFullCellContent: ASDisplayNode, PushUsernameDelegate {
+    
+    func pushUser(user: UserObject) {
+        print("username pressed 2")
+        delegate?.pushUser(user: user)
+    }
+    
     
     var delegate: PushUsernameDelegate?
     var hashtagDelegate: PushHashtagDelegate?
@@ -73,7 +79,7 @@ class NewDiscoverFullCellContent: ASDisplayNode {
         self.placeholderEnabled = true
         livePhotoNode.style.height = ASDimensionMake("\(post.ratio!*UIScreen.screenHeight())pt")
         livePhotoNode.style.flexGrow = 1.0
-
+        feedOverlay?.delegate = self
     }
     
     let activityIndicator = UIActivityIndicatorView(style: .gray)
@@ -81,7 +87,7 @@ class NewDiscoverFullCellContent: ASDisplayNode {
     override func didLoad() {
         super.didLoad()
         
-        print("Did load called")
+        //print("Did load called")
         livePhotoNode.photoNode?.fetchLivePhoto(post: post, completion: {
             DispatchQueue.main.async {
                 self.badgeBaseView.isHidden = false

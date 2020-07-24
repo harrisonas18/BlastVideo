@@ -37,6 +37,7 @@ class FollowingStableController: ASViewController<ASCollectionNode> {
     }
     
     @objc func handleRefreshControl() {
+        //Sends notification post to [DiscoverPageController]
         //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshDiscover"), object: nil)
         refreshContent()
     }
@@ -108,7 +109,11 @@ class FollowingStableController: ASViewController<ASCollectionNode> {
                     let results = diff(old: self.feedItems, new: feedItems)
                     self.collectionNode.view.reload(changes: results, updateData: ({
                         self.feedItems = feedItems
-                        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "endRefreshDiscover"), object: nil)
+                        UIView.animate(withDuration: 0.3) {
+                            self.refresh.endRefreshing()
+                        }
+                        //Sends notification post to [DiscoverPageController]
+                        //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "endRefreshDiscover"), object: nil)
                         
                     }))
                     
@@ -198,6 +203,7 @@ extension FollowingStableController: ASCollectionDataSource, ASCollectionDelegat
 
     func collectionView(_ collectionView: ASCollectionView, nodeForItemAt indexPath: IndexPath) -> ASCellNode {
         let feedItem = feedItems[indexPath.row]
+        
         let cell = DiscoverCellNode(post: feedItem.post, user: feedItem.user)
         cell.contentNode.delegate = self
         return cell

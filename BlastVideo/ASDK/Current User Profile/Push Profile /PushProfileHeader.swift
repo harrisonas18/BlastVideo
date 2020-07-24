@@ -27,18 +27,6 @@ class PushProfileHeader: UIViewController {
     var bannerInitialCenterY: CGFloat!
     var stickyBanner = true
     var user: UserObject?
-//    var user: UserObject? {
-//        didSet {
-//            Api.User.observeUser(withId: user?.id ?? "") { (user) in
-//                DispatchQueue.main.async {
-//                    self.fullName.text = user.username ?? "Full Name"
-//                    self.username.text = user.username ?? "Username"
-//                    let url = URL(string: user.profileImageUrl ?? "")
-//                    self.userImageView.kf.setImage(with: url)
-//                }
-//            }
-//        }
-//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

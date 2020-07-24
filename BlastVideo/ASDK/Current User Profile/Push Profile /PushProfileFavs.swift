@@ -14,7 +14,7 @@ class PushProfileFavs: ASViewController<ASCollectionNode> {
     
     let layout = ProfilePostsLayout()
     var feedItems: [FeedItem] = [FeedItem]()
-    let data = NewProfileData.shared
+    let data = PushProfileData.shared
     var newPosts = 0
     var isLoading = false
     var count = 0
@@ -35,7 +35,7 @@ class PushProfileFavs: ASViewController<ASCollectionNode> {
         super.viewDidLoad()
         collectionNode.delegate = self
         collectionNode.dataSource = self
-        Api.Favorites.observeFavsCount(id: currentUserGlobal.id ?? "") { (count) in
+        Api.Favorites.observeFavsCount(id: user?.id ?? "") { (count) in
             print(count)
             if count > 7 {
                 self.fetchPosts(limit: 8)
@@ -49,7 +49,7 @@ class PushProfileFavs: ASViewController<ASCollectionNode> {
     
     @objc func refreshContent(){
         NewProfileData.shared.favFeedItems.removeAll()
-        Api.Favorites.observeFavsCount(id: currentUserGlobal.id ?? "") { (count) in
+        Api.Favorites.observeFavsCount(id: user?.id ?? "") { (count) in
             print(count)
             if count > 7 {
                 self.fetchPosts(limit: 8)

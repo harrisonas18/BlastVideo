@@ -29,6 +29,8 @@ class NewFeedDesignController: ASViewController<NewFeedDesignNode> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        feedNode.pushUsernameDelegate = self
+        feedNode.pushViewcontrollerDelegate = self
         self.setupNavBar()
         
         self.navigationController?.navigationBar.isHidden = true
@@ -51,7 +53,7 @@ class NewFeedDesignController: ASViewController<NewFeedDesignNode> {
         UIView.animate(withDuration: 2.5, delay: 0, options: UIView.AnimationOptions(), animations: {
             //self.navigationController?.setNavigationBarHidden(true, animated: true)
             self.navigationController?.setToolbarHidden(true, animated: true)
-            print("Hide")
+            //print("Hide")
         }, completion: nil)
     }
     @objc func ShowBarOnSwipe(){
@@ -60,7 +62,7 @@ class NewFeedDesignController: ASViewController<NewFeedDesignNode> {
         UIView.animate(withDuration: 2.5, delay: 0, options: UIView.AnimationOptions(), animations: {
             //self.navigationController?.setNavigationBarHidden(false, animated: true)
             self.navigationController?.setToolbarHidden(false, animated: true)
-            print("Unhide")
+            //print("Unhide")
         }, completion: nil)
     }
     
@@ -125,7 +127,7 @@ extension NewFeedDesignController {
 
 extension NewFeedDesignController: PushViewControllerDelegate {
     func pushViewController(post: Post, user: UserObject) {
-        print("push detail controller")
+        //print("push detail controller")
         let detailViewController = ASDetailViewController(post: post, user: user)
         detailViewController.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(detailViewController, animated: true)
@@ -134,7 +136,7 @@ extension NewFeedDesignController: PushViewControllerDelegate {
 
 extension NewFeedDesignController: PushUsernameDelegate {
     func pushUser(user: UserObject) {
-        print("Push user called")
+        //print("Push user called")
         let vc = PushProfileViewController()
         //vc.hidesBottomBarWhenPushed = true
         vc.user = user

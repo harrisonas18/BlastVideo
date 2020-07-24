@@ -170,8 +170,9 @@ extension SettingsController {
                     """)
                 
             }
-            
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshFeedCntrlrData"), object: nil)
             self.navigationController?.popViewController(animated: true)
+            //Notification observer in ProfileViewController - Index can only be changed from base controller
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ChangeIndexFromProfile"), object: nil)
             
         }))

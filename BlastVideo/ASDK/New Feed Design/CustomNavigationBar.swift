@@ -117,7 +117,7 @@ class CustomNavigationBar: ASDisplayNode {
             self.tabDot.isHidden = false
             self.followingDot.isHidden = true
             
-        UIView.animate(withDuration: 0.2, animations: {
+        UIView.animate(withDuration: 0.0, animations: {
             self.discoverLabel.setAttributedTitle(NSAttributedString(string: "Discover", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)]), for: .normal)
             self.followingLabel.setAttributedTitle(NSAttributedString(string: "Following", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black, NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16.0, weight: .medium)]), for: .normal)
             self.tabDot.isHidden = true

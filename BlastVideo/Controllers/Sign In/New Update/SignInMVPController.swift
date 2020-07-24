@@ -141,9 +141,11 @@ extension SignInMVPController: SignInInfoDelegate {
                 Api.User.observeCurrentUser { (user) in
                     currentUserGlobal = user
                 }
-                let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Login Succesful", attributes: [:]), style: .success, colors: nil)
-                success.show()
+//                let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Login Succesful", attributes: [:]), style: .success, colors: nil)
+//                success.show()
                 isSignedIn = true
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "refreshFeedCntrlrData"), object: nil)
+                self.dismiss(animated: true, completion: nil)
                 self.navigationController?.popViewController(animated: true)
                 
             } else {
