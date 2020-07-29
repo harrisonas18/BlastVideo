@@ -85,6 +85,12 @@ class PostContentNode: ASDisplayNode {
         //set up delegate to call viewcontroller navigation controller push
     }
     
+//    deinit {
+//        self.post = nil
+//        self.user = nil
+//        self.postImageNode = nil
+//    }
+    
     
     // MARK: - Object life cycle
     init(post: Post, user: UserObject? = nil) {

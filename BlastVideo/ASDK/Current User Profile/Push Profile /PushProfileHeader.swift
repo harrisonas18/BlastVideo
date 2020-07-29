@@ -21,24 +21,41 @@ class PushProfileHeader: UIViewController {
     @IBOutlet weak var username: UILabel!
     
     @IBAction func followButtonTouched(_ sender: Any) {
-        followID()
-        unfollow()
+        followButtonTapped()
     }
     var bannerInitialCenterY: CGFloat!
     var stickyBanner = true
     var user: UserObject?
+    var isFollowing: Bool?
+    
+    override func viewDidAppear(_ animated: Bool) {
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         //Checks to see if the current user follows the user with the corresponding user id
+        //This sets the state for the follow button
         Api.Follow.isFollowing(userId: user?.id! ?? "") { (isFollowing) in
             if isFollowing {
+                self.isFollowing = true
                 self.configureUnFollowButton()
             } else {
+                self.isFollowing = false
                 self.configureFollowButton()
             }
         }
-        
+        self.followButton.isUserInteractionEnabled = false
+        //self.followButton.addTarget(self, action: #selector(followButtonTapped), for: .touchUpInside)
+
         
         if let name = self.user?.realName {
             self.fullName.text = name
@@ -109,40 +126,51 @@ class PushProfileHeader: UIViewController {
     }
     
     //Configures follow Button
+    //Triggered when unfollow button is tapped
     func configureFollowButton(){
         UIView.animate(withDuration: 0.3) {
-            self.followButton.addTarget(self, action: #selector(self.followID), for: .touchUpInside)
             self.followButton.setTitleColor(UIColor.init(red: 185/255, green: 185/255, blue: 185/255, alpha: 1.0), for: .normal)
             self.followButton.setTitle("follow", for: .normal)
         }
+        self.followButton.isUserInteractionEnabled = true
     }
     //Configures unfollow Button
+    //Triggered when follow button is tapped
     func configureUnFollowButton(){
         UIView.animate(withDuration: 0.3) {
-            self.followButton.addTarget(self, action: #selector(self.unfollow), for: .touchUpInside)
             self.followButton.setTitleColor(UIColor.init(red: 185/255, green: 185/255, blue: 185/255, alpha: 1.0), for: .normal)
             self.followButton.setTitle("unfollow", for: .normal)
         }
+        self.followButton.isUserInteractionEnabled = true
     }
     
     
     //Configures unfollow Button when follow tapped
-    @objc func followID(){
-        if user!.isFollowing! == false {
-            Api.Follow.followAction(withUser: user!.id!)
-            configureUnFollowButton()
-            user!.isFollowing! = true
+    @objc func followButtonTapped(){
+        
+        if let isFollowing = self.isFollowing {
+            if isFollowing {
+                //changes from unfollow to follow
+                print("isFollowing",isFollowing)
+                Api.Follow.unFollowAction(withUser: user!.id!)
+                configureFollowButton()
+                user!.isFollowing! = false
+                self.isFollowing = false
+                print("isFollowing",isFollowing)
+            } else {
+                //changes from follow to unfollow
+                print("isFollowing",isFollowing)
+                Api.Follow.followAction(withUser: user!.id!)
+                configureUnFollowButton()
+                user!.isFollowing! = true
+                self.isFollowing = true
+                print("isFollowing",isFollowing)
+
+            }
+        } else {
+            print("Follow button tapped")
         }
-    }
     
-    
-    //Configures follow Button when unfollow tapped
-    @objc func unfollow(){
-        if user!.isFollowing! == true {
-            Api.Follow.unFollowAction(withUser: user!.id!)
-            configureFollowButton()
-            user!.isFollowing! = false
-        }
     }
     
     override func viewDidLayoutSubviews() {

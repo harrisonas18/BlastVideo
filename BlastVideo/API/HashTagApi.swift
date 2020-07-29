@@ -55,10 +55,14 @@ class HashTagApi {
             for (_, item) in (items as! [DataSnapshot]).enumerated() {
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
-                    Api.User.observeUser(withId: post.uid!, completion: { (user) in
-                        results.append((post, user))
-                        myGroup.leave()
-                    })
+                    if let post = post {
+                        Api.User.observeUser(withId: post.uid!, completion: { (user) in
+                            results.append((post, user))
+                            myGroup.leave()
+                        })
+                    } else {
+                        print("Error ID: Post ID Not fount\nLocation: HashTagApi.swift\nLine:64")
+                    }
                 })
             }
             myGroup.notify(queue: .main) {
@@ -81,10 +85,14 @@ class HashTagApi {
             for (_, item) in (items as! [DataSnapshot]).enumerated() {
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
-                    Api.User.observeUser(withId: post.uid!, completion: { (user) in
-                        results.append((post, user))
-                        myGroup.leave()
-                    })
+                    if let post = post {
+                        Api.User.observeUser(withId: post.uid!, completion: { (user) in
+                            results.append((post, user))
+                            myGroup.leave()
+                        })
+                    } else {
+                        print("Error ID: Post ID Not fount\nLocation: HashTagApi.swift\nLine:94")
+                    }
                 })
             }
             myGroup.notify(queue: .main) {

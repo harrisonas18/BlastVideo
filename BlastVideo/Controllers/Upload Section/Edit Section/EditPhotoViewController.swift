@@ -79,8 +79,8 @@ extension EditPhotoViewController {
             if success {
                 DispatchQueue.main.async {
                     GradientLoadingBar.shared.fadeOut()
-                    let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Upload Succesful", attributes: [:]), style: .success, colors: nil)
-                    success.show()
+//                    let success = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Upload Succesful", attributes: [:]), style: .success, colors: nil)
+//                    success.show()
                     self.navigationItem.rightBarButtonItem?.isEnabled = true
                     NotificationCenter.default.post(name: NSNotification.Name(rawValue: "ChangeIndex"), object: nil)
                     NotificationCenter.default.post(name: NSNotification.Name(rawValue: "scrollToTopDiscover"), object: nil)
@@ -90,8 +90,8 @@ extension EditPhotoViewController {
             } else {
                 DispatchQueue.main.async {
                     GradientLoadingBar.shared.fadeOut()
-                    let failure = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Upload Failed", attributes: [:]), style: .danger, colors: nil)
-                    failure.show()
+//                    let failure = StatusBarNotificationBanner(attributedTitle: NSAttributedString(string: "Upload Failed", attributes: [:]), style: .danger, colors: nil)
+//                    failure.show()
                     self.navigationItem.rightBarButtonItem?.isEnabled = true
                 }
             }

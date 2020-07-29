@@ -204,7 +204,7 @@ extension DiscoverStableController: ASCollectionDataSource, ASCollectionDelegate
     }
     
     func collectionNode(_ collectionNode: ASCollectionNode, willBeginBatchFetchWith context: ASBatchContext) {
-        if !DiscoverData.shared.isLoadingPost && !DiscoverData.shared.firstFetch && DiscoverData.shared.newItems > 7 {
+        if !DiscoverData.shared.isLoadingPost && !DiscoverData.shared.firstFetch && DiscoverData.shared.newItems > 0 {
             isLoading = true
             //print("Fetching more")
             DiscoverData.shared.fetchMorePosts{ (feedItems) in

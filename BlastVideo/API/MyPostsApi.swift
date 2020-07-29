@@ -42,9 +42,13 @@ class MyPostsApi {
             for (_, item) in (items as! [DataSnapshot]).enumerated() {
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
-                    print(post.id ?? "no id for post")
-                    results.append(post)
-                    myGroup.leave()
+                    if let post = post {
+                        results.append(post)
+                        myGroup.leave()
+                    } else {
+                        print("Error ID: Post ID Not fount\nLocation: MyPostsApi.swift\nLine:51")
+                    }
+                    
                 })
             }
             myGroup.notify(queue: .main) {
@@ -68,8 +72,12 @@ class MyPostsApi {
             for (_, item) in (items as! [DataSnapshot]).enumerated() {
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key , completion: { (post) in
-                    results.append(post)
-                    myGroup.leave()
+                    if let post = post {
+                        results.append(post)
+                        myGroup.leave()
+                    } else {
+                        print("Error ID: Post ID Not fount\nLocation: MyPostsApi.swift\nLine:83")
+                    }
                 })
             }
             myGroup.notify(queue: .main) {

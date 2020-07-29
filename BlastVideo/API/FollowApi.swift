@@ -21,6 +21,7 @@ class FollowApi {
                     if let value = dict[key] as? [String: Any] {
                         let timestampPost = value["timestamp"] as! Int
                         Database.database().reference().child("feed").child(Api.User.CURRENT_USER!.uid).child("posts").child(key).setValue(["timestamp": timestampPost])
+                        print("Added post key: ", key)
                     }
                     
                 }
@@ -40,11 +41,12 @@ class FollowApi {
     //Removes current user from user followers list
     func unFollowAction(withUser id: String) {
         
-        Api.MyPosts.REF_MYPOSTS.child(id).observeSingleEvent(of: .value, with: {
+        Api.MyPosts.REF_MYPOSTS.child(id).child("posts").observeSingleEvent(of: .value, with: {
             snapshot in
             if let dict = snapshot.value as? [String: Any] {
                 for key in dict.keys {
                     Database.database().reference().child("feed").child(Api.User.CURRENT_USER!.uid).child("posts").child(key).removeValue()
+                    print("removed post key: ", key)
                 }
             }
         })

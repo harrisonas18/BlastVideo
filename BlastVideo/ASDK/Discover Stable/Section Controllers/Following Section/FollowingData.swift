@@ -25,6 +25,7 @@ class FollowingData: NSObject {
         }
         
         if limit == 0 {
+            print("Following Data Limit 0")
             isLoadingPost = false
             completion(self.feedItems)
         } else {
@@ -41,6 +42,9 @@ class FollowingData: NSObject {
                 }
                 //print("My Feed Results: ", results.count)
                 self.newItems = results.count
+                for item in self.feedItems {
+                    print("Following Data item id fetch posts list",item.diffId)
+                }
                 completion(self.feedItems)
             }
         }
@@ -67,6 +71,9 @@ class FollowingData: NSObject {
                 self.feedItems.append(item)
             }
             self.newItems = results.count
+        }
+        for item in self.feedItems {
+            print("Following Data item id fetch more posts list",item.diffId)
         }
         completion(self.feedItems)
     }

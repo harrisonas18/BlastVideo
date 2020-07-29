@@ -88,10 +88,15 @@ class FavoritesApi {
             for (_, item) in (items as! [DataSnapshot]).enumerated() {
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
-                    Api.User.observeUser(withId: post.uid!, completion: { (user) in
-                        results.append((post, user))
-                        myGroup.leave()
-                    })
+                    if let post = post {
+                        Api.User.observeUser(withId: post.uid!, completion: { (user) in
+                            results.append((post, user))
+                            myGroup.leave()
+                        })
+                    } else {
+                        print("Error ID: Post ID Not fount\nLocation: FavoritesApi.swift\nLine:97")
+                    }
+                    
                 })
             }
             myGroup.notify(queue: .main) {
@@ -114,10 +119,14 @@ class FavoritesApi {
             for (_, item) in (items as! [DataSnapshot]).enumerated() {
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
-                    Api.User.observeUser(withId: post.uid!, completion: { (user) in
-                        results.append((post, user))
-                        myGroup.leave()
-                    })
+                    if let post = post {
+                        Api.User.observeUser(withId: post.uid!, completion: { (user) in
+                            results.append((post, user))
+                            myGroup.leave()
+                        })
+                    } else {
+                        print("Error ID: Post ID Not fount\nLocation: FavoritesApi.swift\nLine:129")
+                    }
                 })
             }
             myGroup.notify(queue: .main) {

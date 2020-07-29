@@ -44,12 +44,14 @@ class PostApi {
     
     //MARK: BUG: where if no id then no post is returned
     //
-    func observePost(withId id: String, completion: @escaping (Post) -> Void) {
+    func observePost(withId id: String, completion: @escaping (Post?) -> Void) {
         REF_POSTS.child("posts").child(id).observeSingleEvent(of: DataEventType.value, with: {
             snapshot in
             if let dict = snapshot.value as? [String: Any] {
                 let post = Post.transformPostPhoto(dict: dict, key: snapshot.key)
                 completion(post)
+            } else {
+                completion(nil)
             }
         })
     }
@@ -99,11 +101,16 @@ class PostApi {
                 //print("items: ", items)
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
-                    Api.User.observeUser(withId: post.uid!, completion: { (user) in
-                        results.append((post: post, user: user))
-                        //print("Results: ",results)
-                        myGroup.leave()
-                    })
+                    if let post = post {
+                        Api.User.observeUser(withId: post.uid!, completion: { (user) in
+                            results.append((post: post, user: user))
+                            //print("Results: ",results)
+                            myGroup.leave()
+                        })
+                    } else {
+                        print("Error ID: Post ID Not fount\nLocation: PostApi.swift\nLine:111")
+                    }
+                    
                 })
             }
             myGroup.notify(queue: .main) {
@@ -132,10 +139,14 @@ class PostApi {
                 
                 myGroup.enter()
                 Api.Post.observePost(withId: item.key, completion: { (post) in
-                    Api.User.observeUser(withId: post.uid!, completion: { (user) in
-                        results.append((post: post, user: user))
-                        myGroup.leave()
-                    })
+                    if let post = post {
+                        Api.User.observeUser(withId: post.uid!, completion: { (user) in
+                            results.append((post: post, user: user))
+                            myGroup.leave()
+                        })
+                    } else {
+                        print("Error ID: Post ID Not fount\nLocation: PostApi.swift\nLine:146")
+                    }
                 })
             }
             myGroup.notify(queue: DispatchQueue.main, execute: {

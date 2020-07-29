@@ -25,6 +25,7 @@ class FollowingStableController: ASViewController<ASCollectionNode> {
     var pushUsernameDelegate: PushUsernameDelegate?
     var pushViewControllerDelegate: PushViewControllerDelegate?
     var refresh = UIRefreshControl()
+    var isFirstFetch = false
     
     var pageTitle: String?
     
@@ -57,8 +58,10 @@ class FollowingStableController: ASViewController<ASCollectionNode> {
         Api.Feed.observeFeedCount { (count) in
             print("Following Post Count",count)
             if count > 7 {
+                self.isFirstFetch = true
                 self.fetchPosts(limit: 8)
             } else {
+                self.isFirstFetch = true
                 self.fetchPosts(limit: UInt(bitPattern: count))
                 //self.collectionNode.reloadData()
             }
@@ -68,9 +71,15 @@ class FollowingStableController: ASViewController<ASCollectionNode> {
     }
     
     @objc func refreshContent(){
+        print("Feed items count: ", data.feedItems.count)
+        self.isFirstFetch = true
         data.feedItems.removeAll()
+        data.firstFetch = true
+        data.posts.removeAll()
+        data.users.removeAll()
+        print("Feed items count: ", data.feedItems.count)
         Api.Feed.observeFeedCount { (count) in
-            print(count)
+            print("Refresh content following feed count: ",count)
             if count > 7 {
                 self.fetchPosts(limit: 8)
             } else {
@@ -106,9 +115,23 @@ class FollowingStableController: ASViewController<ASCollectionNode> {
                 }
                 
                 DispatchQueue.main.async {
+                    print("\n old feed items count vs new items count: ", self.feedItems.count, feedItems.count)
+                    for item in self.feedItems {
+                        print("item id old list",item.diffId)
+                    }
+                    for item in feedItems {
+                        print("item id new list",item.diffId)
+                    }
                     let results = diff(old: self.feedItems, new: feedItems)
+//                    if self.isFirstFetch {
+//                        results = diff(old: feedItems, new: feedItems)
+//                    } else {
+//                        results = diff(old: self.feedItems, new: feedItems)
+//                    }
                     self.collectionNode.view.reload(changes: results, updateData: ({
+                        self.isFirstFetch = false
                         self.feedItems = feedItems
+                        print("Final feeditems count: ", self.feedItems.count)
                         UIView.animate(withDuration: 0.3) {
                             self.refresh.endRefreshing()
                         }
@@ -222,7 +245,8 @@ extension FollowingStableController: ASCollectionDataSource, ASCollectionDelegat
     }
     
     func collectionNode(_ collectionNode: ASCollectionNode, willBeginBatchFetchWith context: ASBatchContext) {
-        if !data.isLoadingPost && !data.firstFetch && data.newItems > 7 {
+        //Bug here if count is less than 7 but greater than 0 it doesnt fetch at all
+        if !data.isLoadingPost && !data.firstFetch && data.newItems > 0 {
             isLoading = true
             data.fetchMorePosts{ (feedItems) in
                 DispatchQueue.main.async {
@@ -244,7 +268,7 @@ extension FollowingStableController: ASCollectionDataSource, ASCollectionDelegat
 
 extension FollowingStableController: IndicatorInfoProvider {
     func indicatorInfo(for pagerTabStripController: PagerTabStripViewController) -> IndicatorInfo {
-        return IndicatorInfo.init(title: pageTitle ?? "Discover)")
+        return IndicatorInfo.init(title: pageTitle ?? "Following)")
     }
 }
 
